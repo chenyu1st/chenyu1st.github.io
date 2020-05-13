@@ -51,11 +51,15 @@
             
             <tag> 负载均衡 </tag>
             
+            <tag> keepalived </tag>
+            
             <tag> HA </tag>
             
             <tag> Cluster </tag>
             
             <tag> nacos </tag>
+            
+            <tag> 调度算法 </tag>
             
         </tags>
       
