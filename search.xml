@@ -4,6 +4,37 @@
   
     
     <entry>
+      <title>深入浅出docker原理及实战（一)</title>
+      <link href="/2020/05/24/docker/docker-idea-1/"/>
+      <url>/2020/05/24/docker/docker-idea-1/</url>
+      
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第一家互联网工资学习的内容</p><hr><p>深入浅出docker原理及实战系列第一篇，我想向大家阐述在docker的基本理念与原理。</p><h1 id="Docker概述"><a href="#Docker概述" class="headerlink" title="Docker概述"></a>Docker概述</h1><p>Docker是一个用于开发，交付和运行应用程序的开放平台。Docker使我们能够将应用程序与基础架构分开，从而可以快速交付软件。借助Docker，我们可以以与管理应用程序相同的方式来管理基础架构。通过利用Docker的方法来快速交付，测试和部署代码，您可以大大减少编写代码和在生产环境中运行代码之间的延迟。</p><h1 id="Docker平台"><a href="#Docker平台" class="headerlink" title="Docker平台"></a>Docker平台</h1><p>Docker提供了在松散隔离的环境（称为容器）中打包和运行应用程序的功能。隔离和安全性使我们可以在给定主机上同时运行多个容器。容器是轻量级的，因为它们不需要虚拟机管理程序的额外负载，而是直接在主机的内核中运行。这意味着与使用虚拟机相比，可以在给定的硬件组合上运行更多的容器。我们甚至可以在实际上是虚拟机的主机中运行Docker容器！</p><p>Docker提供了工具和平台来管理容器的生命周期：</p><ul><li>使用容器开发应用程序及其支持组件。</li><li>容器成为分发和测试应用程序的单元。</li><li>准备就绪后，可以将应用程序作为容器或协调服务部署到生产环境中。</li></ul><p>docker vs 虚拟机</p><ul><li>容器时在linux上本机运行，并与其他容器共享主机的内核，它运行的一个独立的进程，不占用其他任何可执行文件的内存，非常轻量。</li><li>虚拟机运行的是一个完成的操作系统，通过虚拟机管理程序对主机资源进行虚拟访问，相比之下需要的资源更多</li></ul><p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Docker/docker_esxi.png"  alt="docker_esxi"></p><h1 id="Docker和Devops的关系"><a href="#Docker和Devops的关系" class="headerlink" title="Docker和Devops的关系"></a>Docker和Devops的关系</h1><p>DevOps 强调的是高效组织团队之间如何通过自动化的工具协作和沟通来完成软件的生命周期管理，从而更快、更频繁地交付更稳定的软件。有工具支持，运维关注代码，开发关注部署，效率和质量都能得到提升。</p><p>在软件日趋复杂的情况下，微服务架构是弹性扩展、快速迭代的优选，微服务有利于负责单个服务的小团队降低沟通成本、提升效率，众多的服务却也让研发需要关心环境交付，整个运维工作复杂度剧增。说到秒级启动、秒级自动修复、服务发现、弹性伸缩等等，使用虚拟机和使用容器并无质的差距，但有了Docker，最大的变化是环境交付可以提前，每个开发只需多花 5% 的时间，就能换取运维 200% 的劳动，并且提高稳定性。</p><h2 id="快速，一致地交付您的应用程序"><a href="#快速，一致地交付您的应用程序" class="headerlink" title="快速，一致地交付您的应用程序"></a>快速，一致地交付您的应用程序</h2><p>Docker允许开发人员使用提供您的应用程序和服务的本地容器在标准化环境中工作，从而简化了开发生命周期。容器非常适合持续集成和持续交付（CI / CD）工作流程。</p><p>流水线具体如下：</p><ul><li>开发人员在本地编写代码，并使用Docker容器与同事共享他们的工作。</li><li>他们使用Docker将其应用程序推送到测试环境中，并执行自动和手动测试。</li><li>当开发人员发现错误时，他们可以在开发环境中对其进行修复，然后将其重新部署到测试环境中以进行测试和验证。</li><li>测试完成后，将修补程序推送给生产环境就像将更新的映像推送到生产环境一样简单。</li></ul><h2 id="响应式部署和扩展"><a href="#响应式部署和扩展" class="headerlink" title="响应式部署和扩展"></a>响应式部署和扩展</h2><p>Docker基于容器的平台允许高度可移植的工作负载。Docker容器可以在开发人员的本地笔记本电脑上，数据中心中的物理或虚拟机上，云提供商上或混合环境中运行。</p><p>Docker的可移植性和轻量级的特性还使您可以轻松地动态管理工作负载，并根据业务需求指示实时扩展或拆除应用程序和服务。</p><h2 id="在同一硬件上运行更多工作负载"><a href="#在同一硬件上运行更多工作负载" class="headerlink" title="在同一硬件上运行更多工作负载"></a>在同一硬件上运行更多工作负载</h2><p>Docker轻巧快速。它为基于虚拟机管理程序的虚拟机提供了可行，经济高效的替代方案，因此您可以利用更多的计算能力来实现业务目标。Docker非常适合于高密度环境以及中小型部署，而您需要用更少的资源做更多的事情。</p><h1 id="Docker引擎"><a href="#Docker引擎" class="headerlink" title="Docker引擎"></a>Docker引擎</h1><p>Docker Engine是具有以下主要组件的客户端-服务器应用程序：</p><ul><li><p>服务器是一种长期运行的程序，称为守护程序进程（ dockerd命令）。守护程序创建和管理Docker 对象，例如图像，容器，网络和卷。</p></li><li><p>REST API，它指定程序可以用来与守护程序进行通信并指示其操作的接口。</p></li><li><p>命令行界面（CLI）客户端（docker命令）。<br>CLI使用Docker REST API通过脚本或直接CLI命令来控制Docker守护程序或与Docker守护程序进行交互。许多其他Docker应用程序都使用基础API和CLI。</p></li><li><p>Docker引擎组件流程</p></li></ul><p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Docker/docker_engine.png"  alt="docker_engine"></p><h1 id="Docker架构"><a href="#Docker架构" class="headerlink" title="Docker架构"></a>Docker架构</h1><p>Docker使用经典的CS架构，其中最重要的组成元素为Daemon、Client、Registries、Objects。</p><p>Docker Client（客户端）与Docker Daemon （守护进程）进行对话，该守护进程完成了构建，运行和分发Docker容器的繁重工作。Docker客户端和守护程序在UNIX套接字或网络接口上使用REST API进行通信。</p><p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Docker/docker_cs.png"  alt="docker_cs"></p><h2 id="Docker-Daemon"><a href="#Docker-Daemon" class="headerlink" title="Docker Daemon"></a>Docker Daemon</h2><p>Docker守护程序（dockerd）监听Docker API请求并管理Docker对象，例如镜像，容器，网络和卷。守护程序还可以与其他守护程序通信以管理Docker服务。</p><h2 id="Docker-Client"><a href="#Docker-Client" class="headerlink" title="Docker Client"></a>Docker Client</h2><p>Docker客户端（docker）是许多Docker用户与Docker交互的主要方式。当我们使用诸如之类的命令时docker run，客户端会将这些命令发送到dockerd，以执行这些命令。该docker命令使用Docker API。Docker客户端可以与多个守护程序通信。</p><h2 id="Docker-Registries"><a href="#Docker-Registries" class="headerlink" title="Docker Registries"></a>Docker Registries</h2><p>Docker仓库存储Docker镜像。Docker Hub是任何人都可以使用的公共仓库，并且默认情况下，Docker已配置为在Docker Hub上查找镜像。我们也可以运行自己的私有仓库。如果使用Docker数据中心（DDC），则其中包括Docker可信仓库（DTR）。</p><p>使用docker pull或docker run命令时，所需的镜像将从配置的仓库中提取。使用该docker push命令时，会将镜像推送到配置的仓库。</p><h2 id="Docker-Objects"><a href="#Docker-Objects" class="headerlink" title="Docker Objects"></a>Docker Objects</h2><p>我们一般使用docker时，正在创建和使用镜像，容器，网络，卷，插件和其他对象。下面讲几个最重要的对象。</p><h3 id="IMAGES"><a href="#IMAGES" class="headerlink" title="IMAGES"></a>IMAGES</h3><p>镜像是一个只读模板，其中包含创建Docker容器的说明。通常，一个镜像基于另一个镜像，并进行一些其他自定义。</p><p>我们可以创建自己的镜像，也可以使用其他人在仓库中发布的镜像。要构建自己的镜像，我们可以使用简单的语法创建一个Dockerfile，以定义创建镜像并运行它所需的步骤。Dockerfile中的每个指令都会在镜像中创建一个层。当您更改Dockerfile并重建镜像时，仅重建那些已更改的层。与其他虚拟化技术相比，这是使镜像如此轻巧，小型和快速的部分原因。</p><h3 id="CONTAINERS"><a href="#CONTAINERS" class="headerlink" title="CONTAINERS"></a>CONTAINERS</h3><p>容器是镜像的可运行实例。我们可以使用Docker API或CLI创建，启动，停止，移动或删除容器。我们可以将容器连接到一个或多个网络，将存储连接到它，甚至根据其当前状态创建新镜像。</p><p>默认情况下，容器与其他容器及其主机之间的隔离程度相对较高。我们可以控制容器的网络，存储或其他基础子系统与其他容器或与主机的隔离程度。</p><p>容器由其映像以及在创建或启动时为其提供的任何配置选项定义。删除容器后，未存储在持久性存储中的状态更改将消失。</p><h3 id="SERVICES"><a href="#SERVICES" class="headerlink" title="SERVICES"></a>SERVICES</h3><p>服务允许扩展在多个docker守护进程的容器。群集的每个成员都是Docker守护程序，所有守护程序都使用Docker API进行通信。服务允许我们定义所需的状态，例如在任何给定时间必须可用的服务副本的数量。默认情况下，该服务在所有工作节点之间是负载平衡的。对于消费者而言，Docker服务似乎是一个单独的应用程序。Docker Engine在Docker 1.12及更高版本中支持集群模式。</p><h3 id="VOLUME"><a href="#VOLUME" class="headerlink" title="VOLUME"></a>VOLUME</h3><p>数据卷，用于保存持久化数据。当我们将数据库例如MySQL运行在Docker容器中时，一般将数据通过Docker Volume保存在主机上，这样即使删除MySQL容器，数据依然保存在主机上，有效保证了数据的安全性。</p><h3 id="NETWORK"><a href="#NETWORK" class="headerlink" title="NETWORK"></a>NETWORK</h3><p>Docker使用Linux桥接，在宿主机虚拟一个Docker容器网桥(docker0)，Docker启动一个容器时会根据Docker网桥的网段分配给容器一个IP地址，称为Container-IP，同时Docker网桥是每个容器的默认网关。因为在同一宿主机内的容器都接入同一个网桥，这样容器之间就能够通过容器的Container-IP直接通信。</p><p>Docker网桥是宿主机虚拟出来的，并不是真实存在的网络设备，外部网络是无法寻址到的，这也意味着外部网络无法通过直接Container-IP访问到容器。如果容器希望外部访问能够访问到，可以通过映射容器端口到宿主主机（端口映射），即docker run创建容器时候通过 -p 或 -P 参数来启用，访问容器的时候就通过[宿主机IP]:[容器端口]访问容器。</p><h1 id="底层原理"><a href="#底层原理" class="headerlink" title="底层原理"></a>底层原理</h1><p>Docker用Go编写，并利用Linux内核的多个功能来交付其功能。</p><p>命名空间、控制组、联合文件系统、容器格式。</p><h2 id="Namespaces（命名空间）"><a href="#Namespaces（命名空间）" class="headerlink" title="Namespaces（命名空间）"></a>Namespaces（命名空间）</h2><p>Docker使用一种称为namespaces提供容器的隔离工作区的技术。运行容器时，Docker会为该容器创建一组命名空间。</p><p>这些名称空间提供了一层隔离。容器的每个方面都在单独的名称空间中运行，并且对其的访问仅限于该名称空间。</p><p>Docker Engine在Linux上使用以下名称空间：</p><ul><li>The pid namespace: 进程隔离 (PID: 进程ID).</li><li>The net namespace: 管理网络接口 (NET: 网络).</li><li>The ipc namespace: 管理访问IPC资源 (IPC: 进程间通信).</li><li>The mnt namespace: 管理文件系统挂载点 (MNT: 挂载).</li><li>The uts namespace: 隔离内核和版本标识符。 (UTS:Unix时间共享系统).</li></ul><h2 id="Control-groups（控制组）"><a href="#Control-groups（控制组）" class="headerlink" title="Control groups（控制组）"></a>Control groups（控制组）</h2><p>Linux上的Docker引擎还依赖于另一种称为控制组的技术。Cg将应用程序限制为一组特定的资源。控制组允许Docker Engine将可用的硬件资源共享给容器，并有选择地实施限制和约束。例如，CPU、内存。</p><h2 id="Union-file-systems（联合文件系统）"><a href="#Union-file-systems（联合文件系统）" class="headerlink" title="Union file systems（联合文件系统）"></a>Union file systems（联合文件系统）</h2><p>UnionFS是通过创建图层进行操作的文件系统,使其非常轻便且快速。Docker Engine使用UnionFS为容器提供构建模块。UnionFS可以把文件系统上多个目录(也叫分支)内容联合挂载到同一个目录下，而目录的物理位置是分开的。通俗来说，这个技术就是docker image实现分层的技术基础，因为镜像就是从基础镜像上一层层叠加新的逻辑构成的，这种分层设计，一个优点就是资源共享。</p><h2 id="Container-format（容器格式）"><a href="#Container-format（容器格式）" class="headerlink" title="Container format（容器格式）"></a>Container format（容器格式）</h2><p>Docker Engine将命名空间，控制组和UnionFS组合到一个称为容器格式的包装器中。默认容器格式为libcontainer。未来，Docker可能会通过与BSD Jails或Solaris Zones等技术集成来支持其他容器格式。</p><p>libcontainer基于Go实现，用于创建具有名称空间，cgroup，功能和文件系统访问控制的软件包。使用libcontainer可以管理创建容器以及执行其他操作的容器的生命周期。它定义的容器是一个独立的执行环境，它共享主机系统的内核，并且（可选）与系统中的其他容器隔离。</p><p>容器是通过两步过程生成的。</p><p>第一步：要创建一个容器，我们首先必须初始化一个工厂实例，该实例将处理容器的创建和初始化。</p><p>第二步：一旦创建了工厂的实例，我们就可以创建一个配置文件来描述如何创建容器。</p><p>填充配置后，我们就可以创建一个容器。</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>曾经有位高人指导过我学习的方法：故常无欲，以观其妙；常有欲，以观其徼。我在学习的过程中不断琢磨这句话的真正含义，本系列正是通过这个思想研究docker出现的意义。从下篇开始，我将深入讲解docker的每个技术点及作用。</p><h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p><a href="https://docs.docker.com/get-started/overview/" target="_blank" rel="noopener">docker官方文档</a></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 深入浅出docker原理及实战 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> docker </tag>
+            
+            <tag> linux </tag>
+            
+            <tag> 容器 </tag>
+            
+            <tag> devops </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>顶级理解之互联网的后浪</title>
       <link href="/2020/05/17/king/king-backwave/"/>
       <url>/2020/05/17/king/king-backwave/</url>
@@ -239,13 +270,13 @@
             
             <tag> devops </tag>
             
+            <tag> 自动化 </tag>
+            
             <tag> 敏捷开发 </tag>
             
             <tag> 敏捷部署 </tag>
             
             <tag> CI/CD </tag>
-            
-            <tag> 自动化 </tag>
             
         </tags>
       
