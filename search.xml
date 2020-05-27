@@ -13,12 +13,6 @@
       
       <categories>
           
-          <category> Mysql </category>
-          
-          <category> Mongodb </category>
-          
-          <category> Redis </category>
-          
           <category> Docker </category>
           
       </categories>
@@ -28,13 +22,13 @@
             
             <tag> Docker </tag>
             
-            <tag> Mysql </tag>
-            
             <tag> Mongodb </tag>
             
-            <tag> Redis </tag>
-            
             <tag> 数据备份 </tag>
+            
+            <tag> Mysql </tag>
+            
+            <tag> Redis </tag>
             
         </tags>
       
@@ -52,7 +46,7 @@
       
       <categories>
           
-          <category> 深入浅出Docker原理及实战 </category>
+          <category> Docker </category>
           
       </categories>
       
@@ -419,9 +413,9 @@
       
         <tags>
             
-            <tag> Mysql </tag>
-            
             <tag> 数据备份 </tag>
+            
+            <tag> Mysql </tag>
             
         </tags>
       
