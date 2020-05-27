@@ -15,12 +15,24 @@
           
           <category> Mysql </category>
           
+          <category> Mongodb </category>
+          
+          <category> Redis </category>
+          
+          <category> Docker </category>
+          
       </categories>
       
       
         <tags>
             
+            <tag> Docker </tag>
+            
             <tag> Mysql </tag>
+            
+            <tag> Mongodb </tag>
+            
+            <tag> Redis </tag>
             
             <tag> 数据备份 </tag>
             
@@ -175,9 +187,9 @@
       
         <tags>
             
-            <tag> 数据备份 </tag>
-            
             <tag> Mongodb </tag>
+            
+            <tag> 数据备份 </tag>
             
         </tags>
       
@@ -297,13 +309,13 @@
             
             <tag> Devops </tag>
             
-            <tag> 自动化 </tag>
-            
             <tag> 敏捷开发 </tag>
             
             <tag> 敏捷部署 </tag>
             
             <tag> CI/CD </tag>
+            
+            <tag> 自动化 </tag>
             
         </tags>
       
