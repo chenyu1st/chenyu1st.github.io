@@ -1,0 +1,240 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>深入浅出Docker原理及实战（四) | 宇神之息</title><meta name="description" content="深入浅出Docker原理及实战（四)"><meta name="keywords" content="Devops,Docker,Linux,容器,Dockerfile"><meta name="author" content="Rugod"><meta name="copyright" content="Rugod"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.ico"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="https://www.google-analytics.com" crossorigin="crossorigin"/><link rel="preconnect" href="https://hm.baidu.com"/><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="crossorigin"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="twitter:card" content="summary"><meta name="twitter:title" content="深入浅出Docker原理及实战（四)"><meta name="twitter:description" content="深入浅出Docker原理及实战（四)"><meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/docker.jpg"><meta property="og:type" content="article"><meta property="og:title" content="深入浅出Docker原理及实战（四)"><meta property="og:url" content="https://rugod.com/2020/06/29/docker/docker-idea-4/"><meta property="og:site_name" content="宇神之息"><meta property="og:description" content="深入浅出Docker原理及实战（四)"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/docker.jpg"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>var autoChangeMode = '1'
+var t = Cookies.get("theme")
+if (autoChangeMode == '1'){
+  var isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+  var isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
+  var isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined){
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport){
+      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour < 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+  }
+  } else if (t == 'light') activateLightMode()
+  else activateDarkMode()
+
+} else if (autoChangeMode == '2'){
+  now = new Date();
+  hour = now.getHours();
+  isNight = hour < 6 || hour >= 18
+  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode() 
+} else {
+  if ( t == 'dark' ) activateDarkMode()
+  else if ( t == 'light') activateLightMode()
+}
+
+function activateDarkMode(){
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
+  }
+}
+function activateLightMode(){
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
+  }
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="canonical" href="https://rugod.com/2020/06/29/docker/docker-idea-4/"><link rel="next" title="Webhooks自动部署博客" href="https://rugod.com/2020/06/28/devops/devops-webhooks/"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?a29fc1f2b32c6a60aee5dbf412c89285";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-164950732-1', 'auto');
+ga('send', 'pageview');
+</script><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容:${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://www.rugod.cn/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: {"languages":{"author":"作者: Rugod","link":"链接: ","source":"来源: 宇神之息","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  ClickShowText: {"text":"宇神,牛逼","fontSize":"15px"},
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  baiduPush: true,
+  highlightCopy: true,
+  highlightLang: true,
+  highlightShrink: 'false',
+  isFontAwesomeV5: false,
+  isPhotoFigcaption: false
+  
+}</script><script>var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isSidebar: true  
+  }</script><noscript><style>
+#page-header {
+  opacity: 1
+}
+.justified-gallery img{
+  opacity: 1
+}
+</style></noscript><meta name="generator" content="Hexo 4.2.0"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Challenger.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">26</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">47</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">12</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于本人</span></a></div></div></div></div><i class="fa fa-arrow-right on" id="toggle-sidebar" aria-hidden="true">     </i><div id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#创建镜像的方式"><span class="toc-number">1.</span> <span class="toc-text">创建镜像的方式</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基于一个现有的镜像来修改"><span class="toc-number">2.</span> <span class="toc-text">基于一个现有的镜像来修改</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基于Dockerfile来创建"><span class="toc-number">3.</span> <span class="toc-text">基于Dockerfile来创建</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#底层构建原理"><span class="toc-number">3.1.</span> <span class="toc-text">底层构建原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#上下文"><span class="toc-number">3.2.</span> <span class="toc-text">上下文</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#本地目录"><span class="toc-number">3.3.</span> <span class="toc-text">本地目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#git仓库"><span class="toc-number">3.4.</span> <span class="toc-text">git仓库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#tar包"><span class="toc-number">3.5.</span> <span class="toc-text">tar包</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#例子"><span class="toc-number">3.6.</span> <span class="toc-text">例子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#注意"><span class="toc-number">3.7.</span> <span class="toc-text">注意</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#如何高效地构建一个镜像"><span class="toc-number">4.</span> <span class="toc-text">如何高效地构建一个镜像</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#使用多阶段构建方法"><span class="toc-number">4.1.</span> <span class="toc-text">使用多阶段构建方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#不要安装不必要的软件包"><span class="toc-number">4.2.</span> <span class="toc-text">不要安装不必要的软件包</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#解耦应用"><span class="toc-number">4.3.</span> <span class="toc-text">解耦应用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#最小化层数"><span class="toc-number">4.4.</span> <span class="toc-text">最小化层数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#利用缓存构建镜像-重中之重"><span class="toc-number">4.5.</span> <span class="toc-text">利用缓存构建镜像(重中之重)</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#实践"><span class="toc-number">5.</span> <span class="toc-text">实践</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#基础镜像"><span class="toc-number">5.1.</span> <span class="toc-text">基础镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#项目镜像"><span class="toc-number">5.2.</span> <span class="toc-text">项目镜像</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考资料"><span class="toc-number">7.</span> <span class="toc-text">参考资料</span></a></li></ol></div></div></div><div id="body-wrap"><div class="post-bg" id="nav" style="background-image: url(https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/docker.jpg)"><div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">宇神之息</a></span><span class="pull_right menus"><div id="search_button"><a class="site-page social-icon search"><i class="fa fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于本人</span></a></div></div><span class="toggle-menu close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span></span></div><div id="post-info"><div id="post-title"><div class="posttitle">深入浅出Docker原理及实战（四)</div></div><div id="post-meta"><div class="meta-firstline"><time class="post-meta__date"><span class="post-meta__date-created" title="发表于 2020-06-29 02:45:17"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2020-06-29</span><span class="post-meta__separator">|</span><span class="post-meta__date-updated" title="更新于 2020-06-29 02:49:02"><i class="fa fa-history" aria-hidden="true"></i> 更新于 2020-06-29</span></time><span class="post-meta__categories"><span class="post-meta__separator">|</span><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/Docker/">Docker</a></span></div><div class="meta-secondline"> <span class="post-meta-wordcount"><i class="post-meta__icon fa fa-file-word-o" aria-hidden="true"></i><span>字数总计:</span><span class="word-count">4.3k</span><span class="post-meta__separator">|</span><i class="post-meta__icon fa fa-clock-o" aria-hidden="true"></i><span>阅读时长: 15 分钟</span></span></div><div class="meta-thirdline"><span class="post-meta-pv-cv"><span class="post-meta__separator">|</span><i class="fa fa-eye post-meta__icon" aria-hidden="true"> </i><span>阅读量:</span><span id="busuanzi_value_page_pv"></span></span><span class="post-meta-commentcount"><span class="post-meta__separator">|</span><i class="post-meta__icon fa fa-comment-o" aria-hidden="true"></i><span>评论数:</span><a href="/2020/06/29/docker/docker-idea-4/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count comment-count" data-xid="/2020/06/29/docker/docker-idea-4/" itemprop="commentCount"></span></a></span></div></div></div></div><main class="layout_post" id="content-inner"><article id="post"><div id="article-container"><p>声明:这是我在大学毕业后进入第一家互联网工作学习的内容</p>
+<hr>
+<p>深入浅出Docker原理及实战系列第四篇，我主要分享制作镜像的两种方法以及如何高效构建镜像的注意点，最后展示一个构建项目级镜像的实践过程</p>
+<h1 id="创建镜像的方式"><a href="#创建镜像的方式" class="headerlink" title="创建镜像的方式"></a>创建镜像的方式</h1><p>创建一个指定的镜像有两种方式</p>
+<ul>
+<li>基于一个现有的镜像来修改  docker commit </li>
+<li>基于Dockerfile来创建      docker build </li>
+</ul>
+<h1 id="基于一个现有的镜像来修改"><a href="#基于一个现有的镜像来修改" class="headerlink" title="基于一个现有的镜像来修改"></a>基于一个现有的镜像来修改</h1><p>命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]</span><br><span class="line"></span><br><span class="line">--author , -a		作者（例如“ rugod.cn ”）</span><br><span class="line">--change , -c		将Dockerfile创建的镜像进行更新</span><br><span class="line">--message , -m		提交讯息</span><br><span class="line">--pause , -p	true	提交期间暂停容器</span><br></pre></td></tr></table></figure>
+
+<p>你可以理解成快照，不过不是你在容器里所有的操作都会快照上，支持更改命令有 CMD| ENTRYPOINT| ENV| EXPOSE| LABEL| ONBUILD| USER| VOLUME|WORKDIR</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps</span><br><span class="line"></span><br><span class="line">CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS              NAMES</span><br><span class="line">c3f279d17e0a        ubuntu:12.04        &#x2F;bin&#x2F;bash           7 days ago          Up 25 hours                            desperate_dubinsky</span><br><span class="line">197387f1b436        ubuntu:12.04        &#x2F;bin&#x2F;bash           7 days ago          Up 25 hours                            focused_hamilton</span><br><span class="line"></span><br><span class="line">$ docker commit --change&#x3D;&#39;CMD [&quot;apachectl&quot;, &quot;-DFOREGROUND&quot;]&#39; -c &quot;EXPOSE 80&quot; c3f279d17e0a  svendowideit&#x2F;testimage:version4</span><br><span class="line"></span><br><span class="line">f5283438590d</span><br><span class="line"></span><br><span class="line">$ docker run -d svendowideit&#x2F;testimage:version4</span><br><span class="line"></span><br><span class="line">89373736e2e7f00bc149bd783073ac43d0507da250e999f3f1036e0db60817c0</span><br><span class="line"></span><br><span class="line">$ docker ps</span><br><span class="line"></span><br><span class="line">CONTAINER ID        IMAGE               COMMAND                 CREATED             STATUS              PORTS              NAMES</span><br><span class="line">89373736e2e7        testimage:version4  &quot;apachectl -DFOREGROU&quot;  3 seconds ago       Up 2 seconds        80&#x2F;tcp             distracted_fermat</span><br><span class="line">c3f279d17e0a        ubuntu:12.04        &#x2F;bin&#x2F;bash               7 days ago          Up 25 hours                            desperate_dubinsky</span><br><span class="line">197387f1b436        ubuntu:12.04        &#x2F;bin&#x2F;bash               7 days ago          Up 25 hours</span><br></pre></td></tr></table></figure>
+
+<p>总结：一般来说这种修改的方式镜像都是用于测试构建，不适合生产环境的构建。</p>
+<p>注意！！！提交操作将不包含容器内挂载卷中的任何数据。</p>
+<h1 id="基于Dockerfile来创建"><a href="#基于Dockerfile来创建" class="headerlink" title="基于Dockerfile来创建"></a>基于Dockerfile来创建</h1><p>常规来讲，镜像都是需要有一个dockerfile来构建的，但是我们在制作前需要理解一下底层的构建原理，这很重要</p>
+<h2 id="底层构建原理"><a href="#底层构建原理" class="headerlink" title="底层构建原理"></a>底层构建原理</h2><p>先回顾一下Docker的架构=Docker客户端(CLI)+Docker服务端(docker的守护进程)。</p>
+<p>Docker 客户端通过 REST API 和服务端进行交互，docker 客户端每发送一条指令，底层都会转化成 REST API 调用的形式发送给服务端，服务端处理客户端发送的请求并给出响应。</p>
+<p>Docker 镜像的构建、容器创建、容器运行等工作都是 Docker 服务端来完成的，Docker 客户端只是承担发送指令的角色。</p>
+<p>所以构建一个镜像是由Docker守护程序(Docker的服务端)而不是CLI运行的。构建过程要做的第一件事是将整个上下文（递归）发送到守护程序。在大多数情况下，最好以空目录作为上下文，并将Dockerfile保留在该目录中。仅添加构建Dockerfile所需的文件。</p>
+<p>无论Dockerfile实际位于何处，当前目录中文件和目录的所有递归内容都将作为构建上下文发送到Docker守护程序。</p>
+<p>docker build 构建镜像的流程大概如下：</p>
+<ul>
+<li>执行 docker build -t <a href="imageName:imageTag">imageName:imageTag</a> . ;</li>
+<li>Docker 客户端会将构建命令后面指定的路径(.)下的所有文件打包成一个 tar 包，发送给 Docker 服务端;</li>
+<li>Docker 服务端收到客户端发送的 tar 包，然后解压，根据 Dockerfile 里面的指令进行镜像的分层构建；</li>
+</ul>
+<h2 id="上下文"><a href="#上下文" class="headerlink" title="上下文"></a>上下文</h2><p>这里好好理解一下上下文的意思，官方给出上下文的解释：位于指定位置PATH或URL的文件集。</p>
+<p>context翻译为语境，前后关系</p>
+<p>什么意思呢，Docker 构建上下文就是 Docker 客户端上传给服务端的 tar 文件解压后的内容，也即 docker build 命令行后面指定路径下的文件。</p>
+<p>Docker 镜像的构建是在远程服务端进行的，所以客户端需要把构建所需要的文件传输给服务端。服务端以客户端发送的文件为上下文，也就是说 Dockerfile 中指令的工作目录就是服务端解压客户端传输的 tar 包的路径。</p>
+<p>上下文特别关键，因为在构建的时候构建文件中也是应用的是上下文的相对路径，简单来说<br>COPY 和 ADD 命令不能拷贝上下文之外的本地文件</p>
+<p>比如你的目录结构是这样</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# tree</span><br><span class="line">.</span><br><span class="line">├── test</span><br><span class="line">│   └── Dockerfile</span><br><span class="line">└── test.conf</span><br><span class="line"></span><br><span class="line">你如果在构建的时候在~&#x2F;test&#x2F;目录下执行的docker build . 则Dockerfile里不能copy或add 上一级目录的test.conf</span><br><span class="line"></span><br><span class="line">即使你可以在~&#x2F;目录下执行docker build -f test&#x2F;Dockerfile .</span><br><span class="line">但也不要这么做，保持所有文件在当前docker build 的执行目录下是一件良好也有很必要的习惯。</span><br></pre></td></tr></table></figure>
+
+
+<hr>
+<p>注意！！！<br>请勿将root目录或/目录用作PATH，因为它会导致构建将硬盘驱动器的全部内容传输到Docker守护程序。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build [OPTIONS] PATH | URL | -</span><br></pre></td></tr></table></figure>
+
+<p>docker build命令从Dockerfile和上下文构建镜像。 PATH是本地文件系统上的目录。该URL是一个Git存储库位置。上下文是递归处理的，因此，PATH包括任何子目录，而URL包括存储库及其子模块。</p>
+<h2 id="本地目录"><a href="#本地目录" class="headerlink" title="本地目录"></a>本地目录</h2><p>最简单的一个使用当前目录作为上下文的构建命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker build .</span><br><span class="line"></span><br><span class="line">Sending build context to Docker daemon  6.51 MB</span><br></pre></td></tr></table></figure>
+
+<h2 id="git仓库"><a href="#git仓库" class="headerlink" title="git仓库"></a>git仓库</h2><p>当URL参数指向Git存储库的位置时，该存储库将作为构建上下文。系统以递归方式获取存储库及其子模块。提交历史记录未保留。首先将存储库拉到本地主机上的临时目录中。成功之后，该目录将作为上下文发送到Docker守护程序。本地副本使您能够使用本地用户凭据，VPN等访问私有存储库。</p>
+<p>Git URL在其片段部分接受上下文配置，并用冒号（:）分隔。第一部分代表Git将检出的引用，可以是分支，标签或远程引用。第二部分表示存储库中的子目录，该子目录将用作构建上下文。</p>
+<p>例如，运行以下命令以使用docker分支中 称为的目录container：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker build https:&#x2F;&#x2F;github.com&#x2F;docker&#x2F;rootfs.git#container:docker</span><br></pre></td></tr></table></figure>
+
+<h2 id="tar包"><a href="#tar包" class="headerlink" title="tar包"></a>tar包</h2><p>如果将URL传递到远程tar包，则URL本身将发送到守护程序：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker build http:&#x2F;&#x2F;server&#x2F;context.tar.gz</span><br></pre></td></tr></table></figure>
+
+<p>下载操作将在运行Docker守护程序的主机上执行，该主机不一定与发出build命令的主机相同。Docker守护程序将获取context.tar.gz并将其用作构建上下文。Tar包上下文必须是符合标准tar UNIX格式的tar存档，并且可以使用“xz”，“bzip2”，“gzip”或“identity”（无压缩）格式中的任何一种进行压缩。</p>
+<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><p>最常用的2个参数</p>
+<p>-t 打tag 将做好的镜像标记存储库名称及版本号</p>
+<p>-f 指定dockerfile的路径</p>
+<p>–no-cache  构建映像时不要使用缓存</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">$ docker build -f ctx&#x2F;Dockerfile http:&#x2F;&#x2F;server&#x2F;ctx.tar.gz</span><br><span class="line"></span><br><span class="line">Downloading context: http:&#x2F;&#x2F;server&#x2F;ctx.tar.gz [&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&gt;]    240 B&#x2F;240 B</span><br><span class="line">Step 1&#x2F;3 : FROM busybox</span><br><span class="line"> ---&gt; 8c2e06607696</span><br><span class="line">Step 2&#x2F;3 : ADD ctx&#x2F;container.cfg &#x2F;</span><br><span class="line"> ---&gt; e7829950cee3</span><br><span class="line">Removing intermediate container b35224abf821</span><br><span class="line">Step 3&#x2F;3 : CMD &#x2F;bin&#x2F;ls</span><br><span class="line"> ---&gt; Running in fbc63d321d73</span><br><span class="line"> ---&gt; 3286931702ad</span><br><span class="line">Removing intermediate container fbc63d321d73</span><br><span class="line">Successfully built 377c409b35e4</span><br></pre></td></tr></table></figure>
+<p>这会将URL发送<a href="http://server/ctx.tar.gz到Docker守护程序，该守护程序下载并提取引用的tar包。" target="_blank" rel="noopener">http://server/ctx.tar.gz到Docker守护程序，该守护程序下载并提取引用的tar包。</a></p>
+<p>-f ctx/Dockerfile 参数指定内部的路径ctx.tar.gz的Dockerfile，用于构建图像。其中的任何引用本地路径的ADD命令都Dockerfile必须相对于其中内容的根ctx.tar.gz。在上面的示例中，压缩包包含一个目录ctx/，因此该ADD ctx/container.cfg /操作可以按预期进行。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t vieux&#x2F;apache:2.0 .</span><br></pre></td></tr></table></figure>
+<p>使用当前目录Dockerfile作为上下文的构建，并将构建成功的镜像打tag为vieux/apache:2.0</p>
+<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><p>在Docker守护程序运行Dockerfile中的指令之前，它会对进行初步验证，Dockerfile如果语法不正确，则返回错误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ docker build -t test&#x2F;myapp .</span><br><span class="line"></span><br><span class="line">Sending build context to Docker daemon 2.048 kB</span><br><span class="line">Error response from daemon: Unknown instruction: RUNCMD</span><br></pre></td></tr></table></figure>
+
+<p>Docker守护程序以Dockerfile一对一的方式运行指令，如有必要，将每个指令的结果提交到新映像，然后最终输出新映像的ID。Docker守护程序将自动清理您发送的上下文。</p>
+<p>请注意，每条指令都是独立运行的，并会导致创建新映像-因此RUN cd /tmp对下一条指令不会有任何影响。</p>
+<h1 id="如何高效地构建一个镜像"><a href="#如何高效地构建一个镜像" class="headerlink" title="如何高效地构建一个镜像"></a>如何高效地构建一个镜像</h1><h2 id="使用多阶段构建方法"><a href="#使用多阶段构建方法" class="headerlink" title="使用多阶段构建方法"></a>使用多阶段构建方法</h2><p>多阶段构建有点像虚拟机模板内味，就是需要几个基础镜像，毕竟软件底层都是由一个一个的基础组成的，就像我们的window、centos、ubantu等等一样，我们需要一个基础Docker image，包含一类工程的基础运行环境（java类镜像你需要装jdk），装完系统后的加工则交给我们的上一层Dockerfile来完成。</p>
+<p>为什么这样其实用中国一句老话来说通俗易懂，避免牵一发而动全身。假如你的A项目需要一个jdk1.7的环境 你的B项目需要一个jdk1.8的环境，你只需要做一个centos/ubantu的镜像并且能保证稳定，在此基础上build 2个不同的版本java:1.7 java:1.8即可让不通的项目运行在不通的镜像上，而你则只用专注java:1.7和java:1.8的Dockerfile即可。</p>
+<p>对于Dockerfile来说，最好将命令从更改频率较低（以确保构建缓存可重用）到更改频率较高的顺序来布局整个镜像层级：</p>
+<ul>
+<li>底层  安装构建应用程序所需的工具   </li>
+<li>中层  安装或更新库依赖关系</li>
+<li>顶层  安装应用程序</li>
+</ul>
+<p>Go应用程序的Dockerfile可能类似于：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">FROM golang:1.11-alpine AS build</span><br><span class="line"></span><br><span class="line"># Install tools required for project</span><br><span class="line"># Run &#96;docker build --no-cache .&#96; to update dependencies</span><br><span class="line">RUN apk add --no-cache git</span><br><span class="line">RUN go get github.com&#x2F;golang&#x2F;dep&#x2F;cmd&#x2F;dep</span><br><span class="line"></span><br><span class="line"># List project dependencies with Gopkg.toml and Gopkg.lock</span><br><span class="line"># These layers are only re-built when Gopkg files are updated</span><br><span class="line">COPY Gopkg.lock Gopkg.toml &#x2F;go&#x2F;src&#x2F;project&#x2F;</span><br><span class="line">WORKDIR &#x2F;go&#x2F;src&#x2F;project&#x2F;</span><br><span class="line"># Install library dependencies</span><br><span class="line">RUN dep ensure -vendor-only</span><br><span class="line"></span><br><span class="line"># Copy the entire project and build it</span><br><span class="line"># This layer is rebuilt when a file changes in the project directory</span><br><span class="line">COPY . &#x2F;go&#x2F;src&#x2F;project&#x2F;</span><br><span class="line">RUN go build -o &#x2F;bin&#x2F;project</span><br><span class="line"></span><br><span class="line"># This results in a single layer image</span><br><span class="line">FROM scratch</span><br><span class="line">COPY --from&#x3D;build &#x2F;bin&#x2F;project &#x2F;bin&#x2F;project</span><br><span class="line">ENTRYPOINT [&quot;&#x2F;bin&#x2F;project&quot;]</span><br><span class="line">CMD [&quot;--help&quot;]</span><br></pre></td></tr></table></figure>
+
+<h2 id="不要安装不必要的软件包"><a href="#不要安装不必要的软件包" class="headerlink" title="不要安装不必要的软件包"></a>不要安装不必要的软件包</h2><p>为了降低复杂性，依赖性，文件大小和构建时间，请避免即便它们“很容易安装”而安装多余或不必要的软件包。</p>
+<p>比如不需要在数据库镜像中安装文本编辑器(vim)。</p>
+<h2 id="解耦应用"><a href="#解耦应用" class="headerlink" title="解耦应用"></a>解耦应用</h2><p>即每个容器应该做好自己的，将应用程序解耦到多个容器中，可以更轻松地水平缩放和重复使用容器。</p>
+<p>例如，一个Web应用程序可能由三个单独的容器组成，每个容器都有自己的唯一镜像，以分离的方式管理Web应用程序，数据库和内存中的缓存。</p>
+<p>尽量不要将所有项目的运行环境融合在一个镜像里。根据您的最佳判断，使容器保持清洁和模块化。如果容器相互依赖，则可以使用Docker容器网络来确保这些容器可以通信。</p>
+<h2 id="最小化层数"><a href="#最小化层数" class="headerlink" title="最小化层数"></a>最小化层数</h2><p>只有指令RUN，COPY，ADD会创建层。其他指令只会创建临时的中间镜像，并且不会增加构建的大小。</p>
+<p>尽可能使用多阶段构建，并且仅将所需的工件复制到最终映像中。这样，您就可以在中间构建阶段中包含工具和调试信息，而无需增加最终映像的大小。</p>
+<p>例如，一个java应用最顶层的镜像应该只存在jar包，而不用关注任何启动的环境准备等。</p>
+<h2 id="利用缓存构建镜像-重中之重"><a href="#利用缓存构建镜像-重中之重" class="headerlink" title="利用缓存构建镜像(重中之重)"></a>利用缓存构建镜像(重中之重)</h2><p>构建镜像时，Docker会逐步执行Dockerfile中的指令。在检查每条指令时，Docker会在其缓存中查找可重用的现有镜像，而不是创建新的（重复的）镜像。</p>
+<p>利用构建缓存也是上面提到4种高效构建的核心原因：使用多阶段构建方法、不要安装不必要的软件包、解耦应用、最小化层数。正是由于这些高效构建的方法，才使得利用构建缓存非查有必要。</p>
+<p>利用缓存构建的好处包括：</p>
+<ul>
+<li>缩短构建、拉取、推送镜像的时间</li>
+<li>基于一个基础镜像进行分类扩展</li>
+<li>节省磁盘资源及容器运行时的大小。</li>
+</ul>
+<p>Docker遵循的基本规则概述如下：</p>
+<ul>
+<li>从已在缓存中的基础镜像开始，将下一条指令与从该基本镜像派生的所有子镜像进行比较，以查看是否其中一个是使用完全相同的指令构建的。如果不是，无法使用缓存。</li>
+<li>在大多数情况下，只需将中的指令Dockerfile与基础镜像之一进行比较就足够了。但是，某些说明需要更多的检查和解释。</li>
+<li>对于ADD和COPY指令，将检查镜像中文件的内容，并为每个文件计算一个校验和。这些校验和中不考虑文件的最后修改时间和最后访问时间。在高速缓存查找期间，将校验和与现有镜像中的校验和进行比较。如果文件中的任何内容（例如内容和元数据）发生了更改，则无法使用缓存</li>
+<li>除了ADD和COPY命令之外，缓存检查不会查看容器中的文件来确定缓存是否匹配。例如，在处理RUN apt-get -y update命令时，不检查容器中更新的文件以确定是否存在缓存命中。在这种情况下，仅使用命令字符串本身来查找匹配项。</li>
+</ul>
+<p>如果发现缓存无效的情况，则所有后续Dockerfile命令都会生成新镜像，并且不使用缓存。</p>
+<h1 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h1><p>其实关于构建镜像，最具挑战性的事情之一是保持图像尺寸变小。Dockerfile中的每条指令都在映像上添加了一层，您需要记住在移至下一层之前清除不需要的任何组件。要编写一个真正有效的Dockerfile，传统上，您需要使用Shell技巧和其他逻辑来使各层尽可能小，并确保每一层都具有上一层所需的工件，而没有其他任何东西。</p>
+<p>例如，在执行RUN安装基础组件的时候尽量带上 &amp;&amp;运算符将多个命令压缩在一起，以避免在镜像中创建额外层。</p>
+<h2 id="基础镜像"><a href="#基础镜像" class="headerlink" title="基础镜像"></a>基础镜像</h2><p>可以进入dockerhub上看到一个jdk8环境的Dockerfile</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">FROM ubuntu:xenial</span><br><span class="line">MAINTAINER ASCDC &lt;asdc.sinica@gmail.com&gt;</span><br><span class="line"></span><br><span class="line">RUN mkdir &#x2F;script</span><br><span class="line">ADD run.sh &#x2F;script&#x2F;run.sh</span><br><span class="line"></span><br><span class="line">RUN DEBIAN_FRONTEND&#x3D;noninteractive &amp;&amp; \</span><br><span class="line">	chmod +x &#x2F;script&#x2F;*.sh &amp;&amp; \</span><br><span class="line">	apt-get -qq update &amp;&amp; \</span><br><span class="line">	apt-get -y -qq dist-upgrade &amp;&amp; \</span><br><span class="line">	apt-get -qq install -y locales &amp;&amp; \</span><br><span class="line">	locale-gen en_US.UTF-8 &amp;&amp; \</span><br><span class="line">	export LANG&#x3D;en_US.UTF-8</span><br><span class="line">RUN DEBIAN_FRONTEND&#x3D;noninteractive &amp;&amp; apt-get -qq install -y vim screen wget git curl openjdk-8-jdk</span><br><span class="line"></span><br><span class="line">ENV JAVA_HOME &#x2F;usr&#x2F;lib&#x2F;jvm&#x2F;java-8-openjdk-amd64</span><br><span class="line"></span><br><span class="line">WORKDIR &#x2F;script</span><br><span class="line">ENTRYPOINT [&quot;&#x2F;script&#x2F;run.sh&quot;]</span><br></pre></td></tr></table></figure>
+
+<p>当然，这只是一个例子，你可以根据自己的项目需求调整Dockerfile的内容，比如时区 TZ=Asia/Shanghai  如果你不需要wget 、git 、curl等，也可以不安装。</p>
+<h2 id="项目镜像"><a href="#项目镜像" class="headerlink" title="项目镜像"></a>项目镜像</h2><p>将这个镜像下载到本地修改或者直接重写jdk8的Dockerfile都是不错选择，基础镜像制作完成后，就需要制作项目镜像了。</p>
+<p>项目的镜像一般来说是一个经常变动的(jar包在不断更新迭代)，在基于基础镜像的之上这样再制作一个项目的Dockerfile就容易很多了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">本地目录</span><br><span class="line">[root@localhost ~]# tree</span><br><span class="line">.</span><br><span class="line">├── xxx.jar</span><br><span class="line">├── Dockerfile</span><br><span class="line">└── run.sh</span><br><span class="line"></span><br><span class="line">Dockerfile内容如下，将jar包和启动脚本放到镜像里</span><br><span class="line"></span><br><span class="line">FROM jdk:1.8</span><br><span class="line">ADD xxx.jar &#x2F;</span><br><span class="line">COPY .&#x2F;run.sh &#x2F;run.sh</span><br><span class="line">RUN chmod u+x &#x2F;run.sh</span><br><span class="line">CMD [ &quot;&#x2F;run.sh&quot; ]</span><br><span class="line"></span><br><span class="line">run.sh内容如下 启动命令及调优参数</span><br><span class="line"></span><br><span class="line">#!&#x2F;bin&#x2F;bash</span><br><span class="line">java -server -Xmx4000m -Xms4000m -Xmn2000m -Xss512k -XX:+DisableExplicitGC \</span><br><span class="line">     -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled \</span><br><span class="line">     -XX:LargePageSizeInBytes&#x3D;128m -XX:+UseFastAccessorMethods \</span><br><span class="line">     -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction&#x3D;70 \</span><br><span class="line">     -jar &#x2F;xxx.jar</span><br><span class="line">     </span><br><span class="line">     </span><br><span class="line">制作镜像命令，在~目录执行</span><br><span class="line">docker build -t rugod.cn:1.0 .</span><br></pre></td></tr></table></figure>
+
+<p>2个制作镜像过程种经常用到的命令</p>
+<p>docker history images:tag 查看某个指定版本镜像的构建语句</p>
+<p>docker search images:tag 在Docker Hub中搜索图像</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>如何高效制作镜像的过程就基本上讲完了，希望对大家有帮助，谢谢。</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://qhh.me/2019/02/17/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-Docker-%E6%9E%84%E5%BB%BA%E4%B8%8A%E4%B8%8B%E6%96%87/" target="_blank" rel="noopener">深入理解-Docker-构建上下文</a></p>
+<p><a href="https://docs.docker.com/develop/develop-images/dockerfile_best-practices/" target="_blank" rel="noopener">编写Dockerfile的最佳实践</a></p>
+<hr>
+<p>版权声明：</p>
+<p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Rugod</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://rugod.com/2020/06/29/docker/docker-idea-4/">https://rugod.com/2020/06/29/docker/docker-idea-4/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://rugod.com" target="_blank">宇神之息</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Devops/">Devops</a><a class="post-meta__tags" href="/tags/Docker/">Docker</a><a class="post-meta__tags" href="/tags/Linux/">Linux</a><a class="post-meta__tags" href="/tags/%E5%AE%B9%E5%99%A8/">容器</a><a class="post-meta__tags" href="/tags/Dockerfile/">Dockerfile</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/docker.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"/><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-button button--primary button--animated"> <i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lazyload post-qr-code__img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/wechat.JPG" alt="微信"/><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lazyload post-qr-code__img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/alipay.JPG" alt="支付宝"/><div class="post-qr-code__desc">支付宝</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="next-post pull-full"><a href="/2020/06/28/devops/devops-webhooks/"><img class="next_cover lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/devops.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Webhooks自动部署博客</div></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fa fa-fw fa-thumbs-up" aria-hidden="true"></i><span> 相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/2020/06/27/docker/docker-idea-3/" title="深入浅出Docker原理及实战（三)"><img class="relatedPosts_cover lazyload"data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/docker.jpg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-history fa-fw" aria-hidden="true"></i> 2020-06-29</div><div class="relatedPosts_title">深入浅出Docker原理及实战（三)</div></div></a></div><div class="relatedPosts_item"><a href="/2020/05/24/docker/docker-idea-1/" title="深入浅出Docker原理及实战（一)"><img class="relatedPosts_cover lazyload"data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/docker.jpg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-history fa-fw" aria-hidden="true"></i> 2020-06-25</div><div class="relatedPosts_title">深入浅出Docker原理及实战（一)</div></div></a></div><div class="relatedPosts_item"><a href="/2020/06/09/docker/docker-idea-2/" title="深入浅出Docker原理及实战（二)"><img class="relatedPosts_cover lazyload"data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/docker.jpg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-history fa-fw" aria-hidden="true"></i> 2020-06-27</div><div class="relatedPosts_title">深入浅出Docker原理及实战（二)</div></div></a></div></div><div class="clear_both"></div></div><hr><div id="post-comment"><div class="comment_headling"><i class="fa fa-comments fa-fw" aria-hidden="true"></i><span> 评论</span></div><div class="vcomment" id="vcomment"></div><script src="https://cdn.jsdelivr.net/gh/xaoxuu/volantis/js/volantis.min.js"></script><script>var GUEST_INFO = ['nick','mail','link'];
+var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+  return GUEST_INFO.indexOf(item) > -1
+});
+guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
+
+window.valine = new Valine({
+  el:'#vcomment',
+  notify: false,
+  verify: false,
+  appId: 'GkD8YSRxxCgXoW6LqFO3cKhd-gzGzoHsz',
+  appKey: 'DbbNrHwsCuK9Ehh2wgOw6UXL',
+  placeholder: '记得留下你的昵称和邮箱...可以快速收到回复哦',
+  avatar: 'monsterid',
+  meta: guest_info,
+  pageSize: '10',
+  lang: 'zh-cn',
+  recordIP: false,
+  serverURLs: ''
+});</script></div></article></main><footer id="footer" style="background-image: url(https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/docker.jpg)" data-type="photo"><div id="footer-wrap"><div class="copyright">&copy;2020 By Rugod</div><div class="footer_custom_text">弱小的人才习惯嘲讽和否定，而内心强大的人从不吝啬赞美和鼓励</div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="阅读模式"></i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换" target="_self">繁</a><i class="darkmode fa fa-moon-o" id="darkmode" title="夜间模式"></i></div><div id="rightside-config-show"><div id="rightside_config" title="设置"><i class="fa fa-cog" aria-hidden="true"></i></div><a id="to_comment" href="#post-comment" title="直达评论"><i class="scroll_to_comment fa fa-comments">  </i></a><i class="fa fa-list-ul close" id="mobile-toc-button" title="目录" aria-hidden="true"></i><i class="fa fa-arrow-up" id="go-up" title="回到顶部" aria-hidden="true"></i></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a href="https://github.com/wzpan/hexo-generator-search" target="_blank" rel="noopener" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script id="canvas_nest" color="255,0,0" opacity="0.7" zIndex="-1" count="99" mobile="false" src="/js/third-party/canvas-nest.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@latest/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/lazysizes@latest/lazysizes.min.js" async=""></script><script src="/js/third-party/ClickShowText.js"></script><script src="/js/search/local-search.js"></script></body></html>
