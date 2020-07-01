@@ -1,0 +1,329 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>see审计平台介绍及部署 | 宇神之息</title><meta name="description" content="see审计平台介绍及部署"><meta name="keywords" content="Mysql,审计"><meta name="author" content="Rugod"><meta name="copyright" content="Rugod"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.ico"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="https://www.google-analytics.com" crossorigin="crossorigin"/><link rel="preconnect" href="https://hm.baidu.com"/><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="crossorigin"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="twitter:card" content="summary"><meta name="twitter:title" content="see审计平台介绍及部署"><meta name="twitter:description" content="see审计平台介绍及部署"><meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/mysql.jpg"><meta property="og:type" content="article"><meta property="og:title" content="see审计平台介绍及部署"><meta property="og:url" content="https://rugod.com/2020/07/01/mysql/mysql-see/"><meta property="og:site_name" content="宇神之息"><meta property="og:description" content="see审计平台介绍及部署"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/mysql.jpg"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>var autoChangeMode = '1'
+var t = Cookies.get("theme")
+if (autoChangeMode == '1'){
+  var isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+  var isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
+  var isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined){
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport){
+      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour < 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+  }
+  } else if (t == 'light') activateLightMode()
+  else activateDarkMode()
+
+} else if (autoChangeMode == '2'){
+  now = new Date();
+  hour = now.getHours();
+  isNight = hour < 6 || hour >= 18
+  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode() 
+} else {
+  if ( t == 'dark' ) activateDarkMode()
+  else if ( t == 'light') activateLightMode()
+}
+
+function activateDarkMode(){
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
+  }
+}
+function activateLightMode(){
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
+  }
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="canonical" href="https://rugod.com/2020/07/01/mysql/mysql-see/"><link rel="next" title="跟我学Mysql之索引篇" href="https://rugod.com/2020/06/30/mysql/mysql-index/"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?a29fc1f2b32c6a60aee5dbf412c89285";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-164950732-1', 'auto');
+ga('send', 'pageview');
+</script><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容:${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://www.rugod.cn/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: {"languages":{"author":"作者: Rugod","link":"链接: ","source":"来源: 宇神之息","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  ClickShowText: {"text":"宇神,牛逼","fontSize":"15px"},
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  baiduPush: true,
+  highlightCopy: true,
+  highlightLang: true,
+  highlightShrink: 'false',
+  isFontAwesomeV5: false,
+  isPhotoFigcaption: false
+  
+}</script><script>var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isSidebar: true  
+  }</script><noscript><style>
+#page-header {
+  opacity: 1
+}
+.justified-gallery img{
+  opacity: 1
+}
+</style></noscript><meta name="generator" content="Hexo 4.2.0"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Challenger.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">28</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">50</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">12</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于本人</span></a></div></div></div></div><i class="fa fa-arrow-right on" id="toggle-sidebar" aria-hidden="true">     </i><div id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#背景"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#审计平台介绍"><span class="toc-number">2.</span> <span class="toc-text">审计平台介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#API集成"><span class="toc-number">2.1.</span> <span class="toc-text">API集成</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#功能简介"><span class="toc-number">2.2.</span> <span class="toc-text">功能简介</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#目标库管理"><span class="toc-number">2.2.1.</span> <span class="toc-text">目标库管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SQL操作"><span class="toc-number">2.2.2.</span> <span class="toc-text">SQL操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SQL查询"><span class="toc-number">2.2.3.</span> <span class="toc-text">SQL查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#用户管理"><span class="toc-number">2.2.4.</span> <span class="toc-text">用户管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#个性化设置"><span class="toc-number">2.2.5.</span> <span class="toc-text">个性化设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#inception设置"><span class="toc-number">2.2.6.</span> <span class="toc-text">inception设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#人工审批功能"><span class="toc-number">2.2.7.</span> <span class="toc-text">人工审批功能</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#用户权限"><span class="toc-number">2.2.8.</span> <span class="toc-text">用户权限</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#操作流程"><span class="toc-number">2.2.9.</span> <span class="toc-text">操作流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#API文档"><span class="toc-number">2.2.10.</span> <span class="toc-text">API文档</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#登录"><span class="toc-number">2.2.11.</span> <span class="toc-text">登录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#通知"><span class="toc-number">2.2.12.</span> <span class="toc-text">通知</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其他"><span class="toc-number">2.2.13.</span> <span class="toc-text">其他</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#核心组件"><span class="toc-number">3.</span> <span class="toc-text">核心组件</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Inception"><span class="toc-number">3.1.</span> <span class="toc-text">Inception</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SOAR"><span class="toc-number">3.2.</span> <span class="toc-text">SOAR</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SQLAdvisor"><span class="toc-number">3.3.</span> <span class="toc-text">SQLAdvisor</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#离线部署"><span class="toc-number">4.</span> <span class="toc-text">离线部署</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#准备"><span class="toc-number">4.1.</span> <span class="toc-text">准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装Mysql"><span class="toc-number">4.2.</span> <span class="toc-text">安装Mysql</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装pt-online-schema-change"><span class="toc-number">4.3.</span> <span class="toc-text">安装pt-online-schema-change</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Inception-1"><span class="toc-number">4.4.</span> <span class="toc-text">Inception</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装"><span class="toc-number">4.4.1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#配置"><span class="toc-number">4.4.2.</span> <span class="toc-text">配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#启动"><span class="toc-number">4.4.3.</span> <span class="toc-text">启动</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Sqladvisor"><span class="toc-number">4.5.</span> <span class="toc-text">Sqladvisor</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装-1"><span class="toc-number">4.5.1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#编译sqladvisor-源码目录"><span class="toc-number">4.5.2.</span> <span class="toc-text">编译sqladvisor(源码目录)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#测试"><span class="toc-number">4.5.3.</span> <span class="toc-text">测试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Redis"><span class="toc-number">4.6.</span> <span class="toc-text">Redis</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装-2"><span class="toc-number">4.6.1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#配置-opt-see-redis-4-0-6-redis-conf"><span class="toc-number">4.6.2.</span> <span class="toc-text">配置 &#x2F;opt&#x2F;see&#x2F;redis-4.0.6&#x2F;redis.conf</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Nginx"><span class="toc-number">4.7.</span> <span class="toc-text">Nginx</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#See"><span class="toc-number">4.8.</span> <span class="toc-text">See</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装依赖"><span class="toc-number">4.8.1.</span> <span class="toc-text">安装依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安装python3-6-6"><span class="toc-number">4.8.2.</span> <span class="toc-text">安装python3.6.6</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安装Django及See后端"><span class="toc-number">4.8.3.</span> <span class="toc-text">安装Django及See后端</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#创建数据库"><span class="toc-number">4.8.4.</span> <span class="toc-text">创建数据库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#创建管理员用户-可用于页面的用户登录"><span class="toc-number">4.8.5.</span> <span class="toc-text">创建管理员用户 (可用于页面的用户登录)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安装SOAR"><span class="toc-number">4.8.6.</span> <span class="toc-text">安装SOAR</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#设置（非必需操作）"><span class="toc-number">4.9.</span> <span class="toc-text">设置（非必需操作）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL"><span class="toc-number">4.9.1.</span> <span class="toc-text">MySQL</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Redis-1"><span class="toc-number">4.9.2.</span> <span class="toc-text">Redis</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Inception配置文件"><span class="toc-number">4.9.3.</span> <span class="toc-text">Inception配置文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SQLAdvisor和SOAR的路径"><span class="toc-number">4.9.4.</span> <span class="toc-text">SQLAdvisor和SOAR的路径</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#邮件"><span class="toc-number">4.9.5.</span> <span class="toc-text">邮件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#启动所有服务"><span class="toc-number">4.10.</span> <span class="toc-text">启动所有服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#问题记录"><span class="toc-number">4.11.</span> <span class="toc-text">问题记录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#yum-install-y-Percona-Server-shared-56-失败"><span class="toc-number">4.11.1.</span> <span class="toc-text">yum install -y Percona-Server-shared-56 失败</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#重启see平台"><span class="toc-number">4.11.2.</span> <span class="toc-text">重启see平台</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#解决python3下pymysql对inception支持的问题"><span class="toc-number">4.11.3.</span> <span class="toc-text">解决python3下pymysql对inception支持的问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#解决-Inception"><span class="toc-number">4.11.4.</span> <span class="toc-text">解决 Inception</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考资料"><span class="toc-number">6.</span> <span class="toc-text">参考资料</span></a></li></ol></div></div></div><div id="body-wrap"><div class="post-bg" id="nav" style="background-image: url(https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/mysql.jpg)"><div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">宇神之息</a></span><span class="pull_right menus"><div id="search_button"><a class="site-page social-icon search"><i class="fa fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于本人</span></a></div></div><span class="toggle-menu close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span></span></div><div id="post-info"><div id="post-title"><div class="posttitle">see审计平台介绍及部署</div></div><div id="post-meta"><div class="meta-firstline"><time class="post-meta__date"><span class="post-meta__date-created" title="发表于 2020-07-01 10:12:18"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2020-07-01</span><span class="post-meta__separator">|</span><span class="post-meta__date-updated" title="更新于 2020-07-01 10:13:41"><i class="fa fa-history" aria-hidden="true"></i> 更新于 2020-07-01</span></time><span class="post-meta__categories"><span class="post-meta__separator">|</span><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/Mysql/">Mysql</a></span></div><div class="meta-secondline"> <span class="post-meta-wordcount"><i class="post-meta__icon fa fa-file-word-o" aria-hidden="true"></i><span>字数总计:</span><span class="word-count">3.8k</span><span class="post-meta__separator">|</span><i class="post-meta__icon fa fa-clock-o" aria-hidden="true"></i><span>阅读时长: 16 分钟</span></span></div><div class="meta-thirdline"><span class="post-meta-pv-cv"><span class="post-meta__separator">|</span><i class="fa fa-eye post-meta__icon" aria-hidden="true"> </i><span>阅读量:</span><span id="busuanzi_value_page_pv"></span></span><span class="post-meta-commentcount"><span class="post-meta__separator">|</span><i class="post-meta__icon fa fa-comment-o" aria-hidden="true"></i><span>评论数:</span><a href="/2020/07/01/mysql/mysql-see/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count comment-count" data-xid="/2020/07/01/mysql/mysql-see/" itemprop="commentCount"></span></a></span></div></div></div></div><main class="layout_post" id="content-inner"><article id="post"><div id="article-container"><p>声明:这是我在大学毕业后进入第一家互联网工作学习的内容</p>
+<hr>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>线下数据库，成天有人要求运维执行这sql那sql的，又苦逼又容易背锅，问了下公司的DBA大神，推荐了see审计平台，执行sql有审计记录，留痕留痕留痕，重要的事情说三遍，即使是线下环境，谨防有人删库跑路找不到人，可以解决运维一大痛点。</p>
+<h1 id="审计平台介绍"><a href="#审计平台介绍" class="headerlink" title="审计平台介绍"></a>审计平台介绍</h1><p>数据库审计平台作用</p>
+<ul>
+<li>《对于开发人员》提交代码通过Inception审核，不符合规范代码会有提示，通过<br>Inception 审核后，开发人员可自行发起执行或定时执行，回滚等操作</li>
+<li>《对于测试人员》提交代码需走工单流，通过Inception审核，流程自动到达部门经理，<br>部门经理审核，所有执行、回滚等操作由管理员操作</li>
+<li>支持DDL，DML语句上线，回滚操作，方便统计已上线SQL，便于问题回溯</li>
+<li>SQL优化，可提供SQL优化建议，打分、SQL改写建议，增加索引建议等</li>
+</ul>
+<h2 id="API集成"><a href="#API集成" class="headerlink" title="API集成"></a>API集成</h2><ul>
+<li>Inception: 去哪儿网开源，提供SQL语句审核、执行、回滚功能</li>
+<li>SQLAdvisor: 美团开源，提供分析SQL中的where条件、聚合条件、多表Join关系，输出索引优化建议</li>
+<li>SOAR: 小米开源，提供SQL启发式算法的语句优化、多列索引优化等功能</li>
+</ul>
+<h2 id="功能简介"><a href="#功能简介" class="headerlink" title="功能简介"></a>功能简介</h2><h3 id="目标库管理"><a href="#目标库管理" class="headerlink" title="目标库管理"></a>目标库管理</h3><ul>
+<li>支持多场地/数据中心的数据库管理，集群方式归纳目标数据库</li>
+<li>支持目标数据库配置，库/表结构查询</li>
+</ul>
+<h3 id="SQL操作"><a href="#SQL操作" class="headerlink" title="SQL操作"></a>SQL操作</h3><ul>
+<li>基于Inception</li>
+<li>SQL语法检测</li>
+<li>SQL语句执行</li>
+<li>SQL回滚</li>
+<li>定时工单</li>
+<li>历史记录</li>
+</ul>
+<h3 id="SQL查询"><a href="#SQL查询" class="headerlink" title="SQL查询"></a>SQL查询</h3><ul>
+<li>查询目标数据库的详细表结构</li>
+<li>查询表数据，对结果可导出文件</li>
+<li>SQL语句优化（基于美团SQLAdvisor）</li>
+<li>多层次优化建议（基于小米SOAR）</li>
+</ul>
+<h3 id="用户管理"><a href="#用户管理" class="headerlink" title="用户管理"></a>用户管理</h3><ul>
+<li>对用户/组的注册/注销/加组/授权等管理</li>
+</ul>
+<h3 id="个性化设置"><a href="#个性化设置" class="headerlink" title="个性化设置"></a>个性化设置</h3><ul>
+<li>管理员可以做SQL关键字拦截，平台的审批功能开关等设置</li>
+<li>用户可以订阅其常用的数据库，指定审批工单的经理，以简化审核时所需的操作</li>
+</ul>
+<h3 id="inception设置"><a href="#inception设置" class="headerlink" title="inception设置"></a>inception设置</h3><ul>
+<li>inception服务连接信息</li>
+<li>inception备份库连接信息</li>
+<li>inception支持的参数释义及值</li>
+</ul>
+<h3 id="人工审批功能"><a href="#人工审批功能" class="headerlink" title="人工审批功能"></a>人工审批功能</h3><ul>
+<li>流程开关</li>
+<li>开启流程，工单至少需双人确认（流程：提交人 – inception自动审核 – 经理审批 – DBA上线）</li>
+<li>关闭流程，工单可由经理上线（流程：提交人 – inception自动审核 – 经理上线）</li>
+</ul>
+<h3 id="用户权限"><a href="#用户权限" class="headerlink" title="用户权限"></a>用户权限</h3><ul>
+<li>基于RBAC的表级，对象级权限控制体系</li>
+<li>通过用户管理设置用户权限</li>
+<li>根据用户身份（组员/经理/总监）鉴权用户对SQL的审核/取消/执行/回滚等操作</li>
+</ul>
+<h3 id="操作流程"><a href="#操作流程" class="headerlink" title="操作流程"></a>操作流程</h3><ul>
+<li>用户需要输入SQL，指定环境，执行人，数据库</li>
+<li>inception自动审核SQL语法</li>
+<li>审批人做审批通过或驳回操作</li>
+<li>执行人做执行/撤销/回滚等操作</li>
+<li>SQL列表界面提供SQL查询，操作等相关功能</li>
+</ul>
+<h3 id="API文档"><a href="#API文档" class="headerlink" title="API文档"></a>API文档</h3><ul>
+<li>各接口生成自动化的API文档，对接外部需求</li>
+</ul>
+<h3 id="登录"><a href="#登录" class="headerlink" title="登录"></a>登录</h3><ul>
+<li>支持see系统登录</li>
+<li>支持自定义公司统一认证中心(sso)登录</li>
+</ul>
+<h3 id="通知"><a href="#通知" class="headerlink" title="通知"></a>通知</h3><p>E-mail邮件推送</p>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p>DashBoard数据报表展示</p>
+<h1 id="核心组件"><a href="#核心组件" class="headerlink" title="核心组件"></a>核心组件</h1><h2 id="Inception"><a href="#Inception" class="headerlink" title="Inception"></a>Inception</h2><p>SQL操作基于Inception</p>
+<ul>
+<li>SQL语法检测</li>
+<li>SQL语句执行</li>
+<li>SQL回滚</li>
+<li>定时工单</li>
+<li>历史记录</li>
+</ul>
+<p>Inception提供的功能很丰富，首先，它可以对提交的所有语句的语法分析，如果语法有问题，都会将相应的错误信息返回给审核者。<br>还提供语义分析，当一个表，库，列等信息不正确或者不符合规范的时候报错，或者使用了一个不存在的对象时报错等等。 还提供<br>了很多针对SQL规范性约束的功能，这些DBA都是可以通过系统参数来配置的。 更高级的功能是，可以辅助DBA分析一条查询语句的<br>性能，如果没有使用索引或者某些原因导致查询很慢，都可以检查。<br>还提供SQL语句的执行功能，可执行的语句类型包括常用的DML及DDL语句及truncate table等操作。<br> Inception 在执行 DML 时还提供生成回滚语句的功能，对应的操作记录及回滚语句会被存储在备份机器上面，备份机器通过配置Inception参数来指定。</p>
+<h2 id="SOAR"><a href="#SOAR" class="headerlink" title="SOAR"></a>SOAR</h2><p>SOAR(SQL Optimizer And Rewriter)是一个对SQL进行优化和改写的自动化工具。 由小米人工智能与云平台的数据库团队开发与维护。</p>
+<p>功能特点</p>
+<ul>
+<li>跨平台支持（支持Linux, Mac环境，Windows环境理论上也支持，不过未全面测试）</li>
+<li>目前只支持 MySQL 语法族协议的SQL优化</li>
+<li>支持基于启发式算法的语句优化</li>
+<li>支持复杂查询的多列索引优化（UPDATE, INSERT, DELETE, SELECT）</li>
+<li>支持EXPLAIN信息丰富解读</li>
+<li>支持SQL指纹、压缩和美化</li>
+<li>支持同一张表多条ALTER请求合并</li>
+<li>支持自定义规则的SQL改写</li>
+</ul>
+<h2 id="SQLAdvisor"><a href="#SQLAdvisor" class="headerlink" title="SQLAdvisor"></a>SQLAdvisor</h2><p>SQLAdvisor是由美团点评公司技术工程部DBA团队（北京）开发维护的一个分析SQL给出索引优化建议的工具。它基于MySQL原生态词法解析，结合分析SQL中的where条件、聚合条件、多表Join关系 给出索引优化建议。</p>
+<p>目前SQLAdvisor在美团点评内部广泛应用，公司内部对SQLAdvisor的开发全面转到github上，开源和内部使用保持一致。</p>
+<p>主要功能：输出SQL索引优化建议</p>
+<h1 id="离线部署"><a href="#离线部署" class="headerlink" title="离线部署"></a>离线部署</h1><p>部署过于复杂，而且部分组件网上很难下载(要么找不到官方安装包，要么在国外下载极慢)</p>
+<p>所以本次部署采用离线方式，首先下载百度云上所有安装包</p>
+<p>链接：<a href="https://pan.baidu.com/s/1pnSATgVoIv5Ydv_gTuModg" target="_blank" rel="noopener">https://pan.baidu.com/s/1pnSATgVoIv5Ydv_gTuModg</a> </p>
+<p>提取码：s1zn </p>
+<p>复制这段内容后打开百度网盘手机App，操作更方便哦</p>
+<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><p>操作系统支持(没列举并不代表不能安装,可以自行尝试)</p>
+<ul>
+<li>CentOS 6+</li>
+<li>CentOS 7+</li>
+</ul>
+<p>安装包</p>
+<ul>
+<li>bison-2.5.1.tar.gz</li>
+<li>inception-master.zip</li>
+<li>percona-toolkit-3.1.0_i386.tar.gz</li>
+<li>percona-release-0.1-3.noarch.rpm</li>
+<li>Python-3.6.6.tgz</li>
+<li>redis-4.0.6.tar.gz</li>
+<li>see-master.zip</li>
+<li>SQLAdvisor-master.zip</li>
+<li>mysql-5.7.28-linux-glibc2.12-x86_64.tar.gz</li>
+</ul>
+<p>安装路径</p>
+<ul>
+<li>/opt/see/</li>
+</ul>
+<h2 id="安装Mysql"><a href="#安装Mysql" class="headerlink" title="安装Mysql"></a>安装Mysql</h2><p>安装包：</p>
+<p>mysql-5.7.28-linux-glibc2.12-x86_64.tar.gz</p>
+<p>安装过程参考<br><a href="https://rugod.cn/2020/05/01/mysql/mysql-install/" target="_blank" rel="noopener">离线安装Mysql5.7.28及调优</a></p>
+<p>Mysql配置文件内容需包含以下配置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">server-id &#x3D; 100  # 不限制具体数值</span><br><span class="line">log_bin &#x3D; mysql-bin</span><br><span class="line">binlog_format &#x3D; row  # 或 MIXED</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装pt-online-schema-change"><a href="#安装pt-online-schema-change" class="headerlink" title="安装pt-online-schema-change"></a>安装pt-online-schema-change</h2><p>安装包：</p>
+<p>percona-toolkit-3.1.0_i386.tar.gz</p>
+<p>bison-2.5.1.tar.gz</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">yum install -y perl-DBI perl-DBD-mysql perl-Time-HiRes perl-ExtUtils-MakeMaker</span><br><span class="line"></span><br><span class="line">cd &#x2F;opt&#x2F;see&#x2F;</span><br><span class="line">tar -zxvf percona-toolkit-3.1.0_i386.tar.gz</span><br><span class="line">cd percona-toolkit-3.0.13</span><br><span class="line">perl Makefile.PL</span><br><span class="line">make</span><br><span class="line">make install</span><br><span class="line">ln -s &#x2F;usr&#x2F;local&#x2F;bin&#x2F;pt-online-schema-change &#x2F;usr&#x2F;bin&#x2F;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Inception-1"><a href="#Inception-1" class="headerlink" title="Inception"></a>Inception</h2><p>安装包：</p>
+<p>inception-master.zip </p>
+<p>bison-2.5.1.tar.gz</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">yum -y install cmake libncurses5-dev libssl-dev g++ bison gcc gcc-c++ openssl-devel ncurses-devel mysql MySQL-python</span><br><span class="line"></span><br><span class="line">cd &#x2F;opt&#x2F;see&#x2F;</span><br><span class="line">tar -zxvf bison-2.5.1.tar.gz</span><br><span class="line">cd bison-2.5.1</span><br><span class="line">.&#x2F;configure</span><br><span class="line">make</span><br><span class="line">make install</span><br><span class="line"></span><br><span class="line">cd &#x2F;usr&#x2F;local&#x2F;</span><br><span class="line">unzip inception-master.zip</span><br><span class="line">cd inception-master&#x2F;</span><br><span class="line">sh inception_build.sh builddir linux</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>创建文件 /etc/inc.cnf ,内容如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[inception]</span><br><span class="line">general_log&#x3D;1</span><br><span class="line">general_log_file&#x3D;inc.log</span><br><span class="line">port&#x3D;6669</span><br><span class="line">socket&#x3D;&#x2F;tmp&#x2F;inc.socket </span><br><span class="line">character-set-client-handshake&#x3D;0 </span><br><span class="line">character-set-server&#x3D;utf8 </span><br><span class="line">inception_remote_system_password&#x3D;123456 </span><br><span class="line">inception_remote_system_user&#x3D;root </span><br><span class="line">inception_remote_backup_port&#x3D;3306 </span><br><span class="line">inception_remote_backup_host&#x3D;127.0.0.1 </span><br><span class="line">inception_support_charset&#x3D;utf8 </span><br><span class="line">inception_enable_nullable&#x3D;0 </span><br><span class="line">inception_check_primary_key&#x3D;1 </span><br><span class="line">inception_check_column_comment&#x3D;1 </span><br><span class="line">inception_check_table_comment&#x3D;1 </span><br><span class="line">inception_osc_min_table_size&#x3D;1 </span><br><span class="line">inception_osc_bin_dir&#x3D;&#x2F;usr&#x2F;bin </span><br><span class="line">inception_osc_chunk_time&#x3D;0.1 </span><br><span class="line">inception_ddl_support&#x3D;1</span><br><span class="line">inception_enable_blob_type&#x3D;1 </span><br><span class="line">inception_check_column_default_value&#x3D;1</span><br></pre></td></tr></table></figure>
+
+<p>注意！如果你需要对其他数据库创建utf8mb4或其他字符集的库或表，需要在inception_support_charset 增加响应字符集，以,隔开，例如：</p>
+<p>inception_support_charset=utf8,utf8mb4</p>
+<h3 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h3><p>nohup /usr/local/inception-master/builddir/mysql/bin/Inception –defaults-file=/etc/inc.cnf &amp;</p>
+<h2 id="Sqladvisor"><a href="#Sqladvisor" class="headerlink" title="Sqladvisor"></a>Sqladvisor</h2><p>安装包</p>
+<p>SQLAdvisor-master.zip </p>
+<p>percona-release-0.1-3.noarch.rpm</p>
+<h3 id="安装-1"><a href="#安装-1" class="headerlink" title="安装"></a>安装</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">cd &#x2F;usr&#x2F;local&#x2F;src&#x2F;</span><br><span class="line">unzip inception-master.zip</span><br><span class="line">yum install -y cmake libaio-devel libffi-devel glib2 glib2-devel bison</span><br><span class="line"># 移除mysql-community库(无用途且和Percona-Server有冲突)</span><br><span class="line">yum remove -y mysql-community-client mysql-community-server mysql-community-common mysql-community-libs</span><br><span class="line">cd &#x2F;usr&#x2F;lib64&#x2F; </span><br><span class="line">ln -s libperconaserverclient_r.so.18 libperconaserverclient_r.so </span><br><span class="line">rpm -ivh &#x2F;opt&#x2F;see&#x2F;percona-release-0.1-3.noarch.rpm</span><br><span class="line">yum install -y Percona-Server-shared-56</span><br><span class="line">cd &#x2F;usr&#x2F;local&#x2F;src&#x2F;SQLAdvisor&#x2F;</span><br><span class="line">cmake -DBUILD_CONFIG&#x3D;mysql_release -DCMAKE_BUILD_TYPE&#x3D;debug -DCMAKE_INSTALL_PREFIX&#x3D;&#x2F;usr&#x2F;local&#x2F;sqlparser .&#x2F;</span><br><span class="line">make &amp;&amp; make install</span><br></pre></td></tr></table></figure>
+
+<h3 id="编译sqladvisor-源码目录"><a href="#编译sqladvisor-源码目录" class="headerlink" title="编译sqladvisor(源码目录)"></a>编译sqladvisor(源码目录)</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd .&#x2F;sqladvisor&#x2F;</span><br><span class="line">cmake -DCMAKE_BUILD_TYPE&#x3D;debug .&#x2F;</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cp &#x2F;usr&#x2F;local&#x2F;src&#x2F;SQLAdvisor&#x2F;sqladvisor&#x2F;sqladvisor &#x2F;usr&#x2F;bin&#x2F;sqladvisor</span><br><span class="line">sqladvisor -h 127.0.0.1  -P 3306  -u root -p &#39;123456&#39; -d test -q &quot;sql语句&quot; -v 1</span><br></pre></td></tr></table></figure>
+
+<h2 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h2><p>安装包 </p>
+<p>redis-4.0.6.tar.gz</p>
+<h3 id="安装-2"><a href="#安装-2" class="headerlink" title="安装"></a>安装</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">yum install -y gcc</span><br><span class="line">cd &#x2F;opt&#x2F;see&#x2F;</span><br><span class="line">tar -zxvf redis-4.0.6.tar.gz</span><br><span class="line">cd redis-4.0.6</span><br><span class="line">make MALLOC&#x3D;libc　　</span><br><span class="line">cd src &amp;&amp; make install</span><br><span class="line">.&#x2F;redis-server &#x2F;opt&#x2F;see&#x2F;redis-4.0.6&#x2F;redis.conf</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="配置-opt-see-redis-4-0-6-redis-conf"><a href="#配置-opt-see-redis-4-0-6-redis-conf" class="headerlink" title="配置 /opt/see/redis-4.0.6/redis.conf"></a>配置 /opt/see/redis-4.0.6/redis.conf</h3><p>daemonize yes<br>bind 0.0.0.0</p>
+<h2 id="Nginx"><a href="#Nginx" class="headerlink" title="Nginx"></a>Nginx</h2><p>yum install  -y  epel-release nginx</p>
+<p>修改Nginx配置文件 nginx.conf, 使server部分的内容如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">server</span><br><span class="line">  &#123;</span><br><span class="line">    listen 81;  # 用户访问端口</span><br><span class="line">    access_log    &#x2F;var&#x2F;log&#x2F;access.log;</span><br><span class="line">    error_log    &#x2F;var&#x2F;log&#x2F;error.log;</span><br><span class="line"></span><br><span class="line">    location &#x2F; &#123; </span><br><span class="line">        root &#x2F;usr&#x2F;local&#x2F;seevenv&#x2F;see-master&#x2F;frontend&#x2F;dist&#x2F;;  # 前端项目文件</span><br><span class="line">        try_files $uri $uri&#x2F; &#x2F;index.html &#x3D;404; </span><br><span class="line">        index  index.html; </span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    location &#x2F;static&#x2F;rest_framework_swagger &#123;  #  前端API静态文件</span><br><span class="line">        root &#x2F;usr&#x2F;local&#x2F;seevenv&#x2F;lib&#x2F;python3.6&#x2F;site-packages&#x2F;rest_framework_swagger&#x2F;; </span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    location &#x2F;static&#x2F;rest_framework &#123;  #  前端rest_framework静态文件</span><br><span class="line">        root &#x2F;usr&#x2F;local&#x2F;seevenv&#x2F;lib&#x2F;python3.6&#x2F;site-packages&#x2F;rest_framework&#x2F;;</span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    location &#x2F;api &#123;</span><br><span class="line">        proxy_pass http:&#x2F;&#x2F;127.0.0.1:8090;  # 后端端口此处一定得是127.0.0.1</span><br><span class="line">        add_header Access-Control-Allow-Origin *; </span><br><span class="line">        add_header Access-Control-Allow-Headers Content-Type;</span><br><span class="line">        add_header Access-Control-Allow-Headers &quot;Origin, X-Requested-With, Content-Type, Accept&quot;;</span><br><span class="line">        add_header Access-Control-Allow-Methods &quot;GET, POST, OPTIONS, PUT, DELETE, PATCH&quot;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="See"><a href="#See" class="headerlink" title="See"></a>See</h2><p>终于到了see平台本身了</p>
+<h3 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y readline readline-devel gcc gcc-c++ zlib zlib-devel openssl openssl-devel sqlite-devel python-devel openldap-clients openldap-devel openssl-devel</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装python3-6-6"><a href="#安装python3-6-6" class="headerlink" title="安装python3.6.6"></a>安装python3.6.6</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;opt&#x2F;see&#x2F;</span><br><span class="line">tar -xzf Python-3.6.6.tgz </span><br><span class="line">cd Python-3.6.6</span><br><span class="line">.&#x2F;configure --prefix&#x3D;&#x2F;usr&#x2F;local&#x2F;python3.6 --enable-shared</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">ln -s &#x2F;usr&#x2F;local&#x2F;python3.6&#x2F;bin&#x2F;python3.6 &#x2F;usr&#x2F;bin&#x2F;python3</span><br><span class="line">ln -s &#x2F;usr&#x2F;local&#x2F;python3.6&#x2F;bin&#x2F;pip3 &#x2F;usr&#x2F;bin&#x2F;pip3</span><br><span class="line">ln -s &#x2F;usr&#x2F;local&#x2F;python3.6&#x2F;bin&#x2F;pyvenv &#x2F;usr&#x2F;bin&#x2F;pyvenv</span><br><span class="line"></span><br><span class="line"># 链接库文件</span><br><span class="line">cp &#x2F;usr&#x2F;local&#x2F;python3.6&#x2F;lib&#x2F;libpython3.6m.so.1.0 &#x2F;usr&#x2F;local&#x2F;lib</span><br><span class="line">cd &#x2F;usr&#x2F;local&#x2F;lib</span><br><span class="line">ln -s libpython3.6m.so.1.0 libpython3.6m.so</span><br><span class="line">echo &#39;&#x2F;usr&#x2F;local&#x2F;lib&#39; &gt;&gt; &#x2F;etc&#x2F;ld.so.conf</span><br><span class="line">&#x2F;sbin&#x2F;ldconfig</span><br></pre></td></tr></table></figure>
+<h3 id="安装Django及See后端"><a href="#安装Django及See后端" class="headerlink" title="安装Django及See后端"></a>安装Django及See后端</h3><p>安装包</p>
+<p>see-master.zip</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">cd &#x2F;usr&#x2F;local&#x2F;</span><br><span class="line">&#x2F;usr&#x2F;local&#x2F;python3.6&#x2F;bin&#x2F;pyvenv seevenv</span><br><span class="line">cd seevenv</span><br><span class="line">source bin&#x2F;activate</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">unzip master.zip</span><br><span class="line">cd see-master&#x2F;backend&#x2F;</span><br><span class="line">pip install -r requirements.txt --trusted-host mirrors.aliyun.com -i https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;pypi&#x2F;simple&#x2F;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="创建数据库"><a href="#创建数据库" class="headerlink" title="创建数据库"></a>创建数据库</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">确保mysql的root密码为 123456</span><br><span class="line">mysql -uroot -p123456 -e &quot;create database sqlweb CHARACTER SET utf8;&quot;</span><br><span class="line">python manage.py makemigrations</span><br><span class="line">python manage.py migrate</span><br><span class="line"># 再执行一次migrate</span><br><span class="line">python manage.py migrate</span><br></pre></td></tr></table></figure>
+
+<h3 id="创建管理员用户-可用于页面的用户登录"><a href="#创建管理员用户-可用于页面的用户登录" class="headerlink" title="创建管理员用户 (可用于页面的用户登录)"></a>创建管理员用户 (可用于页面的用户登录)</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python manage.py createsuperuser --username admin --email admin@domain.com</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装SOAR"><a href="#安装SOAR" class="headerlink" title="安装SOAR"></a>安装SOAR</h3><p>mkdir -p /usr/local/SOAR/bin/<br>cp /usr/local/seevenv/see-master/frontend/src/files/soar /usr/local/SOAR/bin<br>chmod +x /usr/local/SOAR/bin/soar</p>
+<h2 id="设置（非必需操作）"><a href="#设置（非必需操作）" class="headerlink" title="设置（非必需操作）"></a>设置（非必需操作）</h2><p>打开文件 /usr/local/seevenv/see-master/backend/sqlweb/settings.py,找到以下设置并修改</p>
+<h3 id="MySQL"><a href="#MySQL" class="headerlink" title="MySQL"></a>MySQL</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">DATABASES &#x3D; &#123;</span><br><span class="line">	&#39;default&#39;: &#123;</span><br><span class="line">        &#39;ENGINE&#39;: &#39;django.db.backends.mysql&#39;,</span><br><span class="line">        &#39;NAME&#39;: &#39;sqlweb&#39;,</span><br><span class="line">        &#39;USER&#39;: &#39;root&#39;,</span><br><span class="line">        &#39;PASSWORD&#39;: &#39;123456&#39;,</span><br><span class="line">        &#39;HOST&#39;:&#39;127.0.0.1&#39;,</span><br><span class="line">        &#39;PORT&#39;:&#39;3306&#39;,</span><br><span class="line">        &#39;OPTIONS&#39;: &#123;&#39;charset&#39;:&#39;utf8mb4&#39;&#125;,</span><br><span class="line">	&#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Redis-1"><a href="#Redis-1" class="headerlink" title="Redis"></a>Redis</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">REDIS_HOST &#x3D; &#39;127.0.0.1&#39;  # redis地址</span><br><span class="line">REDIS_PORT &#x3D; 6379  # redis端口</span><br><span class="line">REDIS_PASSWORD &#x3D; &#39;&#39;  # redis密码</span><br></pre></td></tr></table></figure>
+
+<h3 id="Inception配置文件"><a href="#Inception配置文件" class="headerlink" title="Inception配置文件"></a>Inception配置文件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">INCEPTION_SETTINGS &#x3D; &#123;</span><br><span class="line">    &#39;file_path&#39;: &#39;&#x2F;etc&#x2F;inc.cnf&#39;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="SQLAdvisor和SOAR的路径"><a href="#SQLAdvisor和SOAR的路径" class="headerlink" title="SQLAdvisor和SOAR的路径"></a>SQLAdvisor和SOAR的路径</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">OPTIMIZE_SETTINGS &#x3D; &#123;</span><br><span class="line">    &#39;sqladvisor_cli&#39;: &#39;&#x2F;usr&#x2F;bin&#x2F;sqladvisor&#39;,</span><br><span class="line">    &#39;soar_cli&#39;: &#39;&#x2F;usr&#x2F;local&#x2F;SOAR&#x2F;bin&#x2F;soar&#39;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="邮件"><a href="#邮件" class="headerlink" title="邮件"></a>邮件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MAIL &#x3D; &#123;</span><br><span class="line">    &#39;smtp_host&#39;: &#39;smtp.163.com&#39;,  # 邮件服务器</span><br><span class="line">    &#39;smtp_port&#39;: 25,  # SMTP协议默认端口是25</span><br><span class="line">    &#39;mail_user&#39;: &#39;sql_see@163.com&#39;,  # 邮件用户名</span><br><span class="line">    &#39;mail_pass&#39;: &#39;see123&#39;,  # 授权码</span><br><span class="line">    &#39;see_addr&#39;: &#39;http:&#x2F;&#x2F;xxx.xxx.xxx.xxx:81&#39;,  # see项目访问地址</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="启动所有服务"><a href="#启动所有服务" class="headerlink" title="启动所有服务"></a>启动所有服务</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># mysql  3306端口</span><br><span class="line">&#x2F;etc&#x2F;init.d&#x2F;mysqld start</span><br><span class="line"></span><br><span class="line"># inception  6669端口</span><br><span class="line">nohup &#x2F;usr&#x2F;local&#x2F;inception-master&#x2F;builddir&#x2F;mysql&#x2F;bin&#x2F;Inception --defaults-file&#x3D;&#x2F;etc&#x2F;inc.cnf &amp;</span><br><span class="line"></span><br><span class="line"># redis  6379端口</span><br><span class="line">redis-server &#x2F;etc&#x2F;redis.conf</span><br><span class="line"></span><br><span class="line"># nginx  81端口</span><br><span class="line">&#x2F;usr&#x2F;local&#x2F;nginx&#x2F;sbin&#x2F;nginx</span><br><span class="line"></span><br><span class="line"># see  8090端口</span><br><span class="line">source &#x2F;usr&#x2F;local&#x2F;seevenv&#x2F;bin&#x2F;activate</span><br><span class="line">cd &#x2F;usr&#x2F;local&#x2F;seevenv&#x2F;see-master&#x2F;backend</span><br><span class="line">nohup python manage.py celery worker -c 10 -B --loglevel&#x3D;info &amp;</span><br><span class="line">gunicorn -c sqlweb&#x2F;gunicorn_config.py sqlweb.wsgi</span><br></pre></td></tr></table></figure>
+<p>启动都OK！可以使用啦：</p>
+<p><a href="http://xxx.xxx.xxx.xxx:81/" target="_blank" rel="noopener">http://xxx.xxx.xxx.xxx:81/</a> # see 项目</p>
+<p><a href="http://xxx.xxx.xxx.xxx:81/api/docs/" target="_blank" rel="noopener">http://xxx.xxx.xxx.xxx:81/api/docs/</a> # see api 文档</p>
+<p>推荐用Chrome浏览器访问</p>
+<h2 id="问题记录"><a href="#问题记录" class="headerlink" title="问题记录"></a>问题记录</h2><h3 id="yum-install-y-Percona-Server-shared-56-失败"><a href="#yum-install-y-Percona-Server-shared-56-失败" class="headerlink" title="yum install -y Percona-Server-shared-56 失败"></a>yum install -y Percona-Server-shared-56 失败</h3><p>yum 安装Percona MySQL时，提示错误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">The GPG keys listed for the &quot;Percona-Release YUM repository - x86_64&quot; repository are already installed but they are not correct for this package.</span><br><span class="line">Check that the correct key URLs are configured for this repository.</span><br><span class="line"> Failing package is: Percona-Server-client-56-5.6.43-rel84.3.el7.x86_64</span><br><span class="line"> GPG Keys are configured as: file:&#x2F;&#x2F;&#x2F;etc&#x2F;pki&#x2F;rpm-gpg&#x2F;RPM-GPG-KEY-Percona</span><br></pre></td></tr></table></figure>
+
+
+<p>解决方法：yum update percona-release</p>
+<h3 id="重启see平台"><a href="#重启see平台" class="headerlink" title="重启see平台"></a>重启see平台</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ps aux|grep python|grep -v grep|cut -c 9-15|xargs kill -15</span><br><span class="line">nohup python manage.py celery worker -c 10 -B --loglevel&#x3D;info &amp;</span><br><span class="line">gunicorn -c sqlweb&#x2F;gunicorn_config.py sqlweb.wsgi</span><br></pre></td></tr></table></figure>
+
+<h3 id="解决python3下pymysql对inception支持的问题"><a href="#解决python3下pymysql对inception支持的问题" class="headerlink" title="解决python3下pymysql对inception支持的问题"></a>解决python3下pymysql对inception支持的问题</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">ValueError: invalid literal for int() with base 10: &#39;Inception2&#39;</span><br><span class="line"># 查找pymysql源码修改connections.py文件，&#x2F;usr&#x2F;local&#x2F;seevenv&#x2F;lib&#x2F;python3.6&#x2F;site-packages&#x2F;pymysql&#x2F;connections.py</span><br><span class="line"></span><br><span class="line">    # 找到此处</span><br><span class="line">    def _request_authentication(self):</span><br><span class="line">        # https:&#x2F;&#x2F;dev.mysql.com&#x2F;doc&#x2F;internals&#x2F;en&#x2F;connection-phase-packets.html#packet-Protocol::HandshakeResponse</span><br><span class="line">        if int(self.server_version.split(&#39;.&#39;, 1)[0]) &gt;&#x3D; 5:</span><br><span class="line">            self.client_flag |&#x3D; CLIENT.MULTI_RESULTS</span><br><span class="line"></span><br><span class="line">    # 修改为</span><br><span class="line">    def _request_authentication(self):</span><br><span class="line">        # https:&#x2F;&#x2F;dev.mysql.com&#x2F;doc&#x2F;internals&#x2F;en&#x2F;connection-phase-packets.html#packet-Protocol::HandshakeResponse</span><br><span class="line">        if self.server_version.split(&#39;.&#39;, 1)[0] &#x3D;&#x3D; &#39;Inception2&#39;:</span><br><span class="line">            self.client_flag |&#x3D; CLIENT.MULTI_RESULTS</span><br><span class="line">        elif int(self.server_version.split(&#39;.&#39;, 1)[0]) &gt;&#x3D; 5:</span><br><span class="line">            self.client_flag |&#x3D; CLIENT.MULTI_RESULTS</span><br></pre></td></tr></table></figure>
+
+<h3 id="解决-Inception"><a href="#解决-Inception" class="headerlink" title="解决 Inception"></a>解决 Inception</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">始终反馈”Must start as begin statement”的语法错误</span><br><span class="line"># 查找pymysql源码修改cursors.py文件，&#x2F;usr&#x2F;local&#x2F;seevenv&#x2F;lib&#x2F;python3.6&#x2F;site-packages&#x2F;pymysql&#x2F;cursors.py</span><br><span class="line"></span><br><span class="line">    # 找到此处</span><br><span class="line">    if not self._defer_warnings:</span><br><span class="line">        self._show_warnings()    </span><br><span class="line"></span><br><span class="line">    # 修改为</span><br><span class="line">    if not self._defer_warnings:</span><br><span class="line">        pass</span><br></pre></td></tr></table></figure>
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>安装还是比较麻烦的，安装完成后基本上就可以省心很多了，当然你还得给开发测试人员开通账号，然后把一些公共的账号回收(这并不简单)，一劳永逸的事哪有那么多呢，不过趁机学习了一波还是挺值的。</p>
+<p>see平台不仅是托管审计的功能，sql优化是它的亮点，你可以通过Sqladvisor和SOAR来优化sql，减轻DBA压力(但是好像也没人会记得用这个，就自信呗，就秀)。</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://github.com/myide/see/blob/master/frontend/src/files/install.md" target="_blank" rel="noopener">See项目搭建</a></p>
+<p><a href="https://github.com/XiaoMi/soar" target="_blank" rel="noopener">SOAR </a> </p>
+<p><a href="https://github.com/Meituan-Dianping/SQLAdvisor" target="_blank" rel="noopener">SQLAdvisor</a></p>
+<hr>
+<p>版权声明：</p>
+<p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Rugod</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://rugod.com/2020/07/01/mysql/mysql-see/">https://rugod.com/2020/07/01/mysql/mysql-see/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://rugod.com" target="_blank">宇神之息</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Mysql/">Mysql</a><a class="post-meta__tags" href="/tags/%E5%AE%A1%E8%AE%A1/">审计</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/mysql.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"/><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-button button--primary button--animated"> <i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lazyload post-qr-code__img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/wechat.JPG" alt="微信"/><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lazyload post-qr-code__img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/alipay.JPG" alt="支付宝"/><div class="post-qr-code__desc">支付宝</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="next-post pull-full"><a href="/2020/06/30/mysql/mysql-index/"><img class="next_cover lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/mysql.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">跟我学Mysql之索引篇</div></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fa fa-fw fa-thumbs-up" aria-hidden="true"></i><span> 相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/2020/05/27/docker/docker-install-db/" title="Docker安装Mysql、Mongodb、Redis及数据迁移"><img class="relatedPosts_cover lazyload"data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/docker.jpg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-history fa-fw" aria-hidden="true"></i> 2020-06-27</div><div class="relatedPosts_title">Docker安装Mysql、Mongodb、Redis及数据迁移</div></div></a></div><div class="relatedPosts_item"><a href="/2020/04/28/mysql/mysql-climbing/" title="Mysql导入导出亿条数据（排坑篇）"><img class="relatedPosts_cover lazyload"data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/mysql.jpg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-history fa-fw" aria-hidden="true"></i> 2020-06-08</div><div class="relatedPosts_title">Mysql导入导出亿条数据（排坑篇）</div></div></a></div><div class="relatedPosts_item"><a href="/2020/06/30/mysql/mysql-index/" title="跟我学Mysql之索引篇"><img class="relatedPosts_cover lazyload"data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/mysql.jpg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-history fa-fw" aria-hidden="true"></i> 2020-06-30</div><div class="relatedPosts_title">跟我学Mysql之索引篇</div></div></a></div></div><div class="clear_both"></div></div><hr><div id="post-comment"><div class="comment_headling"><i class="fa fa-comments fa-fw" aria-hidden="true"></i><span> 评论</span></div><div class="vcomment" id="vcomment"></div><script src="https://cdn.jsdelivr.net/gh/xaoxuu/volantis/js/volantis.min.js"></script><script>var GUEST_INFO = ['nick','mail','link'];
+var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+  return GUEST_INFO.indexOf(item) > -1
+});
+guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
+
+window.valine = new Valine({
+  el:'#vcomment',
+  notify: false,
+  verify: false,
+  appId: 'GkD8YSRxxCgXoW6LqFO3cKhd-gzGzoHsz',
+  appKey: 'DbbNrHwsCuK9Ehh2wgOw6UXL',
+  placeholder: '记得留下你的昵称和邮箱...可以快速收到回复哦',
+  avatar: 'monsterid',
+  meta: guest_info,
+  pageSize: '10',
+  lang: 'zh-cn',
+  recordIP: false,
+  serverURLs: ''
+});</script></div></article></main><footer id="footer" style="background-image: url(https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/mysql.jpg)" data-type="photo"><div id="footer-wrap"><div class="copyright">&copy;2020 By Rugod</div><div class="footer_custom_text">弱小的人才习惯嘲讽和否定，而内心强大的人从不吝啬赞美和鼓励</div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="阅读模式"></i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换" target="_self">繁</a><i class="darkmode fa fa-moon-o" id="darkmode" title="夜间模式"></i></div><div id="rightside-config-show"><div id="rightside_config" title="设置"><i class="fa fa-cog" aria-hidden="true"></i></div><a id="to_comment" href="#post-comment" title="直达评论"><i class="scroll_to_comment fa fa-comments">  </i></a><i class="fa fa-list-ul close" id="mobile-toc-button" title="目录" aria-hidden="true"></i><i class="fa fa-arrow-up" id="go-up" title="回到顶部" aria-hidden="true"></i></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a href="https://github.com/wzpan/hexo-generator-search" target="_blank" rel="noopener" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script id="canvas_nest" color="255,0,0" opacity="0.7" zIndex="-1" count="99" mobile="false" src="/js/third-party/canvas-nest.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@latest/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/lazysizes@latest/lazysizes.min.js" async=""></script><script src="/js/third-party/ClickShowText.js"></script><script src="/js/search/local-search.js"></script></body></html>
