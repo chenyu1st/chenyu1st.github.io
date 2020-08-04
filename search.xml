@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>个人总结(2020.7)</title>
+      <link href="/2020/08/04/summary/summary-2020-7/"/>
+      <url>/2020/08/04/summary/summary-2020-7/</url>
+      
+        <content type="html"><![CDATA[<h1 id="感慨"><a href="#感慨" class="headerlink" title="感慨"></a>感慨</h1><p>2020的7月可能是我的整个人生的转折点</p><p>7月我经历了公司部门的震动（直属领导离职、华科大佬离职、大数据大佬们离职），我反思了很多，包括他们为什么会离职，以及自己的处境和发展空间。</p><p>最终我认为我不能按照原计划执行了（9月开始投简历），我需要加快我的复习进度以及现在就开始训练自己的面试能力。</p><p>为此我制定了一系列方案（后续会专门写篇文章分享我的跳槽之旅）以及如何落实（这个很难）</p><p>最终我在这个月内面试了20几家公司（有武汉深圳杭州的）也拿了几个不错的offer，最终在月底锁下了一家深圳的创业型公司。8月6日飞深圳，开始南漂。</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><h2 id="技术"><a href="#技术" class="headerlink" title="技术"></a>技术</h2><h3 id="文章"><a href="#文章" class="headerlink" title="文章"></a>文章</h3><p>7月我一共发布了14篇文章.</p><p>主要关于K8S、SRE、Docker的文章。</p><h3 id="学习："><a href="#学习：" class="headerlink" title="学习："></a>学习：</h3><p>买了极客时间 张磊老师的深入剖析Kubernetes</p><p>虽然是2年前的课，但是看完+官方文档的学习，能对K8S整个技术架构有了更加深刻的了解</p><p>买了本SRE《Site Reliability Engineering 》，学习下谷歌的运维团队的思想</p><h2 id="生活"><a href="#生活" class="headerlink" title="生活"></a>生活</h2><h3 id="作息时间"><a href="#作息时间" class="headerlink" title="作息时间"></a>作息时间</h3><p>7月我的生活是很辛苦的，高频率的面试使得我每天都在反复地总结，复习，进步。这个月超过12点睡觉一共有22天，平均睡觉时长为6小时21分钟。我每天复习面试题、核心知识细节，甚至几次晚上抱着书进入梦乡。</p><h3 id="做饭"><a href="#做饭" class="headerlink" title="做饭"></a>做饭</h3><p>这个月没时间做饭，天天吃外卖，确实有点不太健康。</p><h3 id="锻炼"><a href="#锻炼" class="headerlink" title="锻炼"></a>锻炼</h3><p>这个月只锻炼了3天，和北京出差的朋友打过篮球，带北京的朋友去看了一次黄鹤楼。</p><h1 id="对自己说"><a href="#对自己说" class="headerlink" title="对自己说"></a>对自己说</h1><p>7月的宇神辛苦了，每天不断地准备面试以及回放面试的电话录音，整个7月我就做两件事。</p><p>复习——面试——再复习——再面试</p><p>最好皇天不负有心人，结果是我比较满意的</p><h1 id="向前看"><a href="#向前看" class="headerlink" title="向前看"></a>向前看</h1><p>8月我会在深圳南山区科技园工作，那里都是高科技产业公司。我一边会快速融入新的公司完成自己的本职工作，一边也会去深大附件走走看看，感受大城市的科技魅力。</p><h1 id="名言共勉"><a href="#名言共勉" class="headerlink" title="名言共勉"></a>名言共勉</h1><p>莫愁前路无知己、天下谁人不识君</p><p>天下没有不散的筵席</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 个人总结 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 个人总结 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Mongodb4.2副本集安装</title>
       <link href="/2020/07/30/mongodb/mongodb4.2-install/"/>
       <url>/2020/07/30/mongodb/mongodb4.2-install/</url>
@@ -437,9 +462,9 @@
       
         <tags>
             
-            <tag> Dockerfile </tag>
-            
             <tag> Devops </tag>
+            
+            <tag> Dockerfile </tag>
             
             <tag> Docker </tag>
             
@@ -472,9 +497,9 @@
             
             <tag> Devops </tag>
             
-            <tag> 自动化 </tag>
-            
             <tag> CI/CD </tag>
+            
+            <tag> 自动化 </tag>
             
         </tags>
       
@@ -499,9 +524,9 @@
       
         <tags>
             
-            <tag> Dockerfile </tag>
-            
             <tag> Devops </tag>
+            
+            <tag> Dockerfile </tag>
             
             <tag> Docker </tag>
             
@@ -1076,13 +1101,13 @@
             
             <tag> Devops </tag>
             
-            <tag> 自动化 </tag>
-            
             <tag> 敏捷开发 </tag>
             
             <tag> 敏捷部署 </tag>
             
             <tag> CI/CD </tag>
+            
+            <tag> 自动化 </tag>
             
         </tags>
       
