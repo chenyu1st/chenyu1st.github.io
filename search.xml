@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>顶级理解之天下没有不散的筵席</title>
+      <link href="/2020/08/04/king/king-job-hopping/"/>
+      <url>/2020/08/04/king/king-job-hopping/</url>
+      
+        <content type="html"><![CDATA[<blockquote><p>踏出熟悉的公司大门，我回头，知道以后应该不会经常回来，抬手，拍照，朋友圈里，我留下了“莫愁前路无知己，天下谁人不识君”的文字。              -《  <a href="http://wuwenliang.net/" target="_blank" rel="noopener">精诚所至,我的跳槽之路</a>》</p></blockquote><p>这是一位前公司JAVA大牛在离职前的感概，我们虽然只一起处过短短两天，但是我一直以他为榜样。</p><p>再见了，老东家，再见了，武汉，我开启我的南漂之旅——深圳。</p><hr><p>2020年注定不平凡，疫情在武汉爆发，我周围有很多朋友因此失业了，也有不少朋友因新行业崛起而发财的，还有如我一般在家里浑浑噩噩度过了2个月的。</p><p>疫情之后复工的一个星期，我的导师离职，然后公司离职的人接连不断，我出于本能地慌了，突然在思考为什么会出现这种情况。</p><p>我的目标在哪？</p><p>我的希望在哪？</p><p>我的未来在哪？</p><p>我才发现我根本不知道</p><p>我也曾想着学这位大牛一样跑，但是一年的工作经验让我觉得看似会的东西很多，实际在没有总结和系统性复习的情况下，根本没有人会要我。</p><p>5月4日，我有幸看到了《后浪》</p><p>国家一级演员何冰登台演讲，认可、赞美与寄语年轻一代：“你们有幸遇见这样的时代，但时代更有幸遇见这样的你们。” </p><p>我才发现，原来，世界上有那么多美好的事情等着我们去做，世界上有那么多条路供我们选择，我们真的很幸运。</p><p>从那天起，我开始寻找财富密码。</p><p>那段时间我接受了很多新思想、新知识、新文化，但是我始终在犹豫，对公司依旧抱有涨薪幻想，最终，这个幻想被不断地打破，最终我确定了一个小目标，那就是一定要去找一个更能肯定我价值，能提供更高平台的公司。</p><p>为此我制定了一系列方案（包括城市、公司类型、公司技术选型、发展空间、个人价值的肯定等等）</p><p>我参考大佬的博客给自己制定了一个个模块复习</p><ul><li>容器编排：深入了解docker、kubernetes底层知识、常用运维命令以及实战的案例总结</li><li>网络协议：重点复习OSI、TCP/IP协议、路由交换、子网划分、容器网络</li><li>Linux：重点复习Linux常用命令、内核、防火墙</li><li>负载均衡、中间件：Nginx、LVS、MQ几乎是必考题</li><li>Mysql：重点看索引、锁、MVCC、优化、备份、监控</li><li>CI/CD：重点复习gitlab、jenkins、ansible</li><li>监控：复习prometheus（顺便说下，zabbix已过时，可以说拜拜了）</li><li>日志系统：简单了解ELK和各种云产品的日志服务安装配置即可</li><li>运维手册：积累运维排错思路分析及案例整理，积累自己的心得体会 </li><li>脚本语言：重点复习python的语法，简单复习下shell即可，毕竟Python的第三方库多，很多成熟的功能套件开箱即用</li><li>算法数据结构：运维和开发不一样，这个东西你说不了解吧也不行，花时间在算法上面太多又容易出现面试造火箭,入职拧螺丝的情况，因人而异吧。</li></ul><p>这些模块是我一步步复习总结出来的，也复习过很多不太有用的模块（比如算法和数据结构以及云平台管理等），相比之下浪费较多时间。</p><p>经过一个月的面试，我发现在运维方面，网络协议和Linux基础是重中之重，尤其是网络协议这块，一个TCP/IP就够你复习很久，最重要的是你复习的成果需要由一个一个案例输出才能体现出来。</p><p>很简单的例子：</p><p>在浏览器打开<a href="http://www.baidu.com经过了哪些步骤" target="_blank" rel="noopener">www.baidu.com经过了哪些步骤</a></p><p>一个网页打开很卡，排查这个原因并提出解决方案</p><p>服务器特别卡，但是TOP发现没有很多资源被占用，应该怎么解决</p><p>面对这类面试常考的问题，你不光带着问题去学习，更得深入地了解各个底层知识，集中起来，面对问题你才能快准狠地定位并解决问题。</p><p>最后再讲一下面试需要注意的东西，如何在面试中展示自己的亮点，让自己能够吸引面试官的注意呢？</p><p>那位大牛的博客已经写了很好答案了，我这里就不再复述相同的，只做补充：</p><p>简历篇</p><ul><li>一定要掌握自己的简历：达到熟练地自我介绍，项目、技术有条不紊的讲出来</li><li>实事求是：仅仅用过的技术就不要写熟练，仅仅是平常用的较多的技术就不要写精通，只有到达了深入理解并熟练运用技术的水平才能写精通（例如底层原理，扩展方案，实现场景），否则面试官会问的你漏洞百出</li></ul><p>发展篇</p><ul><li>职业规划，个人目标，不要太泛，太虚（例如我要成为某某领域最牛逼的人，我要给公司创造多大多大的价值，吹呢），一定要讲实际例子，比如某案例，我是怎么想的，做了什么，花了多少心血，最终收获了什么，帮助团队成长了什么，总结反思了什么。</li><li>离职原因想清楚怎么说，必答题，不要太肤浅（公司不给我涨钱），也不要太假（我要与公司共存亡，极度认同公司文化，但是公司把我开除了等等）</li></ul><p>同样，授之以鱼不如授之以渔。</p><p>我想告诉未来有幸能看到我这篇文章的朋友们，如果你们也不满现状，不满自己的价值不被承认，不满自己浑浑噩噩地过日子，那么你应该学会</p><ul><li>思考（自主思考，就跟机器学习一样，自己有意识地去思考）</li><li>珍惜时间，少玩游戏少放松，制作一套切实可行的时间管理表</li><li>多结交/关注牛逼的人（高学历，知名大厂的优秀员工）学学别人成功的经验</li><li>保持技术的纯粹，不要太早被世俗影响</li><li>每日三省吾身，每周自我小结，每月自我总结，不要把这个当作一句空话</li><li>先定一个小目标，1-5年完成，再定一个大目标，10年甚至一生</li><li>投资（理财、自己的身体、人脉）</li></ul><p>顺便给你们也给未来的自己时刻敲响警钟：不求效果不看效率的勤奋比懒惰更可怕。</p><p>要相信，付出一定会有收获，收获可能会迟到，但一定不会缺席。</p><p>写到这里我还是得说那句老生常谈的话：种一棵树最好的时间是十年前，其次是现在。如果有遗憾，那么现在一定要去挽留。</p><p>最后我还是需要感谢老东家，在这里我学习到了很多技术，认识了很多大佬，我的三观在这里逐渐地形成。</p><p>在这里，我拼搏过，我通宵过，我不服过，我被人利用过，我证明过，我爱过、恨过。</p><p>领导走之前嘱咐我”天下没有不散的筵席”、”做人要大大方方的来，大大方方的走”、”不能人走茶凉，关系是需要维护的”、”坚持自己的原则，哪怕你抗衡的是整个世界”</p><p>我衷心地感谢在老东家认识的每一个人。</p><p>我已经不知道应该这篇文章到底要表达什么中心思想，如果要说一句鼓励的话，那么，</p><p>奔涌吧，后浪！RuGod，现在才刚刚开始！</p><h1 id="复习资料"><a href="#复习资料" class="headerlink" title="复习资料"></a>复习资料</h1><h2 id="系统复习课"><a href="#系统复习课" class="headerlink" title="系统复习课"></a>系统复习课</h2><ul><li>MySQL实战45讲（极客时间）</li><li>趣谈网络协议（极客时间）</li><li>深入剖析Kubernetes（极客时间）</li></ul><h2 id="书籍类"><a href="#书籍类" class="headerlink" title="书籍类"></a>书籍类</h2><ul><li>SRE Google运维解密 </li><li>Kubernetes权威指南</li><li>鸟哥的Linux私房菜 基础学习篇 第四版</li><li>云原生服务网格Istio</li><li>高性能MySQL（第3版）</li><li>CCNA学习指南 640-802 第7版</li><li>深入浅出Prometheus</li></ul><h2 id="面试总结类"><a href="#面试总结类" class="headerlink" title="面试总结类"></a>面试总结类</h2><ul><li><a href="https://blog.csdn.net/ThinkWon/article/details/104588679###" target="_blank" rel="noopener">Linux面试题（2020最新版）</a></li><li><a href="https://www.nowcoder.com/discuss/431440?type=5" target="_blank" rel="noopener">计算机网络学习路线和常见面试题总结（字节跳动面试必备）</a></li><li><a href="https://www.cnblogs.com/wuwuyong/p/12198928.html" target="_blank" rel="noopener">计算机网络常见面试题</a></li><li><a href="https://developer.aliyun.com/article/715486?spm=a2c6h.12873639.0.0.792939dfi0wzR1&groupCode=interview" target="_blank" rel="noopener">7大板块，200+面试题，助你拿下offer | 运维工程师面试宝典</a></li><li><a href="https://www.cs.usfca.edu/~galles/visualization/Algorithms.html" target="_blank" rel="noopener">算法实践</a></li><li><a href="https://www.jianshu.com/p/346d3c30eb2c" target="_blank" rel="noopener">MySQL 加锁处理分析</a></li><li><a href="https://zhuanlan.zhihu.com/p/54430650" target="_blank" rel="noopener">110道Python面试题（真题）</a></li></ul><hr><p>版权声明：</p><p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 顶级理解 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 顶级理解 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>个人总结(2020.7)</title>
       <link href="/2020/08/04/summary/summary-2020-7/"/>
       <url>/2020/08/04/summary/summary-2020-7/</url>
@@ -462,9 +487,9 @@
       
         <tags>
             
-            <tag> Dockerfile </tag>
-            
             <tag> Devops </tag>
+            
+            <tag> Dockerfile </tag>
             
             <tag> Docker </tag>
             
@@ -524,9 +549,9 @@
       
         <tags>
             
-            <tag> Dockerfile </tag>
-            
             <tag> Devops </tag>
+            
+            <tag> Dockerfile </tag>
             
             <tag> Docker </tag>
             
@@ -557,9 +582,9 @@
       
         <tags>
             
-            <tag> Helm </tag>
-            
             <tag> Kubernetes </tag>
+            
+            <tag> Helm </tag>
             
             <tag> 阿里云 </tag>
             
@@ -760,13 +785,13 @@
             
             <tag> Docker </tag>
             
+            <tag> Redis </tag>
+            
             <tag> Nacos </tag>
             
             <tag> Zookeeper </tag>
             
             <tag> Rocketmq </tag>
-            
-            <tag> Redis </tag>
             
         </tags>
       
@@ -820,11 +845,11 @@
             
             <tag> Docker </tag>
             
-            <tag> Redis </tag>
-            
             <tag> Mysql </tag>
             
             <tag> Mongodb </tag>
+            
+            <tag> Redis </tag>
             
             <tag> 数据备份 </tag>
             
@@ -1132,11 +1157,11 @@
             
             <tag> 自动化 </tag>
             
+            <tag> CI/CD </tag>
+            
             <tag> 敏捷开发 </tag>
             
             <tag> 敏捷部署 </tag>
-            
-            <tag> CI/CD </tag>
             
         </tags>
       
