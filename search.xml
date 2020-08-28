@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>Centos7安装NVIDIA显卡驱动和CUDA以及Docker-GPU环境</title>
+      <link href="/2020/08/28/gpu/nvidia-install/"/>
+      <url>/2020/08/28/gpu/nvidia-install/</url>
+      
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p><hr><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>领导有需求让在AWS上买一台GPU的服务器，进行安装部署3D建模项目的集成开发环境</p><h1 id="安装NVIDIA显卡驱动和CUDA"><a href="#安装NVIDIA显卡驱动和CUDA" class="headerlink" title="安装NVIDIA显卡驱动和CUDA"></a>安装NVIDIA显卡驱动和CUDA</h1><p>我购买了一台g3s.xlarge型号的ec2，选择centos7 配置好网络、磁盘、安全组和标签就准备开机安装了</p><h2 id="查看显卡型号"><a href="#查看显卡型号" class="headerlink" title="查看显卡型号"></a>查看显卡型号</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@loaclhost ~]# yum install pciutils -y</span><br><span class="line">[root@loaclhost ~]# lspci | grep -i NVIDIA</span><br><span class="line">00:1e.0 VGA compatible controller: NVIDIA Corporation GM204GL [Tesla M60] (rev a1)</span><br></pre></td></tr></table></figure><p>Google后发现</p><p>NVIDIA® Tesla® GPU是适用于服务器的 TESLA 数据中心的 GPU</p><p>它可以更快速地处理要求最严格的高性能计算 (HPC) 和超大规模数据中心工作负载。</p><h2 id="在Linux实例上安装NVIDIA-GRID驱动程序"><a href="#在Linux实例上安装NVIDIA-GRID驱动程序" class="headerlink" title="在Linux实例上安装NVIDIA GRID驱动程序"></a>在Linux实例上安装NVIDIA GRID驱动程序</h2><h3 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h3><p>安装NVIDIA GRID驱动程序的依赖以及AWS CLI</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">yum update -y</span><br><span class="line">yum install -y lrzsz vim wget ntpdate yum-utils zip unzip tree  gcc gcc-c++  epel-release</span><br><span class="line">curl &quot;https:&#x2F;&#x2F;awscli.amazonaws.com&#x2F;awscli-exe-linux-x86_64.zip&quot; -o &quot;awscliv2.zip&quot;</span><br><span class="line">unzip awscliv2.zip</span><br><span class="line">sudo .&#x2F;aws&#x2F;install</span><br><span class="line">reboot</span><br></pre></td></tr></table></figure><h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>配置AWS并确保IAM用户必须具有AmazonS3ReadOnlyAccess 策略授予的权限。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aws configure</span><br></pre></td></tr></table></figure><p>为您当前正在运行的内核版本安装gcc编译器和内核头文件包。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y gcc kernel-devel-$(uname -r)</span><br></pre></td></tr></table></figure><p>禁用nouveauNVIDIA图形卡的开源驱动程序。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">添加nouveau到 &#x2F;etc&#x2F;modprobe.d&#x2F;blacklist.conf黑名单文件。</span><br><span class="line">cat &lt;&lt; EOF | sudo tee --append &#x2F;etc&#x2F;modprobe.d&#x2F;blacklist.conf</span><br><span class="line">blacklist vga16fb</span><br><span class="line">blacklist nouveau</span><br><span class="line">blacklist rivafb</span><br><span class="line">blacklist nvidiafb</span><br><span class="line">blacklist rivatv</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">编辑&#x2F;etc&#x2F;default&#x2F;grub文件并添加以下行：</span><br><span class="line">GRUB_CMDLINE_LINUX&#x3D;&quot;rdblacklist&#x3D;nouveau&quot;</span><br><span class="line"></span><br><span class="line">重建Grub配置</span><br><span class="line">grub2-mkconfig -o &#x2F;boot&#x2F;grub2&#x2F;grub.cfg</span><br></pre></td></tr></table></figure><h3 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">下载GRID驱动程序安装实用程序</span><br><span class="line">aws s3 cp --recursive s3:&#x2F;&#x2F;ec2-linux-nvidia-drivers&#x2F;latest&#x2F; .</span><br><span class="line">chmod +x NVIDIA-Linux-x86_64*.run</span><br><span class="line">sudo &#x2F;bin&#x2F;sh .&#x2F;NVIDIA-Linux-x86_64*.run</span><br><span class="line">reboot</span><br></pre></td></tr></table></figure><p>出现提示时，接受许可协议并根据需要指定安装选项</p><p>部署完成后执行说明安装成功</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@ ~]# nvidia-smi </span><br><span class="line">Thu Aug 27 06:15:12 2020       </span><br><span class="line">+-----------------------------------------------------------------------------+</span><br><span class="line">| NVIDIA-SMI 450.51.05    Driver Version: 450.51.05    CUDA Version: 11.0     |</span><br><span class="line">|-------------------------------+----------------------+----------------------+</span><br><span class="line">| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |</span><br><span class="line">| Fan  Temp  Perf  Pwr:Usage&#x2F;Cap|         Memory-Usage | GPU-Util  Compute M. |</span><br><span class="line">|                               |                      |               MIG M. |</span><br><span class="line">|&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;|</span><br><span class="line">|   0  Tesla M60           On   | 00000000:00:1E.0 Off |                    0 |</span><br><span class="line">| N&#x2F;A   33C    P8    15W &#x2F; 150W |      0MiB &#x2F;  7618MiB |      0%      Default |</span><br><span class="line">|                               |                      |                  N&#x2F;A |</span><br><span class="line">+-------------------------------+----------------------+----------------------+</span><br><span class="line">                                                                               </span><br><span class="line">+-----------------------------------------------------------------------------+</span><br><span class="line">| Processes:                                                                  |</span><br><span class="line">|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |</span><br><span class="line">|        ID   ID                                                   Usage      |</span><br><span class="line">|&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;|</span><br><span class="line">|  No running processes found                                                 |</span><br></pre></td></tr></table></figure><h1 id="运行3D程序"><a href="#运行3D程序" class="headerlink" title="运行3D程序"></a>运行3D程序</h1><p>目前公司的3D项目可以已经用Docker部署，查阅docker官网发现docker在19版本后在docker run –gpus all 即可(表示使用所有的gpu，如果要使用2个gpu：–gpus 2，也可直接指定哪几个卡：–gpus ‘“device=1,2”’</p><p>在docker19之前需要单独下载nvidia-docker1或nvidia-docker2来启动容器</p><p>目前最新的docker版本是19.03.12，即不需要额外安装nvidia-docker</p><h2 id="安装Docker"><a href="#安装Docker" class="headerlink" title="安装Docker"></a>安装Docker</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@ ~]# yum install -y yum-utils </span><br><span class="line">[root@ ~]# yum-config-manager \</span><br><span class="line">    --add-repo \</span><br><span class="line">    https:&#x2F;&#x2F;download.docker.com&#x2F;linux&#x2F;centos&#x2F;docker-ce.repo</span><br><span class="line">[root@ ~]# yum install -y docker-ce docker-ce-cli containerd.io</span><br><span class="line">[root@ ~]# systemctl start docker</span><br><span class="line">[root@ ~]# docker -v</span><br><span class="line">Docker version 19.03.12, build 48a66213fe</span><br></pre></td></tr></table></figure><h2 id="安装GPU容器运行时"><a href="#安装GPU容器运行时" class="headerlink" title="安装GPU容器运行时"></a>安装GPU容器运行时</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">distribution&#x3D;$(. &#x2F;etc&#x2F;os-release;echo $ID$VERSION_ID)</span><br><span class="line">curl -s -L https:&#x2F;&#x2F;nvidia.github.io&#x2F;nvidia-docker&#x2F;$distribution&#x2F;nvidia-docker.repo | sudo tee &#x2F;etc&#x2F;yum.repos.d&#x2F;nvidia-docker.repo</span><br><span class="line"></span><br><span class="line">sudo yum install -y nvidia-container-toolkit</span><br><span class="line">sudo systemctl restart docker</span><br></pre></td></tr></table></figure><h2 id="验证docker可以使用GPU"><a href="#验证docker可以使用GPU" class="headerlink" title="验证docker可以使用GPU"></a>验证docker可以使用GPU</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">docker run --help | grep -i gpus</span><br><span class="line">      --gpus gpu-request               GPU devices to add to the container (&#39;all&#39; to pass all GPUs)</span><br><span class="line">      </span><br><span class="line">docker run -it --rm --gpus all ubuntu nvidia-smi</span><br><span class="line">Thu Aug 27 09:57:43 2020       </span><br><span class="line">+-----------------------------------------------------------------------------+</span><br><span class="line">| NVIDIA-SMI 450.51.05    Driver Version: 450.51.05    CUDA Version: N&#x2F;A      |</span><br><span class="line">|-------------------------------+----------------------+----------------------+</span><br><span class="line">| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |</span><br><span class="line">| Fan  Temp  Perf  Pwr:Usage&#x2F;Cap|         Memory-Usage | GPU-Util  Compute M. |</span><br><span class="line">|                               |                      |               MIG M. |</span><br><span class="line">|&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;|</span><br><span class="line">|   0  Tesla M60           On   | 00000000:00:1E.0 Off |                    0 |</span><br><span class="line">| N&#x2F;A   32C    P8    15W &#x2F; 150W |      0MiB &#x2F;  7618MiB |      0%      Default |</span><br><span class="line">|                               |                      |                  N&#x2F;A |</span><br><span class="line">+-------------------------------+----------------------+----------------------+</span><br><span class="line">                                                                               </span><br><span class="line">+-----------------------------------------------------------------------------+</span><br><span class="line">| Processes:                                                                  |</span><br><span class="line">|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |</span><br><span class="line">|        ID   ID                                                   Usage      |</span><br><span class="line">|&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;|</span><br><span class="line">|  No running processes found                                                 |</span><br><span class="line">+-----------------------------------------------------------------------------+</span><br></pre></td></tr></table></figure><p>说明可以运行</p><h1 id="报错总结"><a href="#报错总结" class="headerlink" title="报错总结"></a>报错总结</h1><p>执行sudo /bin/sh ./NVIDIA-Linux-x86_64*.run时报错</p><h2 id="Nouveau-kernel-driver"><a href="#Nouveau-kernel-driver" class="headerlink" title="Nouveau kernel driver"></a>Nouveau kernel driver</h2><p>ERROR: The Nouveau kernel driver is currently in use by your system.  This driver is incompatible with the NVIDIA driver, and must be disabled before proceeding.  Please consult<br>         the NVIDIA driver README and your Linux distribution’s documentation for details on how to correctly disable the Nouveau kernel driver. </p><p>这个驱动正在被系统使用,这个驱动和Nvidia驱动冲突,要想继续安装,则必须禁用此驱动！因为centos 系统默认装的显卡驱动就是Nouveau .　Nouveau是一个由爱好者组织的针对NVIDIA显卡开发第三方开源3D驱动的共同项目，并且Nouveau是在完全没有得到NVIDIA任何支 持的情况下进行开发的，Nouveau算是X.Org基金会的一个项目.</p><p>解决办法如下：</p><p>即关闭Nouveau：         </p><p>检查nouveau driver确保没有被加载！</p><p>lsmod | grep nouveau</p><h2 id="安装完GPU容器运行时报错"><a href="#安装完GPU容器运行时报错" class="headerlink" title="安装完GPU容器运行时报错"></a>安装完GPU容器运行时报错</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@ ~]# docker run -it --rm --gpus all ubuntu nvidia-smi</span><br><span class="line">Unable to find image &#39;ubuntu:latest&#39; locally</span><br><span class="line">latest: Pulling from library&#x2F;ubuntu</span><br><span class="line">54ee1f796a1e: Pull complete </span><br><span class="line">f7bfea53ad12: Pull complete </span><br><span class="line">46d371e02073: Pull complete </span><br><span class="line">b66c17bbf772: Pull complete </span><br><span class="line">Digest: sha256:31dfb10d52ce76c5ca0aa19d10b3e6424b830729e32a89a7c6eee2cda2be67a5</span><br><span class="line">Status: Downloaded newer image for ubuntu:latest</span><br><span class="line">docker: Error response from daemon: could not select device driver &quot;&quot; with capabilities: [[gpu]].</span><br></pre></td></tr></table></figure><p>解决办法，重启docker</p><p>systemctl restart docker</p><p>如果还不行，说明你没有安装GPU容器运行时</p><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-nvidia-driver.html#nvidia-GRID-driver" target="_blank" rel="noopener">在Linux实例上安装NVIDIA驱动程序</a></p><p><a href="https://github.com/NVIDIA/nvidia-docker" target="_blank" rel="noopener">nvidia-docker</a></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> NVIDIA </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Docker </tag>
+            
+            <tag> NVIDIA </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Centos7安装Nodejs-v12.6.0</title>
       <link href="/2020/08/22/nodejs/nodejs-install/"/>
       <url>/2020/08/22/nodejs/nodejs-install/</url>
@@ -230,11 +257,11 @@
       
         <tags>
             
+            <tag> Dockerfile </tag>
+            
             <tag> Operation Manual </tag>
             
             <tag> Timezone </tag>
-            
-            <tag> Dockerfile </tag>
             
         </tags>
       
@@ -564,15 +591,15 @@
       
         <tags>
             
-            <tag> Dockerfile </tag>
-            
-            <tag> Devops </tag>
-            
             <tag> Docker </tag>
             
             <tag> Linux </tag>
             
             <tag> 容器 </tag>
+            
+            <tag> Devops </tag>
+            
+            <tag> Dockerfile </tag>
             
         </tags>
       
@@ -626,15 +653,15 @@
       
         <tags>
             
-            <tag> Dockerfile </tag>
-            
-            <tag> Devops </tag>
-            
             <tag> Docker </tag>
             
             <tag> Linux </tag>
             
             <tag> 容器 </tag>
+            
+            <tag> Devops </tag>
+            
+            <tag> Dockerfile </tag>
             
         </tags>
       
@@ -775,13 +802,13 @@
       
         <tags>
             
-            <tag> Devops </tag>
-            
             <tag> Docker </tag>
             
             <tag> Linux </tag>
             
             <tag> 容器 </tag>
+            
+            <tag> Devops </tag>
             
         </tags>
       
@@ -920,9 +947,9 @@
       
         <tags>
             
-            <tag> Mysql </tag>
-            
             <tag> Docker </tag>
+            
+            <tag> Mysql </tag>
             
             <tag> Mongodb </tag>
             
@@ -953,13 +980,13 @@
       
         <tags>
             
-            <tag> Devops </tag>
-            
             <tag> Docker </tag>
             
             <tag> Linux </tag>
             
             <tag> 容器 </tag>
+            
+            <tag> Devops </tag>
             
         </tags>
       
