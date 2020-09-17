@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>服务器重启后加载不了文件系统</title>
+      <link href="/2020/09/17/bug/reboot-mount/"/>
+      <url>/2020/09/17/bug/reboot-mount/</url>
+      
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p><hr><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>研发有需求跑3D程序，让我在一台服务器上装显卡驱动，结果重启的时候机器故障，加载不了文件系统</p><h1 id="现状"><a href="#现状" class="headerlink" title="现状"></a>现状</h1><p>装显卡驱动需要禁用Nouveau驱动、更新内核，然后重启</p><p>重启时，出现如下错误</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">GIVE root password for maintenance (or type control-D to continue)</span><br><span class="line">Login incorrct:</span><br><span class="line">Give root password for maintenance</span><br><span class="line">(or type Control-D to continue):</span><br></pre></td></tr></table></figure><p>google后发现 </p><p>当Linux系统被强行关闭或重新启动，电脑的档案系统便有可能受损，系统会自动检查并修复档案系统；但当档案系统未能自动修复，画面便会出现上述讯息。</p><h1 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h1><p>先输入root密码进入服务器</p><p>查看文件系统</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">df -hT</span><br><span class="line">Filesystem              Type      Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                devtmpfs   16G     0   16G   0% &#x2F;dev</span><br><span class="line">tmpfs                   tmpfs      16G     0   16G   0% &#x2F;dev&#x2F;shm</span><br><span class="line">tmpfs                   tmpfs      16G  9.7M   16G   1% &#x2F;run</span><br><span class="line">tmpfs                   tmpfs      16G     0   16G   0% &#x2F;sys&#x2F;fs&#x2F;cgroup</span><br><span class="line">&#x2F;dev&#x2F;mapper&#x2F;centos-root xfs       1.8T  154G  1.7T   9% &#x2F;</span><br><span class="line">&#x2F;dev&#x2F;sda2               xfs      1014M  235M  780M  24% &#x2F;boot</span><br><span class="line">&#x2F;dev&#x2F;sda1               vfat      200M   12M  189M   6% &#x2F;boot&#x2F;efi</span><br></pre></td></tr></table></figure><p>查看硬盘设备及挂载配置</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">[root@jenkins-harbor ~]# blkid </span><br><span class="line">&#x2F;dev&#x2F;mapper&#x2F;centos-root: UUID&#x3D;&quot;406eb28a-e11b-4361-b3eb-3244f895cbf9&quot; TYPE&#x3D;&quot;xfs&quot; </span><br><span class="line">&#x2F;dev&#x2F;sda3: UUID&#x3D;&quot;mULe6E-r4m5-3GYM-wgc2-VzxN-vomR-AP3neD&quot; TYPE&#x3D;&quot;LVM2_member&quot; PARTUUID&#x3D;&quot;fefb0fc6-b09b-4ea2-9f50-2601ce39fd62&quot; </span><br><span class="line">&#x2F;dev&#x2F;nvme0n1: PTTYPE&#x3D;&quot;gpt&quot; </span><br><span class="line">&#x2F;dev&#x2F;nvme0n1p1: UUID&#x3D;&quot;4292-32BD&quot; TYPE&#x3D;&quot;vfat&quot; PARTLABEL&#x3D;&quot;EFI System Partition&quot; PARTUUID&#x3D;&quot;b5ce22ae-35a1-4d6e-8e39-8e79c2bdf627&quot; </span><br><span class="line">&#x2F;dev&#x2F;nvme0n1p2: UUID&#x3D;&quot;d5993c22-3e0f-4cca-baca-8b41d65cf685&quot; TYPE&#x3D;&quot;ext4&quot; PARTUUID&#x3D;&quot;d0fb0bd8-f84a-44f8-b6cd-7eed306823d5&quot; </span><br><span class="line">&#x2F;dev&#x2F;nvme0n1p3: UUID&#x3D;&quot;2e9c7400-9214-4375-9818-ad5e94fbe3a6&quot; TYPE&#x3D;&quot;swap&quot; PARTUUID&#x3D;&quot;2980ef10-5cd2-4215-8e41-f6eff10d4c99&quot; </span><br><span class="line">&#x2F;dev&#x2F;sda1: SEC_TYPE&#x3D;&quot;msdos&quot; UUID&#x3D;&quot;54EC-FF86&quot; TYPE&#x3D;&quot;vfat&quot; PARTLABEL&#x3D;&quot;EFI System Partition&quot; PARTUUID&#x3D;&quot;fc41939c-89d6-4960-8cc7-d4895a06bf85&quot; </span><br><span class="line">&#x2F;dev&#x2F;sda2: UUID&#x3D;&quot;2a29efa6-1bfb-4299-bb75-fb4d2c769954&quot; TYPE&#x3D;&quot;xfs&quot; PARTUUID&#x3D;&quot;f78790e4-7d58-49d1-a714-05c0852449f4&quot; </span><br><span class="line">&#x2F;dev&#x2F;mapper&#x2F;centos-swap: UUID&#x3D;&quot;854cebfc-0956-4559-a20e-927580f29517&quot; TYPE&#x3D;&quot;swap&quot; </span><br><span class="line"></span><br><span class="line">[root@jenkins-harbor ~]# cat &#x2F;etc&#x2F;fstab</span><br><span class="line">#</span><br><span class="line"># &#x2F;etc&#x2F;fstab</span><br><span class="line"># Created by anaconda on Fri Aug 14 12:38:39 2020</span><br><span class="line">#</span><br><span class="line"># Accessible filesystems, by reference, are maintained under &#39;&#x2F;dev&#x2F;disk&#39;</span><br><span class="line"># See man pages fstab(5), findfs(8), mount(8) and&#x2F;or blkid(8) for more info</span><br><span class="line">#</span><br><span class="line">&#x2F;dev&#x2F;mapper&#x2F;centos-root &#x2F;                       xfs     defaults        0 0</span><br><span class="line">UUID&#x3D;2a29efa6-1bfb-4299-bb75-fb4d2c769954 &#x2F;boot                   xfs     defaults        0 0</span><br><span class="line">UUID&#x3D;54EC-FF86          &#x2F;boot&#x2F;efi               vfat    umask&#x3D;0077,shortname&#x3D;winnt 0 0</span><br><span class="line">UUID&#x3D;d276a0d4-c95f-4792-a222-6d1451899de2 &#x2F;home ext4    noatime,errors&#x3D;remount-ro 0 1</span><br><span class="line">&#x2F;dev&#x2F;mapper&#x2F;centos-swap swap                    swap    defaults        0 0</span><br></pre></td></tr></table></figure><p>起初我并没有发现有什么问题</p><p>然后查看开机时的系统日志</p><p>journalctl -xb</p><p>其中有这么一段报错</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Sep 16 19:35:54 jenkins-harbor kernel: ACPI Error: [DSSP] Namespace lookup failure, AE_NOT_FOUND (20130517&#x2F;psargs-359)</span><br><span class="line">Sep 16 19:35:54 jenkins-harbor kernel: ACPI Error: Method parse&#x2F;execution failed [\_SB_.PCI0.SAT0.PRT4._GTF] (Node ffff900bf4b248d0), AE_NOT_</span><br><span class="line">Sep 16 19:35:54 jenkins-harbor kernel: ata5.00: ATA-10: WDC WD20EZAZ-00L9GB0, 80.00A80, max UDMA&#x2F;133</span><br><span class="line">Sep 16 19:35:54 jenkins-harbor kernel: ata5.00: 3907029168 sectors, multi 16: LBA48 NCQ (depth 31&#x2F;32), AA</span><br><span class="line">Sep 16 19:35:54 jenkins-harbor kernel: ACPI Error: [DSSP] Namespace lookup failure, AE_NOT_FOUND (20130517&#x2F;psargs-359)</span><br><span class="line">Sep 16 19:35:54 jenkins-harbor kernel: ACPI Error: Method parse&#x2F;execution failed [\_SB_.PCI0.SAT0.PRT4._GTF] (Node ffff900bf4b248d0), AE_NOT_</span><br><span class="line">Sep 16 19:35:54 jenkins-harbor kernel: ata5.00: configured for UDMA&#x2F;133</span><br><span class="line">Sep 16 19:35:54 jenkins-harbor kernel: scsi 4:0:0:0: Direct-Access     ATA      WDC WD20EZAZ-00L 0A80 PQ: 0 ANSI: 5</span><br><span class="line">Sep 16 19:35:54 jenkins-harbor kernel: sd 4:0:0:0: [sda] 3907029168 512-byte logical blocks: (2.00 TB&#x2F;1.81 TiB)</span><br><span class="line">Sep 16 19:35:54 jenkins-harbor kernel: sd 4:0:0:0: [sda] 4096-byte physical blocks</span><br><span class="line">Sep 16 19:35:54 jenkins-harbor kernel: sd 4:0:0:0: [sda] Write Protect is off</span><br><span class="line">Sep 16 19:35:54 jenkins-harbor kernel: sd 4:0:0:0: [sda] Mode Sense: 00 3a 00 00</span><br><span class="line">Sep 16 19:35:54 jenkins-harbor kernel: sd 4:0:0:0: [sda] Write cache: enabled, read cache: enabled, doesn&#39;t support DPO or FUA</span><br><span class="line">Sep 16 19:35:54 jenkins-harbor kernel:  sda: sda1 sda2 sda3</span><br><span class="line">Sep 16 19:35:54 jenkins-harbor kernel: sd 4:0:0:0: [sda] Attached SCSI disk</span><br><span class="line">Sep 16 19:35:54 jenkins-harbor kernel: random: fast init done</span><br></pre></td></tr></table></figure><p>后来仔细检查blkid 和/etc/fstab的区别发现</p><p>多了一条</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UUID&#x3D;d276a0d4-c95f-4792-a222-6d1451899de2 &#x2F;home ext4    noatime,errors&#x3D;remount-ro 0 1</span><br></pre></td></tr></table></figure><p>不知道从哪里冒出来的</p><p>而且我没有这个设备挂载到/home目录下</p><p>最终删除这一行</p><p>reboot</p><p>成功</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这个事情发生的有些莫名其妙，因为网上说出现文件系统损坏是因为强行关闭或重新启动，我寻思reboot也不算强行重启吧。</p><p>这里不得不说，之前面试复习时经常被问到的一个问题（centos6和7的启动流程分别是什么 ）帮了我大忙，通过分析centos7的启动步骤我，找到了那块不能挂载的磁盘，并且清除挂载的配置项。</p><p>但是这个事故的后果在我看来相当严重</p><p>因为这台服务器部署了jenkins流水线+镜像仓库</p><p>导致一天的项目没法发布</p><p>我深深的感到自责</p><p>而且这台机器本身是有GPU的，在我未深入调查之前就将这台机器作为了Devops实施的服务器，实属浪费资源。</p><p>处理这个问题的心态我是非常不好的，因为马上要发布下项目了，但由于我临时为了帮助一个同事在这台机器上装显卡驱动，导致整个公司的业务更新中断一天。</p><ul><li>以后不能因为只帮同事解决问题而立即一些冒风险的事了（这里不是怪同事的意思，的确是自己疏忽了），至少得自己心里有杆秤，能不能完成，以及重要程度。</li><li>数据备份，其实如果这台服务器真的重启异常导致文件系统损坏的话，那么所有数据都丢失了，jenkins和harbor我都得花很久很久修复。这实在事太不应该了。</li></ul><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://www.cnblogs.com/diantong/p/10745372.html" target="_blank" rel="noopener">CentOS7启动流程</a></p><p><a href="https://unix.stackexchange.com/questions/556819/systemd-time-out-waiting-for-device-dev-mapper-vg" target="_blank" rel="noopener">系统超时等待设备dev-mapper-vg</a></p><hr><p>版权声明：</p><p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Linux </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Linux </tag>
+            
+            <tag> Centos </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>迁移自建Redis至AWS的ElastiCache For Redis</title>
       <link href="/2020/09/16/aws/aws-redis-migrate/"/>
       <url>/2020/09/16/aws/aws-redis-migrate/</url>
@@ -51,9 +78,9 @@
             
             <tag> AWS </tag>
             
-            <tag> RDS </tag>
-            
             <tag> Mysql </tag>
+            
+            <tag> RDS </tag>
             
         </tags>
       
@@ -105,9 +132,9 @@
             
             <tag> AWS </tag>
             
-            <tag> RDS </tag>
-            
             <tag> Mysql </tag>
+            
+            <tag> RDS </tag>
             
         </tags>
       
@@ -161,9 +188,9 @@
       
         <tags>
             
-            <tag> Redis </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Redis </tag>
             
         </tags>
       
@@ -454,9 +481,9 @@
       
         <tags>
             
-            <tag> Docker </tag>
-            
             <tag> Linux </tag>
+            
+            <tag> Docker </tag>
             
             <tag> 容器 </tag>
             
@@ -647,9 +674,9 @@
       
         <tags>
             
-            <tag> Docker </tag>
-            
             <tag> Linux </tag>
+            
+            <tag> Docker </tag>
             
             <tag> 容器 </tag>
             
@@ -761,11 +788,11 @@
             
             <tag> Dockerfile </tag>
             
+            <tag> Linux </tag>
+            
             <tag> Devops </tag>
             
             <tag> Docker </tag>
-            
-            <tag> Linux </tag>
             
             <tag> 容器 </tag>
             
@@ -794,9 +821,9 @@
             
             <tag> Devops </tag>
             
-            <tag> 自动化 </tag>
-            
             <tag> CI/CD </tag>
+            
+            <tag> 自动化 </tag>
             
         </tags>
       
@@ -823,11 +850,11 @@
             
             <tag> Dockerfile </tag>
             
+            <tag> Linux </tag>
+            
             <tag> Devops </tag>
             
             <tag> Docker </tag>
-            
-            <tag> Linux </tag>
             
             <tag> 容器 </tag>
             
@@ -854,9 +881,9 @@
       
         <tags>
             
-            <tag> Helm </tag>
-            
             <tag> Kubernetes </tag>
+            
+            <tag> Helm </tag>
             
             <tag> 阿里云 </tag>
             
@@ -970,11 +997,11 @@
       
         <tags>
             
+            <tag> Linux </tag>
+            
             <tag> Devops </tag>
             
             <tag> Docker </tag>
-            
-            <tag> Linux </tag>
             
             <tag> 容器 </tag>
             
@@ -1081,7 +1108,7 @@
       
       <categories>
           
-          <category> Centos </category>
+          <category> Linux </category>
           
       </categories>
       
@@ -1115,9 +1142,9 @@
       
         <tags>
             
-            <tag> Redis </tag>
-            
             <tag> Mysql </tag>
+            
+            <tag> Redis </tag>
             
             <tag> Docker </tag>
             
@@ -1148,11 +1175,11 @@
       
         <tags>
             
+            <tag> Linux </tag>
+            
             <tag> Devops </tag>
             
             <tag> Docker </tag>
-            
-            <tag> Linux </tag>
             
             <tag> 容器 </tag>
             
@@ -1398,13 +1425,13 @@
             
             <tag> Devops </tag>
             
-            <tag> 自动化 </tag>
-            
             <tag> 敏捷开发 </tag>
             
             <tag> 敏捷部署 </tag>
             
             <tag> CI/CD </tag>
+            
+            <tag> 自动化 </tag>
             
         </tags>
       
