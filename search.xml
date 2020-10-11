@@ -4,6 +4,37 @@
   
     
     <entry>
+      <title>运维手册——解决Harbor镜像传输TLS超时的问题</title>
+      <link href="/2020/10/11/bug/harbor-pull/"/>
+      <url>/2020/10/11/bug/harbor-pull/</url>
+      
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p><hr><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>在设计自动化流水线我采取了经典的jenkins+harbor组合，但是在自动部署的流程中，服务器自动拉取镜像经常报错超时。</p><h1 id="现状"><a href="#现状" class="headerlink" title="现状"></a>现状</h1><p>目前有2段网络地址做了VPN对等连接(上行下行带宽均为25M)</p><p>AWS：172.31.0.0/16</p><p>内网：192.168.0.0/16</p><p>harbor在内网 </p><p>服务器在AWS上</p><p>目前服务器拉取镜像经常出现2种报错</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker login -u admin -p Harbor12345 https:&#x2F;&#x2F;harbor.com</span><br><span class="line">Error response from daemon: Get https:&#x2F;&#x2F;harbor.com&#x2F;v2&#x2F;: net&#x2F;http: request canceled (Client.Timeout exceeded while awaiting headers)</span><br><span class="line">docker pull  https:&#x2F;&#x2F;harbor.com&#x2F;jdk8&#x2F;demo:1.0.0</span><br><span class="line">Error response from daemon: Get https:&#x2F;&#x2F;harbor.com&#x2F;v2&#x2F;: net&#x2F;http: TLS handshake timeout</span><br></pre></td></tr></table></figure><p>更有甚者出现了如下情况</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">docker login -u admin -p Harbor12345 https:&#x2F;&#x2F;harbor.com</span><br><span class="line">WARNING! Using --password via the CLI is insecure. Use --password-stdin.</span><br><span class="line">WARNING! Your password will be stored unencrypted in &#x2F;root&#x2F;.docker&#x2F;config.json.</span><br><span class="line">Configure a credential helper to remove this warning. See</span><br><span class="line">https:&#x2F;&#x2F;docs.docker.com&#x2F;engine&#x2F;reference&#x2F;commandline&#x2F;login&#x2F;#credentials-store</span><br><span class="line"></span><br><span class="line">Login Succeeded</span><br><span class="line"></span><br><span class="line">docker pull  https:&#x2F;&#x2F;harbor.com&#x2F;jdk8&#x2F;demo:1.0.0</span><br><span class="line">Error response from daemon: Get https:&#x2F;&#x2F;harbor.com&#x2F;v2&#x2F;: net&#x2F;http: TLS handshake timeout</span><br><span class="line"></span><br><span class="line">docker pull  https:&#x2F;&#x2F;harbor.com&#x2F;jdk8&#x2F;demo:1.0.0</span><br><span class="line">1.0.0: Pulling from jdk8&#x2F;demo</span><br><span class="line">7595c8c21622: Already exists </span><br><span class="line">d13af8ca898f: Already exists </span><br><span class="line">70799171ddba: Already exists </span><br><span class="line">b6c12202c5ef: Already exists </span><br><span class="line">8374bff0d446: Already exists </span><br><span class="line">1514e412e368: Already exists </span><br><span class="line">d075d688d4bc: Already exists </span><br><span class="line">d3f2f6381e9b: Already exists </span><br><span class="line">61ef965b4675: Already exists </span><br><span class="line">c5307cd0b1a1: Already exists </span><br><span class="line">2e108958a480: Downloading [&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&gt;                            ]  97.76MB&#x2F;221.6MB</span><br><span class="line">2cb827909bfb: Download complete </span><br><span class="line">6f58b1e62713: Downloading [&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&gt;                                             ]  19.55MB&#x2F;179.2MB</span><br><span class="line">Error response from daemon: Get https:&#x2F;&#x2F;harbor.com&#x2F;v2&#x2F;: net&#x2F;http: TLS handshake timeout</span><br></pre></td></tr></table></figure><p>WTF，还能这样？</p><p>我在内网的其他服务器执行docker login docker pull 一点问题都没有</p><p>难道是只是因为网络原因吗</p><p>下面开始介绍我的排坑之旅</p><h1 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h1><p>google此类问题大多都是服务器直接拉取docker镜像默认从docker hub中拉取的，然后因为防火墙和网络原因，拉取速度慢造成超时，大多处理结果是换镜像源。</p><p>这种千篇一律治标不治本的答案对我这种场景没有什么帮助，我也不可能把镜像上传到公有源</p><p>还是继续查找这个原因吧。</p><h2 id="从网络入手"><a href="#从网络入手" class="headerlink" title="从网络入手"></a>从网络入手</h2><p>我试了很多次docker pull，终于有一次成功，在此期间我查看在整个镜像传输过程中的网络带宽监控图</p><p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Harbor/network-up1.png"  alt="network-up1.png"></p><p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Harbor/network-up2.png"  alt="network-up2.png"></p><p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Harbor/network-up3.png"  alt="network-up3.png"></p><p>我发现在这个正常传输的过程中，镜像上传会将VPN上行带宽几乎占满了(上限是25M)</p><p>带宽协议类型ssl占用是那段时间最多的</p><p>传输镜像时间约为3分钟</p><p>我在想是不是因为网络堵塞的时候，连接中断了。。。</p><p>这个时候带宽立马降下去了，但是docker login 还是报错tls超时</p><p>我纳闷了，现在也没有人占用VPN的带宽啊，为什么还是这样</p><h2 id="从VPN入手"><a href="#从VPN入手" class="headerlink" title="从VPN入手"></a>从VPN入手</h2><p>我又想到了可不可能因为VPN的HTTPS的策略有问题</p><p>查了下深信服的VPN协议</p><p>AWS和内网的VPN协议叫做：丢包补偿TCP</p><p>并且协议中添加了HTTPS的加速功能</p><p>不太了解这种协议，google也找不到相关说明</p><h3 id="测试TCP协议"><a href="#测试TCP协议" class="headerlink" title="测试TCP协议"></a>测试TCP协议</h3><p>我找到了一个时间段，这个时候正好服务器docker login超时</p><p>我试了下mysql连接，我在内网的一台服务器给AWS的Mysql里写入一个循环插入的语句，在测试过程中一直尝试docker login均超时，但是数据能正常插入。</p><p>Mysql-client连接走的是tcp协议</p><p>https也是基于tcp协议</p><p>这个时候我让研发测试业务之间传输（rpc协议），也能正常发送请求</p><p>那说明就是这个SSL的问题了</p><p>至此我已经确定了在VPN正常、TCP协议正常的情况</p><p>SSL连接超时</p><h3 id="咨询VPN售后"><a href="#咨询VPN售后" class="headerlink" title="咨询VPN售后"></a>咨询VPN售后</h3><p>调试无果后我只能打电话咨询深信服技术支持</p><p>这时候说一句，深信服售后真的会推皮球。直接把这个问题推给电信，因为VPN实质也是用的电信专线加速的，经常丢包很正常</p><p>我就告诉他，在这段时间VPN是正常的，并且应用的服务之间调用(RPC)并没有中断，只有https协议是出现了若干次连接超时的问题</p><p>最后深信服就一直转移话题说是因为专线不稳定云云</p><p>把我气的</p><p>算了</p><p>还是自己解决</p><p>问了他关于丢包补偿TCP的问题也爱答不理</p><p>国内最牛的VPN厂商就这？</p><p>太牛了</p><h2 id="从Harbor出发"><a href="#从Harbor出发" class="headerlink" title="从Harbor出发"></a>从Harbor出发</h2><p>我这个时候开始怀疑是不是只是Harbor出了问题</p><p>重启Harbor后，还是会出现这种情况</p><p>于是重新看看Harbor的架构</p><p><a href="https://github.com/goharbor/harbor/wiki/Architecture-Overview-of-Harbor" target="_blank" rel="noopener">Architecture Overview of Harbor</a></p><p>由于过于复杂，我只截取其中docker login发生的过程</p><h3 id="docker-login过程"><a href="#docker-login过程" class="headerlink" title="docker login过程"></a>docker login过程</h3><p>假设将Harbor部署在IP为192.168.1.10的主机上。用户运行docker命令将登录请求发送到Harbor：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker login 192.168.1.10</span><br></pre></td></tr></table></figure><p>用户输入所需的凭证后，Docker客户端将HTTP GET请求发送到地址“ 192.168.1.10/v2/”。Harbor的不同容器将按照以下步骤进行处理：</p><ul><li>首先，代理容器在端口80上侦听此请求。该容器中的Nginx将请求转发到后端的Registry容器。</li><li>注册表容器已配置为基于令牌的身份验证，因此它返回错误代码401，通知Docker客户端从指定的URL获取有效的令牌。在Harbor中，此URL指向核心服务的令牌服务；</li><li>当Docker客户端收到此错误代码时，它将根据HTTP规范的基本身份验证将请求发送到令牌服务URL，并将用户名和密码嵌入请求标头中；</li><li>在此请求通过端口80发送到代理容器之后，Nginx根据预先配置的规则再次将请求转发到UI容器。UI容器中的令牌服务接收请求，将请求解码并获取用户名和密码；</li><li>获得用户名和密码后，令牌服务将检查数据库并通过MySql中的数据对用户进行身份验证。将令牌服务配置为进行LDAP / AD身份验证时，它将针对外部LDAP / AD服务器进行身份验证。成功认证之后，令牌服务将返回指示成功的HTTP代码。HTTP响应主体包含由私钥生成的令牌。</li></ul><p>如下图所示</p><p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Harbor/harbor-the-process-of-docker-login.png"  alt="network-up3.png"></p><p>用通俗易懂的话来说，docker login harbor是一个二次请求的过程</p><ul><li>第一次请求：docker向registry发起请求，由于registry是基于token auth的，因此registry回复应答，告诉docker client去哪个URL去获取token；<br>docker client根据应答中的URL向token service(ui)发起请求，通过user和passwd获取token<br>如果user和passwd在db中通过了验证，那么token service将用自己的私钥(harbor/common/config/ui/private_key.pem)生成一个token，返回给docker client端；</li><li>第二次请求：docker client获得token后再向registry发起login请求，registry用自己的证书(harbor/common/config/registry/root.crt)对token进行校验。通过则返回成功，docker client 端接收到返回的200状态码并在控制台上打印Login Succeeded的信息，否则返回失败。</li></ul><h3 id="docker-push的过程"><a href="#docker-push的过程" class="headerlink" title="docker push的过程"></a>docker push的过程</h3><p>用户成功登录后，将通过Docker Push命令将Docker映像发送到Harbor</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker push 192.168.1.10&#x2F;library&#x2F;hello-world</span><br></pre></td></tr></table></figure><ul><li><p>首先，docker客户端通过将请求发送到注册表来重复类似于登录的过程，然后取回令牌服务的URL；</p></li><li><p>随后，在联系令牌服务时，Docker客户端会提供其他信息，以申请对映像进行推送操作的令牌（库/ hello-world）；</p></li><li><p>在收到Nginx转发的请求之后，令牌服务查询数据库以查找用户的角色和允许推送镜像的权限。如果用户拥有适当的权限，它将对推送操作的信息进行编码，并使用私钥对其进行签名，并为Docker客户端生成令牌；</p></li><li><p>Docker客户端获取令牌后，它将带有包含令牌的标头的推送请求发送到注册表。注册管理机构收到请求后，将使用公共密钥对令牌进行解码并验证其内容。公钥对应于令牌服务的私钥。如果注册表发现可用于推送镜像的令牌，则镜像传输过程开始。</p></li></ul><h3 id="Harbor的结论"><a href="#Harbor的结论" class="headerlink" title="Harbor的结论"></a>Harbor的结论</h3><p>虽然Harbor给出的例子是docker login 和docker push </p><p>但是我认为docker pull也会和push的流程类似（经过登陆，验证权限，最后镜像传输）</p><p>这里面会有一点</p><p>即使我先docker login了，但是后面的docker pull仍然会有docker login的请求</p><p>以及docker pull中镜像传输过程中可能出现的网络抖动或者harbor的token过期的可能</p><p>初步判断是这个方面的原因</p><h2 id="从https出发"><a href="#从https出发" class="headerlink" title="从https出发"></a>从https出发</h2><p>harbor默认安装后采用的是http方式，后面使用的时候可能会发现很多不方面。因为Docker客户端登录harbor进行镜像推送或拉取时默认是https方式！所以http方式下，需要在每一台harbor客户端机器上都要设置”insecure-registries”, 感觉很麻烦！所以最好还是将harbor默认的http方式改为https方式！另外，从安全角度考虑，容器的仓库在生产环境中往往也是需要被设定为https的方式</p><p>因为报错很明显是tls超时</p><p>其实我也不太懂https内部经过了什么，又要学习下https的知识</p><h3 id="https通信过程"><a href="#https通信过程" class="headerlink" title="https通信过程"></a>https通信过程</h3><p>HTTPS协议 = HTTP协议 + SSL/TLS协议，在HTTPS数据传输的过程中，需要用SSL/TLS对数据进行加密和解密，需要用HTTP对加密后的数据进行传输，由此可以看出HTTPS是由HTTP和SSL/TLS一起合作完成的。</p><p>SSL的全称是Secure Sockets Layer，即安全套接层协议，是为网络通信提供安全及数据完整性的一种安全协议。</p><p>TLS的全称是Transport Layer Security，即安全传输层协议，最新版本的TLS（Transport Layer Security，传输层安全协议）是IETF（Internet Engineering Task Force，Internet工程任务组）制定的一种新的协议，它建立在SSL 3.0协议规范之上，是SSL 3.0的后续版本。在TLS与SSL3.0之间存在着显著的差别，主要是它们所支持的加密算法不同，所以TLS与SSL3.0不能互操作。虽然TLS与SSL3.0在加密算法上不同，但是在我们理解HTTPS的过程中，我们可以把SSL和TLS看做是同一个协议。</p><p>HTTPS为了兼顾安全与效率，同时使用了对称加密和非对称加密。数据是被对称加密传输的，对称加密过程需要客户端的一个密钥，为了确保能把该密钥安全传输到服务器端，采用非对称加密对该密钥进行加密传输，总的来说，对数据进行对称加密，对称加密所要使用的密钥通过非对称加密传输。</p><p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Harbor/https.png"  alt="network-up3.png"></p><p>HTTPS在传输的过程中会涉及到三个密钥：</p><p>服务器端的公钥和私钥，用来进行非对称加密</p><p>客户端生成的随机密钥，用来进行对称加密</p><p>一个HTTPS请求实际上包含了两次HTTP传输，可以细分为8步。</p><p>1.客户端向服务器发起HTTPS请求，连接到服务器的443端口</p><p>2.服务器端有一个密钥对，即公钥和私钥，是用来进行非对称加密使用的，服务器端保存着私钥，不能将其泄露，公钥可以发送给任何人。</p><p>3.服务器将自己的公钥发送给客户端。</p><p>4.客户端收到服务器端的证书之后，会对证书进行检查，验证其合法性，如果发现发现证书有问题，那么HTTPS传输就无法继续。严格的说，这里应该是验证服务器发送的数字证书的合法性，关于客户端如何验证数字证书的合法性，下文会进行说明。如果公钥合格，那么客户端会生成一个随机值，这个随机值就是用于进行对称加密的密钥，我们将该密钥称之为client key，即客户端密钥，这样在概念上和服务器端的密钥容易进行区分。然后用服务器的公钥对客户端密钥进行非对称加密，这样客户端密钥就变成密文了，至此，HTTPS中的第一次HTTP请求结束。</p><p>5.客户端会发起HTTPS中的第二个HTTP请求，将加密之后的客户端密钥发送给服务器。</p><p>6.服务器接收到客户端发来的密文之后，会用自己的私钥对其进行非对称解密，解密之后的明文就是客户端密钥，然后用客户端密钥对数据进行对称加密，这样数据就变成了密文。</p><p>7.然后服务器将加密后的密文发送给客户端。</p><p>8.客户端收到服务器发送来的密文，用客户端密钥对其进行对称解密，得到服务器发送的数据。这样HTTPS中的第二个HTTP请求结束，整个HTTPS传输完成。</p><h2 id="分析docker-pull-https-harbor-com"><a href="#分析docker-pull-https-harbor-com" class="headerlink" title="分析docker pull https:harbor.com"></a>分析docker pull https:harbor.com</h2><p>https的过程我也只是一知半解，后面会专门针对协议内容进行学习。</p><p>现在了解docker pull和https的基本原理后，我把这个过程分解成下面几步</p><ul><li>第一步获取URL</li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">curl -v &quot;https:&#x2F;&#x2F;harbor.com&#x2F;v2&#x2F;&quot;</span><br><span class="line">&lt; HTTP&#x2F;2 401 </span><br><span class="line">&lt; content-type: application&#x2F;json; charset&#x3D;utf-8</span><br><span class="line">&lt; docker-distribution-api-version: registry&#x2F;2.0</span><br></pre></td></tr></table></figure><ul><li>第二步获取Token</li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl -v &quot;https:&#x2F;&#x2F;harbor.com&#x2F;auth?service</span><br><span class="line"></span><br><span class="line">&#123;&quot;access_token&quot;:&quot;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIs&#125;</span><br></pre></td></tr></table></figure><ul><li>第三步通过Token获取image下载配置</li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">curl -v -H &quot;Accept: application&#x2F;vnd.docker.distribution.manifest.v2+json&quot; -H &quot;Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIs&quot; &quot;https:&#x2F;&#x2F;harbor.com&#x2F;v2&#x2F;acs-sample&#x2F;ubuntu&#x2F;manifests&#x2F;latest&quot;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">   &quot;schemaVersion&quot;: 2,</span><br><span class="line">   &quot;mediaType&quot;: &quot;application&#x2F;vnd.docker.distribution.manifest.v2+json&quot;,</span><br><span class="line">   &quot;config&quot;: &#123;</span><br><span class="line">      &quot;mediaType&quot;: &quot;application&#x2F;octet-stream&quot;,</span><br><span class="line">      &quot;size&quot;: 3820,</span><br><span class="line">      &quot;digest&quot;: &quot;sha256:4791cda23dbc3d1c7a0491644ae1c819c7d24b516be95df79113119e0f073416&quot;</span><br><span class="line">   &#125;,</span><br><span class="line">   &quot;layers&quot;: [</span><br><span class="line">      &#123;</span><br><span class="line">         &quot;mediaType&quot;: &quot;application&#x2F;vnd.docker.image.rootfs.diff.tar.gzip&quot;,</span><br><span class="line">         &quot;size&quot;: 65699368,</span><br><span class="line">         &quot;digest&quot;: &quot;sha256:56eb14001cebec19f2255d95e125c9f5199c9e1d97dd708e1f3ebda3d32e5da7&quot;</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">         &quot;mediaType&quot;: &quot;application&#x2F;vnd.docker.image.rootfs.diff.tar.gzip&quot;,</span><br><span class="line">         &quot;size&quot;: 101415,</span><br><span class="line">         &quot;digest&quot;: &quot;sha256:7ff49c327d838cf14f7db33fa44f6057b7209298e9c03369257485a085e231df&quot;</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">         &quot;mediaType&quot;: &quot;application&#x2F;vnd.docker.image.rootfs.diff.tar.gzip&quot;,</span><br><span class="line">         &quot;size&quot;: 365,</span><br><span class="line">         &quot;digest&quot;: &quot;sha256:6e532f87f96dd5821006d02e65e7d4729a4e6957a34c3f4ec72046e221eb7c52&quot;</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">         &quot;mediaType&quot;: &quot;application&#x2F;vnd.docker.image.rootfs.diff.tar.gzip&quot;,</span><br><span class="line">         &quot;size&quot;: 681,</span><br><span class="line">         &quot;digest&quot;: &quot;sha256:3ce63537e70c2c250fbc41b5f04bfb31f445be4034effc4b4c513bf8899dfa0a&quot;</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">         &quot;mediaType&quot;: &quot;application&#x2F;vnd.docker.image.rootfs.diff.tar.gzip&quot;,</span><br><span class="line">         &quot;size&quot;: 686,</span><br><span class="line">         &quot;digest&quot;: &quot;sha256:a521f68c7946d409bc182c615aa77d7e89de0914f67b2c0ce9be9f4c8e27c949&quot;</span><br><span class="line">      &#125;</span><br><span class="line">   ]</span><br></pre></td></tr></table></figure><ul><li>第四步获取config开始传输</li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -v -H &quot;Accept: application&#x2F;vnd.docker.distribution.manifest.v2+json&quot; -H &quot;Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIs</span><br></pre></td></tr></table></figure><p>看harbor的registry和nginx的日志判断出在第三步重新请求的过程中出现了问题</p><p>那么问题来了，docker pull会发多次https请求，并且在建立镜像传输的时候是并发传输layers的</p><p>中途任何一个https超时的情况都会影响整个流程</p><h2 id="绝杀"><a href="#绝杀" class="headerlink" title="绝杀"></a>绝杀</h2><p>其实到这里我还是不能定位到底是哪个地方出了问题</p><p>这个时候我跟领导反馈了一下这个事</p><p>领导说可以看看证书是不是存在问题</p><p>继续google到了一些例子，和我这个很像</p><p>其中一个案例如下</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">项目部署上去之后之前HTTP访问正常，后来升级为https，刚升级的时候是正常访问的，之后就很频繁的出现不能访问，提示超时。</span><br><span class="line"></span><br><span class="line">证书是在百度SSL那边申请的免费证书，我司域名是http:&#x2F;&#x2F;xxx.com.cn这样的，当时给阿里提工单，发现SSL有问题，阿里给的建议是--如果真的想https访问，就购买他们的全球加速....不然可以开启ssl，建议不强制hppts，抓包结果说他们国际链路有问题，暂时无法解决。</span><br></pre></td></tr></table></figure><p>我发现我用的也是免费申请的证书，说不定也是这个链路有问题</p><h1 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h1><p>网上重新换了一个证书</p><p>替换证书</p><p>重启harbor</p><p>OK</p><p>观察近1个月，再也没有出现类似问题</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这个问题从发现到解决花了我3天左右，但是复盘这个问题花了我接近半个月，恶补了一下docker pull/harbor/https等知识，还是非常有收获的。</p><p>后面我会继续研究https的原理问题以及是如何抓包ssl的过程</p><p>感谢我的这个领导</p><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://tonybai.com/2017/06/15/fix-auth-fail-when-login-harbor-registry/" target="_blank" rel="noopener">解决登录Harbor Registry时鉴权失败的问题</a></p><p><a href="https://github.com/docker/for-win/issues/611" target="_blank" rel="noopener">Get https://registry-1.docker.io/v2/: net/http: request canceled while waiting for connection</a></p><p><a href="https://github.com/docker/for-win/issues/1534" target="_blank" rel="noopener">Client.Timeout exceeded while awaiting headers</a></p><p><a href="https://github.com/goharbor/harbor/issues/11243" target="_blank" rel="noopener">error authorizing context: authorization token required</a></p><p><a href="https://www.jianshu.com/p/14cd2c9d2cd2" target="_blank" rel="noopener">Https原理及流程</a></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> SSL </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Harbor </tag>
+            
+            <tag> Docker </tag>
+            
+            <tag> HTTPS </tag>
+            
+            <tag> SSL </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>跟我学Devops之工具篇（Jenkins）</title>
       <link href="/2020/10/11/devops/devops-jenkins-1/"/>
       <url>/2020/10/11/devops/devops-jenkins-1/</url>
@@ -22,11 +53,11 @@
             
             <tag> Devops </tag>
             
-            <tag> Jenkins </tag>
-            
             <tag> CI/CD </tag>
             
             <tag> 自动化 </tag>
+            
+            <tag> Jenkins </tag>
             
         </tags>
       
@@ -80,9 +111,9 @@
             
             <tag> AWS </tag>
             
-            <tag> Redis </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Redis </tag>
             
         </tags>
       
@@ -275,9 +306,9 @@
       
         <tags>
             
-            <tag> Redis </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Redis </tag>
             
         </tags>
       
@@ -568,9 +599,9 @@
       
         <tags>
             
-            <tag> Linux </tag>
-            
             <tag> Docker </tag>
+            
+            <tag> Linux </tag>
             
             <tag> 容器 </tag>
             
@@ -761,9 +792,9 @@
       
         <tags>
             
-            <tag> Linux </tag>
-            
             <tag> Docker </tag>
+            
+            <tag> Linux </tag>
             
             <tag> 容器 </tag>
             
@@ -875,11 +906,11 @@
             
             <tag> Dockerfile </tag>
             
-            <tag> Devops </tag>
+            <tag> Docker </tag>
             
             <tag> Linux </tag>
             
-            <tag> Docker </tag>
+            <tag> Devops </tag>
             
             <tag> 容器 </tag>
             
@@ -937,11 +968,11 @@
             
             <tag> Dockerfile </tag>
             
-            <tag> Devops </tag>
+            <tag> Docker </tag>
             
             <tag> Linux </tag>
             
-            <tag> Docker </tag>
+            <tag> Devops </tag>
             
             <tag> 容器 </tag>
             
@@ -1084,11 +1115,11 @@
       
         <tags>
             
-            <tag> Devops </tag>
+            <tag> Docker </tag>
             
             <tag> Linux </tag>
             
-            <tag> Docker </tag>
+            <tag> Devops </tag>
             
             <tag> 容器 </tag>
             
@@ -1229,9 +1260,9 @@
       
         <tags>
             
-            <tag> Redis </tag>
-            
             <tag> Mysql </tag>
+            
+            <tag> Redis </tag>
             
             <tag> Docker </tag>
             
@@ -1262,11 +1293,11 @@
       
         <tags>
             
-            <tag> Devops </tag>
+            <tag> Docker </tag>
             
             <tag> Linux </tag>
             
-            <tag> Docker </tag>
+            <tag> Devops </tag>
             
             <tag> 容器 </tag>
             
@@ -1494,6 +1525,39 @@
     
     
     <entry>
+      <title>跟我学Devops之思想篇（一）</title>
+      <link href="/2020/05/03/devops/devops-idea-1/"/>
+      <url>/2020/05/03/devops/devops-idea-1/</url>
+      
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第一家互联网公司学习的内容</p><hr><h1 id="Devops简介"><a href="#Devops简介" class="headerlink" title="Devops简介"></a>Devops简介</h1><p>DevOps（Development和Operations的组合词）是一组过程、方法与系统的统称，用于促进开发（应用程序/软件工程）、技术运营和质量保障（QA）部门之间的沟通、协作与整合。</p><p>它是一种重视“软件开发人员（Dev）”和“IT运维技术人员（Ops）”之间沟通合作的文化、运动或惯例。透过自动化“软件交付”和“架构变更”的流程，来使得构建、测试、发布软件能够更加地快捷、频繁和可靠。</p><p>它的出现是由于软件行业日益清晰地认识到：为了按时交付软件产品和服务，开发和运维工作必须紧密合作。</p><p>下面用一张图来表示Devops的思想<br><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/devops.jpg"  alt="devopsjpg"></p><h2 id="敏捷开发"><a href="#敏捷开发" class="headerlink" title="敏捷开发"></a>敏捷开发</h2><p>敏捷开发以用户的需求进化为核心，采用迭代、循序渐进的方法进行软件开发。在敏捷开发中，软件项目在构建初期被切分成多个子项目，各个子项目的成果都经过测试，具备可视、可集成和可运行使用的特征。换言之，就是把一个大项目分为多个相互联系，但也可独立运行的小项目，并分别完成，在此过程中软件一直处于可使用状态。</p><h2 id="敏捷部署"><a href="#敏捷部署" class="headerlink" title="敏捷部署"></a>敏捷部署</h2><p>敏捷部署是通过自动化工具或脚本来达到项目自动发布的目的。强大的部署自动化手段确保部署任务的可重复性、减少部署出错的可能性。</p><h1 id="个人从工作中理解什么叫Devops"><a href="#个人从工作中理解什么叫Devops" class="headerlink" title="个人从工作中理解什么叫Devops"></a>个人从工作中理解什么叫Devops</h1><p>我们公司的项目应用大多以Java为主，用的微服务架构。那么在实际项目中应用到devops中是怎么样的呢？详情可以看下图。<br><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Devops/CICD.png"  alt="devopsjpg"></p><h2 id="整个流程可以细分成3个阶段"><a href="#整个流程可以细分成3个阶段" class="headerlink" title="整个流程可以细分成3个阶段"></a>整个流程可以细分成3个阶段</h2><h3 id="开发阶段"><a href="#开发阶段" class="headerlink" title="开发阶段"></a>开发阶段</h3><ul><li>开发团队提交代码到gitlab的dev分支</li><li>从gitlab拉去dev分支代码</li><li>单元测试</li><li>maven编译打成jar包</li><li>sonar质量检查</li><li>Dockerfile将jar包打成image</li><li>将image推送到Harbor仓库</li><li>开发环境服务器拉取Harbor仓库image并创建容器</li><li>验证相关功能正常</li></ul><h3 id="测试阶段"><a href="#测试阶段" class="headerlink" title="测试阶段"></a>测试阶段</h3><ul><li>测试环境服务器拉取Harbor仓库image并创建容器</li><li>验证相关功能正常</li><li>通知开发合并分支到master分支</li><li>从gitlab拉去master分支代码</li><li>单元测试</li><li>maven编译打成jar包</li><li>sonar质量检查</li><li>Dockerfile将jar包打成image</li><li>将image推送到Harbor仓库</li><li>测试环境服务器拉取Harbor仓库image并创建容器</li><li>验证相关功能正常</li></ul><h3 id="投产阶段"><a href="#投产阶段" class="headerlink" title="投产阶段"></a>投产阶段</h3><ul><li>将Harbor仓库image推送到生产环境Harbor</li><li>生产环境服务器拉取生产环境Harbor仓库image并滚动发布</li><li>测试、产品人员验收</li></ul><h2 id="细分阶段的好处"><a href="#细分阶段的好处" class="headerlink" title="细分阶段的好处"></a>细分阶段的好处</h2><p>这样分阶段的Devops流程好处在于允许分散开的团队控制他们自己的命运：</p><ul><li>开发人员只用关心自己的分支代码功能、代码质量，不用考虑部署、测试。</li><li>测试人员只用关心开发人员的代码功能、回归、自动化、性能测试等，不用考虑部署流程。</li><li>运维人员只用关心将镜像发布到生产环境，不用考虑，代码功能、测试。</li></ul><p>这样的流水线设计是需要一段时间的，但是设计完成后可以一劳永逸，每个团队都能专注自己的工作。也许以前你是开发，你还需要负责部署、测试；也许以前你是测试，你还需要推送镜像到生产环境；有了Devops后，你只需要在jenkins点下构建按钮，选择环境就可以实现一键发布了，专注自己领域的事有利于提高整个团队的工作效率！</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>作为一个运维人员，当我学习到了Devops思想后就深深的认同这一点：所有的人工操作都要转换成自动化。</p><p>Devops七荣七耻与大家共勉</p><p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Devops/HonorandDisgrace.png"  alt="devops.jpg"></p><hr><p>版权声明：</p><p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 跟我学Devops </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Devops </tag>
+            
+            <tag> 敏捷开发 </tag>
+            
+            <tag> 敏捷部署 </tag>
+            
+            <tag> CI/CD </tag>
+            
+            <tag> 自动化 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>跟我学Devops之思想篇（二）</title>
       <link href="/2020/05/03/devops/devops-idea-2/"/>
       <url>/2020/05/03/devops/devops-idea-2/</url>
@@ -1515,39 +1579,6 @@
             <tag> 微服务 </tag>
             
             <tag> Rest Api </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>跟我学Devops之思想篇（一）</title>
-      <link href="/2020/05/03/devops/devops-idea-1/"/>
-      <url>/2020/05/03/devops/devops-idea-1/</url>
-      
-        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第一家互联网公司学习的内容</p><hr><h1 id="Devops简介"><a href="#Devops简介" class="headerlink" title="Devops简介"></a>Devops简介</h1><p>DevOps（Development和Operations的组合词）是一组过程、方法与系统的统称，用于促进开发（应用程序/软件工程）、技术运营和质量保障（QA）部门之间的沟通、协作与整合。</p><p>它是一种重视“软件开发人员（Dev）”和“IT运维技术人员（Ops）”之间沟通合作的文化、运动或惯例。透过自动化“软件交付”和“架构变更”的流程，来使得构建、测试、发布软件能够更加地快捷、频繁和可靠。</p><p>它的出现是由于软件行业日益清晰地认识到：为了按时交付软件产品和服务，开发和运维工作必须紧密合作。</p><p>下面用一张图来表示Devops的思想<br><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/devops.jpg"  alt="devopsjpg"></p><h2 id="敏捷开发"><a href="#敏捷开发" class="headerlink" title="敏捷开发"></a>敏捷开发</h2><p>敏捷开发以用户的需求进化为核心，采用迭代、循序渐进的方法进行软件开发。在敏捷开发中，软件项目在构建初期被切分成多个子项目，各个子项目的成果都经过测试，具备可视、可集成和可运行使用的特征。换言之，就是把一个大项目分为多个相互联系，但也可独立运行的小项目，并分别完成，在此过程中软件一直处于可使用状态。</p><h2 id="敏捷部署"><a href="#敏捷部署" class="headerlink" title="敏捷部署"></a>敏捷部署</h2><p>敏捷部署是通过自动化工具或脚本来达到项目自动发布的目的。强大的部署自动化手段确保部署任务的可重复性、减少部署出错的可能性。</p><h1 id="个人从工作中理解什么叫Devops"><a href="#个人从工作中理解什么叫Devops" class="headerlink" title="个人从工作中理解什么叫Devops"></a>个人从工作中理解什么叫Devops</h1><p>我们公司的项目应用大多以Java为主，用的微服务架构。那么在实际项目中应用到devops中是怎么样的呢？详情可以看下图。<br><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Devops/CICD.png"  alt="devopsjpg"></p><h2 id="整个流程可以细分成3个阶段"><a href="#整个流程可以细分成3个阶段" class="headerlink" title="整个流程可以细分成3个阶段"></a>整个流程可以细分成3个阶段</h2><h3 id="开发阶段"><a href="#开发阶段" class="headerlink" title="开发阶段"></a>开发阶段</h3><ul><li>开发团队提交代码到gitlab的dev分支</li><li>从gitlab拉去dev分支代码</li><li>单元测试</li><li>maven编译打成jar包</li><li>sonar质量检查</li><li>Dockerfile将jar包打成image</li><li>将image推送到Harbor仓库</li><li>开发环境服务器拉取Harbor仓库image并创建容器</li><li>验证相关功能正常</li></ul><h3 id="测试阶段"><a href="#测试阶段" class="headerlink" title="测试阶段"></a>测试阶段</h3><ul><li>测试环境服务器拉取Harbor仓库image并创建容器</li><li>验证相关功能正常</li><li>通知开发合并分支到master分支</li><li>从gitlab拉去master分支代码</li><li>单元测试</li><li>maven编译打成jar包</li><li>sonar质量检查</li><li>Dockerfile将jar包打成image</li><li>将image推送到Harbor仓库</li><li>测试环境服务器拉取Harbor仓库image并创建容器</li><li>验证相关功能正常</li></ul><h3 id="投产阶段"><a href="#投产阶段" class="headerlink" title="投产阶段"></a>投产阶段</h3><ul><li>将Harbor仓库image推送到生产环境Harbor</li><li>生产环境服务器拉取生产环境Harbor仓库image并滚动发布</li><li>测试、产品人员验收</li></ul><h2 id="细分阶段的好处"><a href="#细分阶段的好处" class="headerlink" title="细分阶段的好处"></a>细分阶段的好处</h2><p>这样分阶段的Devops流程好处在于允许分散开的团队控制他们自己的命运：</p><ul><li>开发人员只用关心自己的分支代码功能、代码质量，不用考虑部署、测试。</li><li>测试人员只用关心开发人员的代码功能、回归、自动化、性能测试等，不用考虑部署流程。</li><li>运维人员只用关心将镜像发布到生产环境，不用考虑，代码功能、测试。</li></ul><p>这样的流水线设计是需要一段时间的，但是设计完成后可以一劳永逸，每个团队都能专注自己的工作。也许以前你是开发，你还需要负责部署、测试；也许以前你是测试，你还需要推送镜像到生产环境；有了Devops后，你只需要在jenkins点下构建按钮，选择环境就可以实现一键发布了，专注自己领域的事有利于提高整个团队的工作效率！</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>作为一个运维人员，当我学习到了Devops思想后就深深的认同这一点：所有的人工操作都要转换成自动化。</p><p>Devops七荣七耻与大家共勉</p><p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Devops/HonorandDisgrace.png"  alt="devops.jpg"></p><hr><p>版权声明：</p><p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>]]></content>
-      
-      
-      <categories>
-          
-          <category> 跟我学Devops </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> Devops </tag>
-            
-            <tag> CI/CD </tag>
-            
-            <tag> 自动化 </tag>
-            
-            <tag> 敏捷开发 </tag>
-            
-            <tag> 敏捷部署 </tag>
             
         </tags>
       
