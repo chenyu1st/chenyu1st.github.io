@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>SRE实战之独立解决生产级的业务调用链路问题</title>
+      <link href="/2020/10/11/sre/traceroute-bug/"/>
+      <url>/2020/10/11/sre/traceroute-bug/</url>
+      
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p><hr><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>最近开发反馈公司服务器网络环境不稳定，服务器业务功能时好时坏。我问这个现象持续了多久，开发说从我进公司前就有了，只是最近特别不稳定，一起来看看问题吧。</p><h1 id="现状"><a href="#现状" class="headerlink" title="现状"></a>现状</h1><p>目前现象是前端页面点击某按钮的功能是卡时不卡</p><p>我先让开发定位有没有错误日志</p><p>开发看了业务日志后发现，后端代码调用hadoop后，hadoop的回调经常超时</p><p>那么很明显从hadoop开始找问题</p><h1 id="分析问题"><a href="#分析问题" class="headerlink" title="分析问题"></a>分析问题</h1><p>A调用B可以</p><p>B回调A不行</p><p>那么直接看看调用链的区别</p><p>我用链路追踪看了一下这个项目的调用链，如下图所示</p><p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/DNS/traceroute_old.jpg"  alt="traceroute_old.jpg"></p><p>其实在之前的公司我遇到过这个问题，链路图画出来分析问题就一目了然</p><p>用户访问前端页面 &gt; 点击按钮 &gt; 请求后端接口https:a.com &gt; 这个地方用户的主机会做一次域名解析 &gt; 进入公司主路由器 &gt; Nginx &gt; 转发后端 &gt; 后端调用hadoop &gt; hadoop回调 </p><p>注意这个地方hadoop回调也是用的https:a.com</p><p>这个是公网的域名，回调一个内网的服务为什么还要从公网走一遭？</p><p>我当时问开发，开发说没有做内网dns，而且代码都是统一用一个接口</p><p>那么用公网的域名中间回让hadoop这台服务器再解析一次这个域名发送请求，而这台hadoop的网关正好是这个主路由器，那不就是相当于从主路由器出去，解析发现就是这个主路由器，然后又再请求进来，中间哪一步出现问题都会超时</p><p>然后我查看了nginx的日志，在超时的那段时间，nginx没有接收来自hadoop的回调请求，那么说明这个请求在中途因为某些原因不见了</p><h1 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h1><p>继续追究这个回调请求打不到nginx上的原因没有什么意义，直接开始解决问题吧</p><p>为此我提了3种实操方案</p><ul><li>直接改hadoop /etc/hosts文件强制指向后端（临时方法，目前也是用这个方法实现的）</li><li>建立一个内部的DNS服务器，在项目里分2种域名 前端调后端的还是走公网域名<a href="https://a.com" target="_blank" rel="noopener">https://a.com</a> 后端之间的内部调用都是用内网DNS解析的域名</li><li>加入服务注册中心，统一管理服务调用</li></ul><p>我认为终极方案肯定还是用注册中心，把服务之间的调用管理起来，但是由于历史原因，这个事情目前做不了，我只能通过改/etc/hosts强制指向后端</p><p>说到这个地方，当真是指向后端吗？其实应该指向nginx的服务器，因为后端调用的是<a href="https://a.com" target="_blank" rel="noopener">https://a.com</a> 还有证书呢</p><p>最后调用链切换至如下图所示</p><p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/DNS/traceroute_new.png"  alt="traceroute_new.png"></p><p>后面我提建议让后端之间的调用采用rpc，都内网调用了还搞https干嘛呢</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>改进后持续跟踪半个月，再也没有出现超时的情况，并且后端处理速度大大提高</p><p>其实这个问题在我看来不应该出现，也许是因为团队当时写项目的时候没有考虑全面，导致了这种调用回路的事出现</p><p>但是时代变了</p><p>我加入了团队</p><p>这种问题我会逐渐处理掉。</p><p>争做团队的MVP！</p><hr><p>版权声明：</p><p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Sre </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Sre </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>运维手册——解决Harbor镜像传输TLS超时的问题</title>
       <link href="/2020/10/11/bug/harbor-pull/"/>
       <url>/2020/10/11/bug/harbor-pull/</url>
@@ -19,6 +44,8 @@
       
       
         <tags>
+            
+            <tag> Operation Manual </tag>
             
             <tag> Harbor </tag>
             
@@ -53,11 +80,11 @@
             
             <tag> Devops </tag>
             
-            <tag> CI/CD </tag>
-            
             <tag> 自动化 </tag>
             
             <tag> Jenkins </tag>
+            
+            <tag> CI/CD </tag>
             
         </tags>
       
@@ -109,9 +136,9 @@
       
         <tags>
             
-            <tag> AWS </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> AWS </tag>
             
             <tag> Redis </tag>
             
@@ -137,6 +164,8 @@
       
       
         <tags>
+            
+            <tag> Operation Manual </tag>
             
             <tag> Linux </tag>
             
@@ -193,6 +222,8 @@
       
       
         <tags>
+            
+            <tag> Operation Manual </tag>
             
             <tag> AWS </tag>
             
@@ -385,9 +416,9 @@
       
         <tags>
             
-            <tag> Mysql </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Mysql </tag>
             
         </tags>
       
@@ -939,9 +970,9 @@
             
             <tag> Devops </tag>
             
-            <tag> CI/CD </tag>
-            
             <tag> 自动化 </tag>
+            
+            <tag> CI/CD </tag>
             
         </tags>
       
@@ -1260,9 +1291,9 @@
       
         <tags>
             
-            <tag> Mysql </tag>
-            
             <tag> Redis </tag>
+            
+            <tag> Mysql </tag>
             
             <tag> Docker </tag>
             
@@ -1543,13 +1574,13 @@
             
             <tag> Devops </tag>
             
-            <tag> 敏捷开发 </tag>
-            
-            <tag> 敏捷部署 </tag>
+            <tag> 自动化 </tag>
             
             <tag> CI/CD </tag>
             
-            <tag> 自动化 </tag>
+            <tag> 敏捷开发 </tag>
+            
+            <tag> 敏捷部署 </tag>
             
         </tags>
       
@@ -1653,9 +1684,9 @@
       
         <tags>
             
-            <tag> Mysql </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Mysql </tag>
             
         </tags>
       
