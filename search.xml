@@ -136,11 +136,11 @@
       
         <tags>
             
+            <tag> Operation Manual </tag>
+            
             <tag> AWS </tag>
             
             <tag> Redis </tag>
-            
-            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -223,13 +223,13 @@
       
         <tags>
             
+            <tag> Operation Manual </tag>
+            
             <tag> AWS </tag>
             
             <tag> RDS </tag>
             
             <tag> Mysql </tag>
-            
-            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -337,9 +337,9 @@
       
         <tags>
             
-            <tag> Redis </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Redis </tag>
             
         </tags>
       
@@ -416,9 +416,9 @@
       
         <tags>
             
-            <tag> Mysql </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Mysql </tag>
             
         </tags>
       
@@ -939,11 +939,11 @@
             
             <tag> Docker </tag>
             
+            <tag> Devops </tag>
+            
             <tag> Linux </tag>
             
             <tag> 容器 </tag>
-            
-            <tag> Devops </tag>
             
         </tags>
       
@@ -1001,11 +1001,11 @@
             
             <tag> Docker </tag>
             
+            <tag> Devops </tag>
+            
             <tag> Linux </tag>
             
             <tag> 容器 </tag>
-            
-            <tag> Devops </tag>
             
         </tags>
       
@@ -1030,9 +1030,9 @@
       
         <tags>
             
-            <tag> Helm </tag>
-            
             <tag> Kubernetes </tag>
+            
+            <tag> Helm </tag>
             
             <tag> 阿里云 </tag>
             
@@ -1148,11 +1148,11 @@
             
             <tag> Docker </tag>
             
+            <tag> Devops </tag>
+            
             <tag> Linux </tag>
             
             <tag> 容器 </tag>
-            
-            <tag> Devops </tag>
             
         </tags>
       
@@ -1326,11 +1326,11 @@
             
             <tag> Docker </tag>
             
+            <tag> Devops </tag>
+            
             <tag> Linux </tag>
             
             <tag> 容器 </tag>
-            
-            <tag> Devops </tag>
             
         </tags>
       
@@ -1684,9 +1684,9 @@
       
         <tags>
             
-            <tag> Mysql </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Mysql </tag>
             
         </tags>
       
