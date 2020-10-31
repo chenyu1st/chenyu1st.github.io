@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>NVIDIA不能正常工作问题汇总</title>
+      <link href="/2020/10/31/bug/nvidia-reboot/"/>
+      <url>/2020/10/31/bug/nvidia-reboot/</url>
+      
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p><hr><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>公司搬家需要关机所有服务器后再开机，其中遇到了不少问题，这期先分享下GPU服务器启动报错的问题</p><h1 id="问题归纳"><a href="#问题归纳" class="headerlink" title="问题归纳"></a>问题归纳</h1><h2 id="问题一-安装meshroom报错"><a href="#问题一-安装meshroom报错" class="headerlink" title="问题一 安装meshroom报错"></a>问题一 安装meshroom报错</h2><p>安装meshroom时报错了一个与cuda相关的问题，需要更新版本</p><p>解决办法</p><p>sudo apt remove(purge) nvidia-*<br>sudo reboot</p><h2 id="问题二-黑屏"><a href="#问题二-黑屏" class="headerlink" title="问题二 黑屏"></a>问题二 黑屏</h2><p>重启时无法进入登录页,黑屏</p><p>初步判断与显卡驱动有关</p><h3 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h3><p>在/etc/default/grub配置文件中添加nomodeset选项，意思是不加载视频驱动</p><p>sudo vim /etc/default/grub<br>在”quiet splash” 后添加 “nomodeset”参数，如下</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">GRUB_DEFAULT&#x3D;&quot;Advanced options for Ubuntu&gt;Ubuntu, with Linux 4.15.0-20-generic&quot;</span><br><span class="line">GRUB_TIMEOUT_STYLE&#x3D;hidden</span><br><span class="line">GRUB_TIMEOUT&#x3D;10</span><br><span class="line">GRUB_DISTRIBUTOR&#x3D;&#96;lsb_release -i -s 2&gt; &#x2F;dev&#x2F;null || echo Debian&#96;</span><br><span class="line">GRUB_CMDLINE_LINUX_DEFAULT&#x3D;&quot;quiet splash nomodeset&quot;</span><br><span class="line">GRUB_CMDLINE_LINUX&#x3D;&quot;&quot;</span><br></pre></td></tr></table></figure><p>sudo update-grub<br>sudo reboot</p><h3 id="此时可以进入登页面，但是没有加载驱动的情况下，图形界面很卡"><a href="#此时可以进入登页面，但是没有加载驱动的情况下，图形界面很卡" class="headerlink" title="此时可以进入登页面，但是没有加载驱动的情况下，图形界面很卡"></a>此时可以进入登页面，但是没有加载驱动的情况下，图形界面很卡</h3><blockquote><p><a href="https://blog.mtkfan.com/post-431.html" target="_blank" rel="noopener">https://blog.mtkfan.com/post-431.html</a><br><a href="https://zhengdao.github.io/2018/10/09/switch-ubuntu-linux-kernel/" target="_blank" rel="noopener">https://zhengdao.github.io/2018/10/09/switch-ubuntu-linux-kernel/</a></p></blockquote><h3 id="调整内核的启动顺序"><a href="#调整内核的启动顺序" class="headerlink" title="调整内核的启动顺序"></a>调整内核的启动顺序</h3><p>因为ubuntu内核会自动更新，更新后nvidia-smi的驱动就失效了。需要降低linux内核版本。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1. 查看启动内核的菜单</span><br><span class="line">   grep menuentry &#x2F;boot&#x2F;grub&#x2F;grub.cfg</span><br><span class="line">2. 修改grub文件的启动配置</span><br><span class="line">   sudo vim &#x2F;etc&#x2F;default&#x2F;grub </span><br><span class="line">   修改GRUB_DEFAULT&#x3D;0的值为</span><br><span class="line">   GRUB_DEFAULT&#x3D;&quot;Advanced options for Ubuntu&gt;Ubuntu, with Linux 5.3.0-28-generic&quot;</span><br><span class="line">3. sudo update-grub</span><br><span class="line">4. sudo reboot</span><br></pre></td></tr></table></figure><h2 id="问题三-The-system-is-running-in-low-graphics-mode"><a href="#问题三-The-system-is-running-in-low-graphics-mode" class="headerlink" title="问题三 The system is running in low-graphics mode"></a>问题三 The system is running in low-graphics mode</h2><p>开机显示The system is running in low-graphics mode,但是不黑屏</p><p>这个是ubuntu系统可能存在的问题</p><p>解决方法</p><p>不用管提示，直接按 ctrl+alt+F1，强行进入命令输入的模式</p><p>输入用户名密码</p><p>输入以下命令:</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd &#x2F;etc&#x2F;X11 </span><br><span class="line">sudo cp xorg.conf.failsafe xorg.conf </span><br><span class="line">sudo reboot</span><br></pre></td></tr></table></figure><p>如果这个方法也不行</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo reboot</span><br></pre></td></tr></table></figure><h2 id="问题四-开机启动都正常，但是英伟达不工作"><a href="#问题四-开机启动都正常，但是英伟达不工作" class="headerlink" title="问题四 开机启动都正常，但是英伟达不工作"></a>问题四 开机启动都正常，但是英伟达不工作</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nvidia-smi</span><br><span class="line">NVIDIA-SMI has failed because it couldn&#39;t communicate with the NVIDIA driver. Make sure that the latest NVIDIA driver is installed and running.</span><br></pre></td></tr></table></figure><p>google之后发现这个问题是因为为ubutnu内核升级了，新版本内核和显卡驱动不匹配出现了上面的问题</p><p>这个时候不需要回退内核，毕竟都更新了，直接让dkms(Dynamic Kernel ModuleSupport)重新生成对应nvidia的驱动模块</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install -y dkms</span><br><span class="line">whereis nvidia</span><br><span class="line">nvidia: &#x2F;usr&#x2F;lib&#x2F;nvidia &#x2F;usr&#x2F;share&#x2F;nvidia &#x2F;usr&#x2F;src&#x2F;nvidia-430.64&#x2F;nvidia</span><br><span class="line">sudo dkms install -m nvidia -v 430.64</span><br><span class="line">nvidia-smi</span><br><span class="line">+-----------------------------------------------------------------------------+</span><br><span class="line">| NVIDIA-SMI 430.64       Driver Version: 430.64       CUDA Version: 10.1     |</span><br><span class="line">|-------------------------------+----------------------+----------------------+</span><br><span class="line">| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |</span><br><span class="line">| Fan  Temp  Perf  Pwr:Usage&#x2F;Cap|         Memory-Usage | GPU-Util  Compute M. |</span><br><span class="line">|&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;|</span><br><span class="line">|   0  GeForce RTX 208...  Off  | 00000000:AF:00.0 Off |                  N&#x2F;A |</span><br><span class="line">| 43%   38C    P0    N&#x2F;A &#x2F;  N&#x2F;A |      0MiB &#x2F; 11016MiB |      0%      Default |</span><br><span class="line">+-------------------------------+----------------------+----------------------+</span><br><span class="line">                                                                               </span><br><span class="line">+-----------------------------------------------------------------------------+</span><br><span class="line">| Processes:                                                       GPU Memory |</span><br><span class="line">|  GPU       PID   Type   Process name                             Usage      |</span><br><span class="line">|&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;|</span><br><span class="line">|  No running processes found                                                 |</span><br><span class="line">+-----------------------------------------------------------------------------+</span><br></pre></td></tr></table></figure><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>以上问题均为解决各自报错的一种途径，没有绝对的方法，出现类似问题的处理方法仅供参考</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> NVIDIA </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> NVIDIA </tag>
+            
+            <tag> Ubuntu </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>配置企业级路由器VPN功能</title>
       <link href="/2020/10/31/vpn/vpn/"/>
       <url>/2020/10/31/vpn/vpn/</url>
@@ -45,9 +72,9 @@
       
         <tags>
             
-            <tag> Gitlab </tag>
-            
             <tag> CI/CD </tag>
+            
+            <tag> Gitlab </tag>
             
         </tags>
       
@@ -182,11 +209,11 @@
       
         <tags>
             
-            <tag> CI/CD </tag>
-            
             <tag> Devops </tag>
             
             <tag> 自动化 </tag>
+            
+            <tag> CI/CD </tag>
             
             <tag> Jenkins </tag>
             
@@ -240,9 +267,9 @@
       
         <tags>
             
-            <tag> AWS </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> AWS </tag>
             
             <tag> Redis </tag>
             
@@ -300,9 +327,9 @@
             
             <tag> AWS </tag>
             
-            <tag> ElastiCache </tag>
-            
             <tag> Redis </tag>
+            
+            <tag> ElastiCache </tag>
             
         </tags>
       
@@ -327,13 +354,13 @@
       
         <tags>
             
-            <tag> AWS </tag>
-            
             <tag> Operation Manual </tag>
             
-            <tag> RDS </tag>
-            
             <tag> Mysql </tag>
+            
+            <tag> AWS </tag>
+            
+            <tag> RDS </tag>
             
         </tags>
       
@@ -383,11 +410,11 @@
       
         <tags>
             
+            <tag> Mysql </tag>
+            
             <tag> AWS </tag>
             
             <tag> RDS </tag>
-            
-            <tag> Mysql </tag>
             
         </tags>
       
@@ -1045,9 +1072,9 @@
             
             <tag> Linux </tag>
             
-            <tag> Devops </tag>
-            
             <tag> 容器 </tag>
+            
+            <tag> Devops </tag>
             
         </tags>
       
@@ -1072,11 +1099,11 @@
       
         <tags>
             
-            <tag> CI/CD </tag>
-            
             <tag> Devops </tag>
             
             <tag> 自动化 </tag>
+            
+            <tag> CI/CD </tag>
             
         </tags>
       
@@ -1107,9 +1134,9 @@
             
             <tag> Linux </tag>
             
-            <tag> Devops </tag>
-            
             <tag> 容器 </tag>
+            
+            <tag> Devops </tag>
             
         </tags>
       
@@ -1254,9 +1281,9 @@
             
             <tag> Linux </tag>
             
-            <tag> Devops </tag>
-            
             <tag> 容器 </tag>
+            
+            <tag> Devops </tag>
             
         </tags>
       
@@ -1335,9 +1362,9 @@
       
         <tags>
             
-            <tag> Redis </tag>
-            
             <tag> Docker </tag>
+            
+            <tag> Redis </tag>
             
             <tag> Nacos </tag>
             
@@ -1397,9 +1424,9 @@
             
             <tag> Mysql </tag>
             
-            <tag> Redis </tag>
-            
             <tag> Docker </tag>
+            
+            <tag> Redis </tag>
             
             <tag> Mongodb </tag>
             
@@ -1432,9 +1459,9 @@
             
             <tag> Linux </tag>
             
-            <tag> Devops </tag>
-            
             <tag> 容器 </tag>
+            
+            <tag> Devops </tag>
             
         </tags>
       
@@ -1660,6 +1687,39 @@
     
     
     <entry>
+      <title>跟我学Devops之思想篇（一）</title>
+      <link href="/2020/05/03/devops/devops-idea-1/"/>
+      <url>/2020/05/03/devops/devops-idea-1/</url>
+      
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第一家互联网公司学习的内容</p><hr><h1 id="Devops简介"><a href="#Devops简介" class="headerlink" title="Devops简介"></a>Devops简介</h1><p>DevOps（Development和Operations的组合词）是一组过程、方法与系统的统称，用于促进开发（应用程序/软件工程）、技术运营和质量保障（QA）部门之间的沟通、协作与整合。</p><p>它是一种重视“软件开发人员（Dev）”和“IT运维技术人员（Ops）”之间沟通合作的文化、运动或惯例。透过自动化“软件交付”和“架构变更”的流程，来使得构建、测试、发布软件能够更加地快捷、频繁和可靠。</p><p>它的出现是由于软件行业日益清晰地认识到：为了按时交付软件产品和服务，开发和运维工作必须紧密合作。</p><p>下面用一张图来表示Devops的思想<br><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/devops.jpg"  alt="devopsjpg"></p><h2 id="敏捷开发"><a href="#敏捷开发" class="headerlink" title="敏捷开发"></a>敏捷开发</h2><p>敏捷开发以用户的需求进化为核心，采用迭代、循序渐进的方法进行软件开发。在敏捷开发中，软件项目在构建初期被切分成多个子项目，各个子项目的成果都经过测试，具备可视、可集成和可运行使用的特征。换言之，就是把一个大项目分为多个相互联系，但也可独立运行的小项目，并分别完成，在此过程中软件一直处于可使用状态。</p><h2 id="敏捷部署"><a href="#敏捷部署" class="headerlink" title="敏捷部署"></a>敏捷部署</h2><p>敏捷部署是通过自动化工具或脚本来达到项目自动发布的目的。强大的部署自动化手段确保部署任务的可重复性、减少部署出错的可能性。</p><h1 id="个人从工作中理解什么叫Devops"><a href="#个人从工作中理解什么叫Devops" class="headerlink" title="个人从工作中理解什么叫Devops"></a>个人从工作中理解什么叫Devops</h1><p>我们公司的项目应用大多以Java为主，用的微服务架构。那么在实际项目中应用到devops中是怎么样的呢？详情可以看下图。<br><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Devops/CICD.png"  alt="devopsjpg"></p><h2 id="整个流程可以细分成3个阶段"><a href="#整个流程可以细分成3个阶段" class="headerlink" title="整个流程可以细分成3个阶段"></a>整个流程可以细分成3个阶段</h2><h3 id="开发阶段"><a href="#开发阶段" class="headerlink" title="开发阶段"></a>开发阶段</h3><ul><li>开发团队提交代码到gitlab的dev分支</li><li>从gitlab拉去dev分支代码</li><li>单元测试</li><li>maven编译打成jar包</li><li>sonar质量检查</li><li>Dockerfile将jar包打成image</li><li>将image推送到Harbor仓库</li><li>开发环境服务器拉取Harbor仓库image并创建容器</li><li>验证相关功能正常</li></ul><h3 id="测试阶段"><a href="#测试阶段" class="headerlink" title="测试阶段"></a>测试阶段</h3><ul><li>测试环境服务器拉取Harbor仓库image并创建容器</li><li>验证相关功能正常</li><li>通知开发合并分支到master分支</li><li>从gitlab拉去master分支代码</li><li>单元测试</li><li>maven编译打成jar包</li><li>sonar质量检查</li><li>Dockerfile将jar包打成image</li><li>将image推送到Harbor仓库</li><li>测试环境服务器拉取Harbor仓库image并创建容器</li><li>验证相关功能正常</li></ul><h3 id="投产阶段"><a href="#投产阶段" class="headerlink" title="投产阶段"></a>投产阶段</h3><ul><li>将Harbor仓库image推送到生产环境Harbor</li><li>生产环境服务器拉取生产环境Harbor仓库image并滚动发布</li><li>测试、产品人员验收</li></ul><h2 id="细分阶段的好处"><a href="#细分阶段的好处" class="headerlink" title="细分阶段的好处"></a>细分阶段的好处</h2><p>这样分阶段的Devops流程好处在于允许分散开的团队控制他们自己的命运：</p><ul><li>开发人员只用关心自己的分支代码功能、代码质量，不用考虑部署、测试。</li><li>测试人员只用关心开发人员的代码功能、回归、自动化、性能测试等，不用考虑部署流程。</li><li>运维人员只用关心将镜像发布到生产环境，不用考虑，代码功能、测试。</li></ul><p>这样的流水线设计是需要一段时间的，但是设计完成后可以一劳永逸，每个团队都能专注自己的工作。也许以前你是开发，你还需要负责部署、测试；也许以前你是测试，你还需要推送镜像到生产环境；有了Devops后，你只需要在jenkins点下构建按钮，选择环境就可以实现一键发布了，专注自己领域的事有利于提高整个团队的工作效率！</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>作为一个运维人员，当我学习到了Devops思想后就深深的认同这一点：所有的人工操作都要转换成自动化。</p><p>Devops七荣七耻与大家共勉</p><p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Devops/HonorandDisgrace.png"  alt="devops.jpg"></p><hr><p>版权声明：</p><p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 跟我学Devops </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Devops </tag>
+            
+            <tag> 自动化 </tag>
+            
+            <tag> 敏捷开发 </tag>
+            
+            <tag> 敏捷部署 </tag>
+            
+            <tag> CI/CD </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>跟我学Devops之思想篇（二）</title>
       <link href="/2020/05/03/devops/devops-idea-2/"/>
       <url>/2020/05/03/devops/devops-idea-2/</url>
@@ -1681,39 +1741,6 @@
             <tag> 微服务 </tag>
             
             <tag> Rest Api </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>跟我学Devops之思想篇（一）</title>
-      <link href="/2020/05/03/devops/devops-idea-1/"/>
-      <url>/2020/05/03/devops/devops-idea-1/</url>
-      
-        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第一家互联网公司学习的内容</p><hr><h1 id="Devops简介"><a href="#Devops简介" class="headerlink" title="Devops简介"></a>Devops简介</h1><p>DevOps（Development和Operations的组合词）是一组过程、方法与系统的统称，用于促进开发（应用程序/软件工程）、技术运营和质量保障（QA）部门之间的沟通、协作与整合。</p><p>它是一种重视“软件开发人员（Dev）”和“IT运维技术人员（Ops）”之间沟通合作的文化、运动或惯例。透过自动化“软件交付”和“架构变更”的流程，来使得构建、测试、发布软件能够更加地快捷、频繁和可靠。</p><p>它的出现是由于软件行业日益清晰地认识到：为了按时交付软件产品和服务，开发和运维工作必须紧密合作。</p><p>下面用一张图来表示Devops的思想<br><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/devops.jpg"  alt="devopsjpg"></p><h2 id="敏捷开发"><a href="#敏捷开发" class="headerlink" title="敏捷开发"></a>敏捷开发</h2><p>敏捷开发以用户的需求进化为核心，采用迭代、循序渐进的方法进行软件开发。在敏捷开发中，软件项目在构建初期被切分成多个子项目，各个子项目的成果都经过测试，具备可视、可集成和可运行使用的特征。换言之，就是把一个大项目分为多个相互联系，但也可独立运行的小项目，并分别完成，在此过程中软件一直处于可使用状态。</p><h2 id="敏捷部署"><a href="#敏捷部署" class="headerlink" title="敏捷部署"></a>敏捷部署</h2><p>敏捷部署是通过自动化工具或脚本来达到项目自动发布的目的。强大的部署自动化手段确保部署任务的可重复性、减少部署出错的可能性。</p><h1 id="个人从工作中理解什么叫Devops"><a href="#个人从工作中理解什么叫Devops" class="headerlink" title="个人从工作中理解什么叫Devops"></a>个人从工作中理解什么叫Devops</h1><p>我们公司的项目应用大多以Java为主，用的微服务架构。那么在实际项目中应用到devops中是怎么样的呢？详情可以看下图。<br><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Devops/CICD.png"  alt="devopsjpg"></p><h2 id="整个流程可以细分成3个阶段"><a href="#整个流程可以细分成3个阶段" class="headerlink" title="整个流程可以细分成3个阶段"></a>整个流程可以细分成3个阶段</h2><h3 id="开发阶段"><a href="#开发阶段" class="headerlink" title="开发阶段"></a>开发阶段</h3><ul><li>开发团队提交代码到gitlab的dev分支</li><li>从gitlab拉去dev分支代码</li><li>单元测试</li><li>maven编译打成jar包</li><li>sonar质量检查</li><li>Dockerfile将jar包打成image</li><li>将image推送到Harbor仓库</li><li>开发环境服务器拉取Harbor仓库image并创建容器</li><li>验证相关功能正常</li></ul><h3 id="测试阶段"><a href="#测试阶段" class="headerlink" title="测试阶段"></a>测试阶段</h3><ul><li>测试环境服务器拉取Harbor仓库image并创建容器</li><li>验证相关功能正常</li><li>通知开发合并分支到master分支</li><li>从gitlab拉去master分支代码</li><li>单元测试</li><li>maven编译打成jar包</li><li>sonar质量检查</li><li>Dockerfile将jar包打成image</li><li>将image推送到Harbor仓库</li><li>测试环境服务器拉取Harbor仓库image并创建容器</li><li>验证相关功能正常</li></ul><h3 id="投产阶段"><a href="#投产阶段" class="headerlink" title="投产阶段"></a>投产阶段</h3><ul><li>将Harbor仓库image推送到生产环境Harbor</li><li>生产环境服务器拉取生产环境Harbor仓库image并滚动发布</li><li>测试、产品人员验收</li></ul><h2 id="细分阶段的好处"><a href="#细分阶段的好处" class="headerlink" title="细分阶段的好处"></a>细分阶段的好处</h2><p>这样分阶段的Devops流程好处在于允许分散开的团队控制他们自己的命运：</p><ul><li>开发人员只用关心自己的分支代码功能、代码质量，不用考虑部署、测试。</li><li>测试人员只用关心开发人员的代码功能、回归、自动化、性能测试等，不用考虑部署流程。</li><li>运维人员只用关心将镜像发布到生产环境，不用考虑，代码功能、测试。</li></ul><p>这样的流水线设计是需要一段时间的，但是设计完成后可以一劳永逸，每个团队都能专注自己的工作。也许以前你是开发，你还需要负责部署、测试；也许以前你是测试，你还需要推送镜像到生产环境；有了Devops后，你只需要在jenkins点下构建按钮，选择环境就可以实现一键发布了，专注自己领域的事有利于提高整个团队的工作效率！</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>作为一个运维人员，当我学习到了Devops思想后就深深的认同这一点：所有的人工操作都要转换成自动化。</p><p>Devops七荣七耻与大家共勉</p><p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Devops/HonorandDisgrace.png"  alt="devops.jpg"></p><hr><p>版权声明：</p><p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>]]></content>
-      
-      
-      <categories>
-          
-          <category> 跟我学Devops </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> CI/CD </tag>
-            
-            <tag> Devops </tag>
-            
-            <tag> 自动化 </tag>
-            
-            <tag> 敏捷开发 </tag>
-            
-            <tag> 敏捷部署 </tag>
             
         </tags>
       
