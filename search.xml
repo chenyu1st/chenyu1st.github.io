@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>Ubuntu网络基础运维</title>
+      <link href="/2020/11/07/linux/ubuntu-network-manager/"/>
+      <url>/2020/11/07/linux/ubuntu-network-manager/</url>
+      
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p><hr><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>公司由于历史原因，很多服务器和同事的服务器都是安装的Ubuntu，有16.04也有18.04，每个版本差异比较大，这期先总结下网络方面的运维技术</p><h1 id="安装网络运维软件包"><a href="#安装网络运维软件包" class="headerlink" title="安装网络运维软件包"></a>安装网络运维软件包</h1><p>如果你是最小化安装，你需要额外装一些软件包</p><ul><li>traceroute  链路追踪</li><li>net-tools   NET-3网络分发的基础包(包括 arp, hostname, ifconfig, netstat, rarp, route, plipconfig, slattach, mii-tool and iptunnel and ipmaddr)</li><li>telnet      测试IP：端口是否能访问</li></ul><p>安装命令</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install -y traceroute net-tools telnet</span><br></pre></td></tr></table></figure><p>如果出现nothing to do则需要更新apt源</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br></pre></td></tr></table></figure><h1 id="查看网络信息"><a href="#查看网络信息" class="headerlink" title="查看网络信息"></a>查看网络信息</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ip add</span><br><span class="line">ifconfig</span><br><span class="line">nmcli device show</span><br></pre></td></tr></table></figure><h1 id="网络配置"><a href="#网络配置" class="headerlink" title="网络配置"></a>网络配置</h1><h2 id="16-04-server"><a href="#16-04-server" class="headerlink" title="16.04 server"></a>16.04 server</h2><p>配置文件   /etc/network/interfaces </p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sudo vim &#x2F;etc&#x2F;network&#x2F;interfaces </span><br><span class="line">auto ens33 网卡名字</span><br><span class="line">#iface ens33 inet dhcp动态的获取IP地址</span><br><span class="line">iface ens33 inet static 静态的获取IP地址</span><br><span class="line">address 192.168.1.100 设置IP地址</span><br><span class="line">gateway 192.168.1.1 设置网关</span><br><span class="line">netmask 255.255.255.0 设置子网掩码</span><br><span class="line">dns-nameserver 8.8.8.8 设置DNS，域名解析</span><br></pre></td></tr></table></figure><hr><p>运维命令</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl start networking 启动网卡服务</span><br><span class="line">sudo systemctl stop  networking 关闭网卡服务</span><br><span class="line">sudo systemctl restart networking 重启网卡服务</span><br></pre></td></tr></table></figure><h2 id="18-04-server"><a href="#18-04-server" class="headerlink" title="18.04 server"></a>18.04 server</h2><p>配置文件   /etc/netplan/下的一个yaml文件，名字可能各不相同</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">sudo vim &#x2F;etc&#x2F;netplan&#x2F;50-cloud-init.yaml</span><br><span class="line"># Let NetworkManager manage all devices on this system</span><br><span class="line">network:</span><br><span class="line">  version: 2</span><br><span class="line"> # renderer: NetworkManager</span><br><span class="line">  ethernets:</span><br><span class="line">     ens33: #配置的网卡名称,使用ifconfig  查看得到,且必须是空格缩进，netplan只认空格</span><br><span class="line">       dhcp4: no #no-dhcp4关闭 true-dhcp4开启</span><br><span class="line">       addresses: [192.168.1.100&#x2F;24, ] </span><br><span class="line">       gateway4: 192.168.1.1 #设置ipv4的默认网关</span><br><span class="line">       nameservers:  #设置DNS服务器</span><br><span class="line">         addresses: [114.114.114.114,8.8.8.8]  #多个DNS服务器之间用逗号隔开</span><br></pre></td></tr></table></figure><p>注意几个点</p><ul><li>修改权限必须为root</li><li>将/etc/netplan/01-network-manager-all.yaml文件中的renderer: NetworkManager注释，否则netplan命令无法生效</li><li>IP配置信息要按如上格式，使用yaml语法格式，每个配置项使用空格缩进表示层级</li><li>对应配置项后跟着冒号，之后要接个空格，否则netplan命令也会报错</li></ul><hr><p>运维命令</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo netplan apply 应用网卡服务</span><br></pre></td></tr></table></figure><h2 id="desktop"><a href="#desktop" class="headerlink" title="desktop"></a>desktop</h2><p>NetworkManager工具是Ubuntu桌面版的GUI设置工具。</p><p>这个工具推荐直接在GUI上操作，不建议用命令行进行管理，比如Wifi这些配置等。</p><p>当然，这个工具能带有命令行工具：nmcli，如果使用了NetworkManager进行配置网络，那么IP、网关、DNS都可以通过这个工具进行查询。</p><p>如果配置了命令行的网络设置，那么NetworkManager就会失效</p><p>你的所有连接信息都在/etc/NetworkManager/system-connections下</p><p>运维命令</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl start NetworkManager.service</span><br><span class="line">sudo systemctl sttop NetworkManager.service</span><br></pre></td></tr></table></figure><h1 id="DNS配置"><a href="#DNS配置" class="headerlink" title="DNS配置"></a>DNS配置</h1><h2 id="临时添加"><a href="#临时添加" class="headerlink" title="临时添加"></a>临时添加</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo vim &#x2F;etc&#x2F;resolv.conf</span><br><span class="line">添加 nameserver dns服务器的ip</span><br><span class="line">eg：nameserver 114.114.114.114</span><br></pre></td></tr></table></figure><h2 id="永久添加"><a href="#永久添加" class="headerlink" title="永久添加"></a>永久添加</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1.修改对应ubuntu版本的网络配置，上面已经说过，这里不在叙述</span><br><span class="line">2.sudo vim &#x2F;etc&#x2F;hosts</span><br><span class="line">直接加域名解析的地址，格式为： IP  域名</span><br><span class="line">eg：192.168.10.1    baidu.com</span><br><span class="line">保存后，你访问baidu.com就是访问192.168.10.1了</span><br></pre></td></tr></table></figure><h2 id="刷新dns"><a href="#刷新dns" class="headerlink" title="刷新dns"></a>刷新dns</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemd-resolve --flush-caches</span><br></pre></td></tr></table></figure><h1 id="route-查看路由表"><a href="#route-查看路由表" class="headerlink" title="route 查看路由表"></a>route 查看路由表</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">route</span><br></pre></td></tr></table></figure><h1 id="ss-netstat-查看端口"><a href="#ss-netstat-查看端口" class="headerlink" title="ss/netstat 查看端口"></a>ss/netstat 查看端口</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ss -lnt</span><br><span class="line">netstat -nap</span><br></pre></td></tr></table></figure><h1 id="ping-测试主机通信"><a href="#ping-测试主机通信" class="headerlink" title="ping 测试主机通信"></a>ping 测试主机通信</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ping IP&#x2F;域名</span><br></pre></td></tr></table></figure><p>ICMP全称为 Internet 控制报文协议（Internet Control Message Protocol）。它是一种面向无连接的协议，属于TCP/IP协议中的网络层</p><p>ping 命令会发送一份ICMP回显请求报文给目标主机，并等待目标主机返回ICMP回显应答。因为ICMP协议会要求目标主机在收到消息之后，必须返回ICMP应答消息给源主机，如果源主机在一定时间内收到了目标主机的应答，则表明两台主机之间网络是可达的。</p><p>但是Ping不通并不一定代表网络不通。ping是基于ICMP协议的命令，就是你发出去一个数据包，对方收到后返给你一个！就好比声纳。这个协议是可以禁止的！禁止后，如果你ping对方，对方收到后就不回馈给你，这样你就显示无法ping通，但实际你们还是连着的！</p><h1 id="telnet-测试IP-域名-端口是否通信"><a href="#telnet-测试IP-域名-端口是否通信" class="headerlink" title="telnet 测试IP/域名:端口是否通信"></a>telnet 测试IP/域名:端口是否通信</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">telnet IP&#x2F;域名:端口</span><br><span class="line"></span><br><span class="line"># 测试192.168.20.150的443端口是否开放</span><br><span class="line">telnet 192.168.20.150 443</span><br><span class="line">Trying 192.168.20.150...</span><br><span class="line"></span><br><span class="line">一直trying则说明不行</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">telnet 192.168.20.150 80</span><br><span class="line">Trying 192.168.20.150...</span><br><span class="line">Connected to 192.168.20.150.</span><br><span class="line">Escape character is &#39;^]&#39;.</span><br><span class="line"></span><br><span class="line">成功</span><br></pre></td></tr></table></figure><p>telnet是OSI模型中基于TCP协议之上应用层的一种协议，是一个通过创建虚拟终端提供连接到远程主机终端仿真的TCP/IP协议。</p><p>现在telnet用于测试IP：端口的通信较多，本质上telnet是登陆服务器的！服务没禁止就能登陆，一般来说会比ping更容易测试主机之间的通信问题（端口通信）</p><h1 id="链路追踪"><a href="#链路追踪" class="headerlink" title="链路追踪"></a>链路追踪</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">traceroute ip</span><br></pre></td></tr></table></figure><h1 id="最原汁原味的配置网络信息"><a href="#最原汁原味的配置网络信息" class="headerlink" title="最原汁原味的配置网络信息"></a>最原汁原味的配置网络信息</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#设置IP和子网掩码</span><br><span class="line">sudo ifconfig ens33 192.168.20.100 netmask 255.255.255.0</span><br><span class="line">#设置网关</span><br><span class="line">sudo route add default gw 192.168.20.1</span><br><span class="line">#设置DNS</span><br><span class="line">sudo echo &quot;nameserver 192.168.20.1&quot; &gt;&gt; &#x2F;etc&#x2F;resolv.conf</span><br></pre></td></tr></table></figure><h1 id="问题梳理"><a href="#问题梳理" class="headerlink" title="问题梳理"></a>问题梳理</h1><h2 id="关于desktop的网络配置"><a href="#关于desktop的网络配置" class="headerlink" title="关于desktop的网络配置"></a>关于desktop的网络配置</h2><p>在Desktop版本中，除了可以修改 /etc/network/interfaces 来进行配置以外；还可以直接在network-manager中配置。通过 interfaces修改的方法参照Server版本。network-manager的配置和直观，按照提示一步一步操作即可，有兴趣的朋友，可以自行Google或者Baidu。</p><p>但如果修改了interfaces，又配置了network-manager（以下简称nm），你就会发现出现了一些莫名其妙的问题：</p><p>1，interfaces和 nm中的网络设置不一样，系统实际的IP是哪个？</p><p>2，有时候莫名其妙的，界面右上角的网络连接图标就丢失了。</p><p>3，明明在nm中配置了正确的网络设置，为什么就上不了网呢？</p><p>其实，我们要知道 interfaces和 nm之间的关系，这些问题就不难解释了。</p><p>首先，当系统内没有第三方网络管理工具（比如nm）时，系统默认使用interfaces文件内的参数进行网络配置。（就像Server版本一样）</p><p>接着，当系统内安装了 nm之后，nm默认接管了系统的网络配置，使用nm 自己的网络配置参数来进行配置。</p><p>但是，如果用户在安装nm之后（Desktop版本默认安装了nm），自己手动修改了interfaces 文件，那nm 就自动停止对系统网络的管理，系统改使用interfaces 文件内的参数进行网络配置。</p><p>此时，再去修改nm 内的参数，不影响系统实际的网络配置。若要让nm 内的配置生效，必须重新启用nm 接管系统的网络配置。</p><p>现在知道了两者之间的工作关系，再看上面的三个问题：</p><p>1，要看nm是否接管，如果没有接管，系统实际的IP设置以interfaces 中的为准。反之，以nm 中的为准。</p><p>2，当nm 停止接管的时候，网络连接图标就丢失了。</p><p>3，同样是接管的问题。</p><p>如果用户希望在Desktop版本中，直接使用interfaces 进行网络配置，那可以关闭network-manager：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl stop network-manager</span><br></pre></td></tr></table></figure><p>vim /etc/network/interfaces修改之后</p><p>确保/etc/NetworkManager/Network-manager.conf内的managed=false(系统默认是false，但是你更改过的话需要改这里)</p><p>如果希望能继续使用nm 来进行网络配置，则需要进行如下操作：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl stop network-manager # 停止 nm服务</span><br><span class="line">sudo rm &#x2F;var&#x2F;lib&#x2F;NetworkManager&#x2F;NetworkManager.state # 移除nm 的状态文件</span><br><span class="line">sudo vim &#x2F;etc&#x2F;NetworkManager&#x2F;Network-manager.conf # 打开nm 的配置文件(managed&#x3D;true)</span><br><span class="line">sudo systemctl start network-manager</span><br></pre></td></tr></table></figure><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://www.cnblogs.com/jins-note/p/10153374.html" target="_blank" rel="noopener">Ubuntu中网络配置interfaces与界面网络配置NetworkManager</a></p><hr><p>版权声明：</p><p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Linux </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Ubuntu </tag>
+            
+            <tag> Network </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>NVIDIA不能正常工作问题汇总</title>
       <link href="/2020/10/31/bug/nvidia-reboot/"/>
       <url>/2020/10/31/bug/nvidia-reboot/</url>
@@ -72,9 +99,9 @@
       
         <tags>
             
-            <tag> CI/CD </tag>
-            
             <tag> Gitlab </tag>
+            
+            <tag> CI/CD </tag>
             
         </tags>
       
@@ -267,9 +294,9 @@
       
         <tags>
             
-            <tag> Operation Manual </tag>
-            
             <tag> AWS </tag>
+            
+            <tag> Operation Manual </tag>
             
             <tag> Redis </tag>
             
@@ -327,9 +354,9 @@
             
             <tag> AWS </tag>
             
-            <tag> Redis </tag>
-            
             <tag> ElastiCache </tag>
+            
+            <tag> Redis </tag>
             
         </tags>
       
@@ -354,13 +381,13 @@
       
         <tags>
             
-            <tag> Operation Manual </tag>
-            
-            <tag> Mysql </tag>
-            
             <tag> AWS </tag>
             
+            <tag> Operation Manual </tag>
+            
             <tag> RDS </tag>
+            
+            <tag> Mysql </tag>
             
         </tags>
       
@@ -410,11 +437,11 @@
       
         <tags>
             
-            <tag> Mysql </tag>
-            
             <tag> AWS </tag>
             
             <tag> RDS </tag>
+            
+            <tag> Mysql </tag>
             
         </tags>
       
@@ -1070,11 +1097,11 @@
             
             <tag> Docker </tag>
             
+            <tag> Devops </tag>
+            
             <tag> Linux </tag>
             
             <tag> 容器 </tag>
-            
-            <tag> Devops </tag>
             
         </tags>
       
@@ -1132,11 +1159,11 @@
             
             <tag> Docker </tag>
             
+            <tag> Devops </tag>
+            
             <tag> Linux </tag>
             
             <tag> 容器 </tag>
-            
-            <tag> Devops </tag>
             
         </tags>
       
@@ -1279,11 +1306,11 @@
             
             <tag> Docker </tag>
             
+            <tag> Devops </tag>
+            
             <tag> Linux </tag>
             
             <tag> 容器 </tag>
-            
-            <tag> Devops </tag>
             
         </tags>
       
@@ -1362,9 +1389,9 @@
       
         <tags>
             
-            <tag> Docker </tag>
-            
             <tag> Redis </tag>
+            
+            <tag> Docker </tag>
             
             <tag> Nacos </tag>
             
@@ -1383,7 +1410,7 @@
       <link href="/2020/06/04/linux/centos7-install/"/>
       <url>/2020/06/04/linux/centos7-install/</url>
       
-        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第一家互联网公司学习的内容</p><hr><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>最近公司需要安装很多虚拟机，一想到普通的Centos需要安装很多额外的东西就头痛，决定还是做一个优化过的镜像，以后直接用这个镜像做虚拟机的操作系统可以节省大量时间。</p><h1 id="选择虚拟化系统"><a href="#选择虚拟化系统" class="headerlink" title="选择虚拟化系统"></a>选择虚拟化系统</h1><p>我使用的VMware Esxi或VMware Workstation Pro</p><h1 id="安装centos7-最小化系统"><a href="#安装centos7-最小化系统" class="headerlink" title="安装centos7 最小化系统"></a>安装centos7 最小化系统</h1><p>下载镜像  <a href="http://mirrors.aliyun.com/centos/7/isos/x86_64/" target="_blank" rel="noopener">阿里云centos镜像</a></p><p>如果是安装到虚拟机里直接看<br><a href="https://blog.csdn.net/capricorn90/article/details/52556174" target="_blank" rel="noopener">CentOS 7 最小化安装</a></p><p>里面注意几点就行：</p><ul><li>时区调为中国上海</li><li>安装语言选择英语（别整中文了，多学点英语没有什么不好）</li><li>磁盘如果懒得划分就按默认标准即可</li><li>密码一定要设置</li></ul><h1 id="制作镜像模板"><a href="#制作镜像模板" class="headerlink" title="制作镜像模板"></a>制作镜像模板</h1><p>进入操作系统</p><h2 id="改主机名-重新连接生效"><a href="#改主机名-重新连接生效" class="headerlink" title="改主机名(重新连接生效)"></a>改主机名(重新连接生效)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hostnamectl set-hostname xxx</span><br></pre></td></tr></table></figure><h2 id="改yum源为阿里源-个人习惯，不喜勿喷"><a href="#改yum源为阿里源-个人习惯，不喜勿喷" class="headerlink" title="改yum源为阿里源(个人习惯，不喜勿喷)"></a>改yum源为阿里源(个人习惯，不喜勿喷)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl -o &#x2F;etc&#x2F;yum.repos.d&#x2F;CentOS-Base.repo http:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;repo&#x2F;Centos-7.repo</span><br><span class="line">yum clean all</span><br><span class="line">yum makecache</span><br></pre></td></tr></table></figure><h2 id="yum安装插件-根据喜好增删"><a href="#yum安装插件-根据喜好增删" class="headerlink" title="yum安装插件(根据喜好增删)"></a>yum安装插件(根据喜好增删)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y lrzsz vim wget ntpdate yum-utils zip unzip tree  gcc gcc-c++  epel-release</span><br></pre></td></tr></table></figure><h2 id="改dns-如果需要添加内网域名的话，否则可以不用这一步"><a href="#改dns-如果需要添加内网域名的话，否则可以不用这一步" class="headerlink" title="改dns(如果需要添加内网域名的话，否则可以不用这一步)"></a>改dns(如果需要添加内网域名的话，否则可以不用这一步)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vim &#x2F;etc&#x2F;resolv.conf</span><br><span class="line">添加dns</span><br><span class="line">nameserver 8.8.8.8</span><br><span class="line">nameserver xxxx</span><br></pre></td></tr></table></figure><h2 id="改密码"><a href="#改密码" class="headerlink" title="改密码"></a>改密码</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo    &#39;123456&#39;    |     passwd   --stdin  root</span><br></pre></td></tr></table></figure><p>echo的值为密码</p><h2 id="关闭防火墙"><a href="#关闭防火墙" class="headerlink" title="关闭防火墙"></a>关闭防火墙</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop firewalld</span><br><span class="line">systemctl disable firewalld</span><br><span class="line">setenforce 0</span><br><span class="line">sed -i &quot;s&#x2F;SELINUX&#x3D;enforcing&#x2F;SELINUX&#x3D;disabled&#x2F;g&quot; &#x2F;etc&#x2F;selinux&#x2F;config</span><br></pre></td></tr></table></figure><h2 id="时间同步"><a href="#时间同步" class="headerlink" title="时间同步"></a>时间同步</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">crontab -e</span><br><span class="line">#一小时同步一次</span><br><span class="line">0 *&#x2F;1 * * * &#x2F;usr&#x2F;sbin&#x2F;ntpdate ntp1.aliyun.com &gt; &#x2F;dev&#x2F;null 2&gt;&amp;1; &#x2F;sbin&#x2F;hwclock -w</span><br></pre></td></tr></table></figure><h2 id="安装docker-不会还有人不装docker吧"><a href="#安装docker-不会还有人不装docker吧" class="headerlink" title="安装docker(不会还有人不装docker吧)"></a>安装docker(不会还有人不装docker吧)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">yum install -y yum-utils #如果在前面已经安装了则不用执行这个命令</span><br><span class="line">yum-config-manager \</span><br><span class="line">    --add-repo \</span><br><span class="line">    https:&#x2F;&#x2F;download.docker.com&#x2F;linux&#x2F;centos&#x2F;docker-ce.repo</span><br><span class="line"></span><br><span class="line">yum install -y docker-ce docker-ce-cli containerd.io</span><br><span class="line"></span><br><span class="line">vim &#x2F;etc&#x2F;docker&#x2F;daemon.json</span><br><span class="line">#添加国内镜像加速</span><br><span class="line">&#123;</span><br><span class="line">  &quot;registry-mirrors&quot;: [&quot;https:&#x2F;&#x2F;wghlmi3i.mirror.aliyuncs.com&quot;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h2 id="提高资源限制上限-重新连接生效"><a href="#提高资源限制上限-重新连接生效" class="headerlink" title="提高资源限制上限(重新连接生效)"></a>提高资源限制上限(重新连接生效)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;* soft nofile 65536&quot; &gt;&gt; &#x2F;etc&#x2F;security&#x2F;limits.conf         </span><br><span class="line">echo &quot;* hard nofile 65536&quot; &gt;&gt; &#x2F;etc&#x2F;security&#x2F;limits.conf</span><br></pre></td></tr></table></figure><h2 id="关闭Swap"><a href="#关闭Swap" class="headerlink" title="关闭Swap"></a>关闭Swap</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">swapoff -a</span><br><span class="line">free -h</span><br><span class="line">              total        used        free      shared  buff&#x2F;cache   available</span><br><span class="line">Mem:           3.7G        132M        3.4G         11M        173M        3.3G</span><br><span class="line">Swap:            0B          0B          0B</span><br></pre></td></tr></table></figure><h2 id="内核调优"><a href="#内核调优" class="headerlink" title="内核调优"></a>内核调优</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vim &#x2F;etc&#x2F;sysctl.conf </span><br><span class="line">vm.swappiness &#x3D; 1</span><br><span class="line">net.ipv6.conf.all.disable_ipv6 &#x3D; 1</span><br><span class="line"></span><br><span class="line">sysctl -p</span><br></pre></td></tr></table></figure><h1 id="保存镜像"><a href="#保存镜像" class="headerlink" title="保存镜像"></a>保存镜像</h1><p>进入虚拟化控制台，导出为 OVF 格式即可</p><hr><p>版权声明：</p><p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>]]></content>
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第一家互联网公司学习的内容</p><hr><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>最近公司需要安装很多虚拟机，一想到普通的Centos需要安装很多额外的东西就头痛，决定还是做一个优化过的镜像，以后直接用这个镜像做虚拟机的操作系统可以节省大量时间。</p><h1 id="选择虚拟化系统"><a href="#选择虚拟化系统" class="headerlink" title="选择虚拟化系统"></a>选择虚拟化系统</h1><p>我使用的VMware Esxi或VMware Workstation Pro</p><h1 id="安装centos7-最小化系统"><a href="#安装centos7-最小化系统" class="headerlink" title="安装centos7 最小化系统"></a>安装centos7 最小化系统</h1><p>下载镜像  <a href="http://mirrors.aliyun.com/centos/7/isos/x86_64/" target="_blank" rel="noopener">阿里云centos镜像</a></p><p>如果是安装到虚拟机里直接看<br><a href="https://blog.csdn.net/capricorn90/article/details/52556174" target="_blank" rel="noopener">CentOS 7 最小化安装</a></p><p>里面注意几点就行：</p><ul><li>时区调为中国上海</li><li>安装语言选择英语（别整中文了，多学点英语没有什么不好）</li><li>磁盘如果懒得划分就按默认标准即可</li><li>密码一定要设置</li></ul><h1 id="制作镜像模板"><a href="#制作镜像模板" class="headerlink" title="制作镜像模板"></a>制作镜像模板</h1><p>进入操作系统</p><h2 id="改主机名-重新连接生效"><a href="#改主机名-重新连接生效" class="headerlink" title="改主机名(重新连接生效)"></a>改主机名(重新连接生效)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hostnamectl set-hostname xxx</span><br></pre></td></tr></table></figure><h2 id="改yum源为阿里源-个人习惯，不喜勿喷"><a href="#改yum源为阿里源-个人习惯，不喜勿喷" class="headerlink" title="改yum源为阿里源(个人习惯，不喜勿喷)"></a>改yum源为阿里源(个人习惯，不喜勿喷)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">yum install -y epel-release  wget</span><br><span class="line">curl -o &#x2F;etc&#x2F;yum.repos.d&#x2F;CentOS-Base.repo http:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;repo&#x2F;Centos-7.repo</span><br><span class="line">mv &#x2F;etc&#x2F;yum.repos.d&#x2F;epel.repo   &#x2F;etc&#x2F;yum.repos.d&#x2F;epel.repo.backup</span><br><span class="line">wget -O &#x2F;etc&#x2F;yum.repos.d&#x2F;epel.repo http:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;repo&#x2F;epel-7.repo</span><br><span class="line">yum clean all</span><br><span class="line">yum makecache</span><br></pre></td></tr></table></figure><h2 id="yum安装插件-根据喜好增删"><a href="#yum安装插件-根据喜好增删" class="headerlink" title="yum安装插件(根据喜好增删)"></a>yum安装插件(根据喜好增删)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y lrzsz vim ntpdate yum-utils zip unzip tree  gcc gcc-c++</span><br></pre></td></tr></table></figure><h2 id="改dns-如果需要添加内网域名的话，否则可以不用这一步"><a href="#改dns-如果需要添加内网域名的话，否则可以不用这一步" class="headerlink" title="改dns(如果需要添加内网域名的话，否则可以不用这一步)"></a>改dns(如果需要添加内网域名的话，否则可以不用这一步)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vim &#x2F;etc&#x2F;resolv.conf</span><br><span class="line">添加dns</span><br><span class="line">nameserver 8.8.8.8</span><br><span class="line">nameserver xxxx</span><br></pre></td></tr></table></figure><h2 id="改密码"><a href="#改密码" class="headerlink" title="改密码"></a>改密码</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo    &#39;123456&#39;    |     passwd   --stdin  root</span><br></pre></td></tr></table></figure><p>echo的值为密码</p><h2 id="关闭防火墙"><a href="#关闭防火墙" class="headerlink" title="关闭防火墙"></a>关闭防火墙</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop firewalld</span><br><span class="line">systemctl disable firewalld</span><br><span class="line">setenforce 0</span><br><span class="line">sed -i &quot;s&#x2F;SELINUX&#x3D;enforcing&#x2F;SELINUX&#x3D;disabled&#x2F;g&quot; &#x2F;etc&#x2F;selinux&#x2F;config</span><br></pre></td></tr></table></figure><h2 id="时间同步"><a href="#时间同步" class="headerlink" title="时间同步"></a>时间同步</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">crontab -e</span><br><span class="line">#一小时同步一次</span><br><span class="line">0 *&#x2F;1 * * * &#x2F;usr&#x2F;sbin&#x2F;ntpdate ntp1.aliyun.com &gt; &#x2F;dev&#x2F;null 2&gt;&amp;1; &#x2F;sbin&#x2F;hwclock -w</span><br></pre></td></tr></table></figure><h2 id="安装docker-不会还有人不装docker吧"><a href="#安装docker-不会还有人不装docker吧" class="headerlink" title="安装docker(不会还有人不装docker吧)"></a>安装docker(不会还有人不装docker吧)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">yum install -y yum-utils #如果在前面已经安装了则不用执行这个命令</span><br><span class="line">yum-config-manager \</span><br><span class="line">    --add-repo \</span><br><span class="line">    https:&#x2F;&#x2F;download.docker.com&#x2F;linux&#x2F;centos&#x2F;docker-ce.repo</span><br><span class="line"></span><br><span class="line">yum install -y docker-ce docker-ce-cli containerd.io</span><br><span class="line"></span><br><span class="line">vim &#x2F;etc&#x2F;docker&#x2F;daemon.json</span><br><span class="line">#添加国内镜像加速</span><br><span class="line">&#123;</span><br><span class="line">  &quot;registry-mirrors&quot;: [&quot;https:&#x2F;&#x2F;wghlmi3i.mirror.aliyuncs.com&quot;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h2 id="提高资源限制上限-重新连接生效"><a href="#提高资源限制上限-重新连接生效" class="headerlink" title="提高资源限制上限(重新连接生效)"></a>提高资源限制上限(重新连接生效)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;* soft nofile 65536&quot; &gt;&gt; &#x2F;etc&#x2F;security&#x2F;limits.conf         </span><br><span class="line">echo &quot;* hard nofile 65536&quot; &gt;&gt; &#x2F;etc&#x2F;security&#x2F;limits.conf</span><br></pre></td></tr></table></figure><h2 id="关闭Swap"><a href="#关闭Swap" class="headerlink" title="关闭Swap"></a>关闭Swap</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">swapoff -a</span><br><span class="line">free -h</span><br><span class="line">              total        used        free      shared  buff&#x2F;cache   available</span><br><span class="line">Mem:           3.7G        132M        3.4G         11M        173M        3.3G</span><br><span class="line">Swap:            0B          0B          0B</span><br></pre></td></tr></table></figure><h2 id="内核调优"><a href="#内核调优" class="headerlink" title="内核调优"></a>内核调优</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;vm.swappiness &#x3D; 1 &gt;&gt; &#x2F;etc&#x2F;sysctl.conf </span><br><span class="line">echo &quot;net.ipv6.conf.all.disable_ipv6 &#x3D; 1 &gt;&gt; &#x2F;etc&#x2F;sysctl.conf </span><br><span class="line">sysctl -p</span><br></pre></td></tr></table></figure><h1 id="保存镜像"><a href="#保存镜像" class="headerlink" title="保存镜像"></a>保存镜像</h1><p>进入虚拟化控制台，导出为 OVF 格式即可</p><hr><p>版权声明：</p><p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>]]></content>
       
       
       <categories>
@@ -1424,9 +1451,9 @@
             
             <tag> Mysql </tag>
             
-            <tag> Docker </tag>
-            
             <tag> Redis </tag>
+            
+            <tag> Docker </tag>
             
             <tag> Mongodb </tag>
             
@@ -1457,11 +1484,11 @@
             
             <tag> Docker </tag>
             
+            <tag> Devops </tag>
+            
             <tag> Linux </tag>
             
             <tag> 容器 </tag>
-            
-            <tag> Devops </tag>
             
         </tags>
       
@@ -1707,11 +1734,11 @@
             
             <tag> 自动化 </tag>
             
+            <tag> CI/CD </tag>
+            
             <tag> 敏捷开发 </tag>
             
             <tag> 敏捷部署 </tag>
-            
-            <tag> CI/CD </tag>
             
         </tags>
       
