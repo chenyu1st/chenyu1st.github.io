@@ -4,11 +4,36 @@
   
     
     <entry>
+      <title>个人总结(2020.10)</title>
+      <link href="/2020/11/08/summary/summary-2020-10/"/>
+      <url>/2020/11/08/summary/summary-2020-10/</url>
+      
+        <content type="html"><![CDATA[<h1 id="个人能力价值的体现"><a href="#个人能力价值的体现" class="headerlink" title="个人能力价值的体现"></a>个人能力价值的体现</h1><p>1个月的调整，给公司创造了如下价值</p><ul><li>将公司的服务器对比上月永久（注意是永久）减少接近200美金/月</li><li>部署一套深圳本地的系统（测试及生产环境）上云，且服务器费用还减少(又变相减少服务器的月支出)</li><li>设计新办公场地网络拓扑图、机房装修、设备购买方案，宽带、VPN业务办理并落地</li><li>搬家实操机房布线，有线无线网络划分管理</li><li>制作安全开关机脚本，开机自启服务，达到5分钟内安全关闭所有业务及服务器，10分钟内开机所有服务器并自启业务。</li><li>续费深信服VPN服务，将合同从9W/年砍到1w4/年，办理电信业务700/月 1000M宽带</li></ul><h1 id="技术"><a href="#技术" class="headerlink" title="技术"></a>技术</h1><p>学习底层网络下三层知识及七层应用配置，设计新办公场地网络拓扑图到机房布线实操的时候才发现这些知识有多么重要。</p><p>其中包括交换机、路由器、AP、DNS、NAT、VPN、DHCP等技术</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这个月主要就是搬家，因为在之前公司参与了一次搬家（当时跟着一个网络工程师，在后面坐着端茶倒水的小事，不过还是学习到了很多知识）现在终于到了我自己展现独挡一面的时候了。</p><p>因为旧网络拓扑图实属稀烂，而且不好改，一条专线办公服务器两用，还没有无线网。</p><p>现在改造成1000M宽带给办公网使用，并增加了无线WIFI，将电信专线给服务器网使用，充分利用带宽上限</p><p>设计新场地网络拓扑图花了快一个月，以及保证每台服务器的数据安全，备份，正常开关机脚本制作。</p><p>最后搬家2天内恢复所有服务</p><p>由于公司目前就我一个运维，能力有限，所以在时间上，我觉得还可以做的更好，毕竟一回生二回熟嘛，有了这次实战经验，我认为对我提升还是很大的。</p><h1 id="心态"><a href="#心态" class="headerlink" title="心态"></a>心态</h1><p>公司就我一个运维，不仅仅只做应用运维方面的事，网络、IT设备也需要我来管，其实我的压力还是相当大的。</p><p>能力越大，责任越大，这些工作任务的每一点都很关键，稍有不慎造成的结果可能不仅仅影响着我们的办公环境，还会影响着公司的业务、公司的命脉。</p><p>所以我对自己的要求相当之高，什么能做什么不能做，说到做到，不拖时间，尽自己最大的能力完成任务</p><p>因此我也非常感谢我的领导以及各位同事对我信任，放手让我干让我闯。</p><p>经过了3个月的努力</p><p>公司的同事对我说，“现在自动发布太舒服了，缺了你的自动化流水线，我不知道发布需要多久，这台服务器太重要了”</p><p>公司的领导对我说，“什么？你来了才3个月，感觉做了好多事啊，你不说我还以为你来了很久了”</p><p>其实做运维，有时候能让团队的成员说出这样的话实属对我技术的肯定。</p><p>不需要任何的华丽的辞藻，就一句，有你在，运维的事我们放心，足矣。</p><p>但其实我一直追求真正的SRE的境界：就是不需要运维，所有的服务自动化构建，无人值守，高可用，有我和没我没有区别才是最高境界</p><p>目前以为的能力还远远不够，加油努力达到这个目标吧。</p><h1 id="对自己说"><a href="#对自己说" class="headerlink" title="对自己说"></a>对自己说</h1><p>RUGOD，永不止步！现在搬家也搬完了，尘埃落定，接下来继续深入做运维开发的事情，我准备手动打造一套属于公司体系的K8S生态，所有服务上K8S，让我们拭目以待吧。</p><p>总结下本月学习的各种顶级理解</p><ul><li>努力最坏的结果就是大器晚成</li><li>努力的动力就是努力不一定成功</li><li>但行好事，莫问前程</li></ul>]]></content>
+      
+      
+      <categories>
+          
+          <category> 个人总结 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 个人总结 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Ubuntu网络基础运维</title>
       <link href="/2020/11/07/linux/ubuntu-network-manager/"/>
       <url>/2020/11/07/linux/ubuntu-network-manager/</url>
       
-        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p><hr><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>公司由于历史原因，很多服务器和同事的服务器都是安装的Ubuntu，有16.04也有18.04，每个版本差异比较大，这期先总结下网络方面的运维技术</p><h1 id="安装网络运维软件包"><a href="#安装网络运维软件包" class="headerlink" title="安装网络运维软件包"></a>安装网络运维软件包</h1><p>如果你是最小化安装，你需要额外装一些软件包</p><ul><li>traceroute  链路追踪</li><li>net-tools   NET-3网络分发的基础包(包括 arp, hostname, ifconfig, netstat, rarp, route, plipconfig, slattach, mii-tool and iptunnel and ipmaddr)</li><li>telnet      测试IP：端口是否能访问</li></ul><p>安装命令</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install -y traceroute net-tools telnet</span><br></pre></td></tr></table></figure><p>如果出现nothing to do则需要更新apt源</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br></pre></td></tr></table></figure><h1 id="查看网络信息"><a href="#查看网络信息" class="headerlink" title="查看网络信息"></a>查看网络信息</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ip add</span><br><span class="line">ifconfig</span><br><span class="line">nmcli device show</span><br></pre></td></tr></table></figure><h1 id="网络配置"><a href="#网络配置" class="headerlink" title="网络配置"></a>网络配置</h1><h2 id="16-04-server"><a href="#16-04-server" class="headerlink" title="16.04 server"></a>16.04 server</h2><p>配置文件   /etc/network/interfaces </p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sudo vim &#x2F;etc&#x2F;network&#x2F;interfaces </span><br><span class="line">auto ens33 网卡名字</span><br><span class="line">#iface ens33 inet dhcp动态的获取IP地址</span><br><span class="line">iface ens33 inet static 静态的获取IP地址</span><br><span class="line">address 192.168.1.100 设置IP地址</span><br><span class="line">gateway 192.168.1.1 设置网关</span><br><span class="line">netmask 255.255.255.0 设置子网掩码</span><br><span class="line">dns-nameserver 8.8.8.8 设置DNS，域名解析</span><br></pre></td></tr></table></figure><hr><p>运维命令</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl start networking 启动网卡服务</span><br><span class="line">sudo systemctl stop  networking 关闭网卡服务</span><br><span class="line">sudo systemctl restart networking 重启网卡服务</span><br></pre></td></tr></table></figure><h2 id="18-04-server"><a href="#18-04-server" class="headerlink" title="18.04 server"></a>18.04 server</h2><p>配置文件   /etc/netplan/下的一个yaml文件，名字可能各不相同</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">sudo vim &#x2F;etc&#x2F;netplan&#x2F;50-cloud-init.yaml</span><br><span class="line"># Let NetworkManager manage all devices on this system</span><br><span class="line">network:</span><br><span class="line">  version: 2</span><br><span class="line"> # renderer: NetworkManager</span><br><span class="line">  ethernets:</span><br><span class="line">     ens33: #配置的网卡名称,使用ifconfig  查看得到,且必须是空格缩进，netplan只认空格</span><br><span class="line">       dhcp4: no #no-dhcp4关闭 true-dhcp4开启</span><br><span class="line">       addresses: [192.168.1.100&#x2F;24, ] </span><br><span class="line">       gateway4: 192.168.1.1 #设置ipv4的默认网关</span><br><span class="line">       nameservers:  #设置DNS服务器</span><br><span class="line">         addresses: [114.114.114.114,8.8.8.8]  #多个DNS服务器之间用逗号隔开</span><br></pre></td></tr></table></figure><p>注意几个点</p><ul><li>修改权限必须为root</li><li>将/etc/netplan/01-network-manager-all.yaml文件中的renderer: NetworkManager注释，否则netplan命令无法生效</li><li>IP配置信息要按如上格式，使用yaml语法格式，每个配置项使用空格缩进表示层级</li><li>对应配置项后跟着冒号，之后要接个空格，否则netplan命令也会报错</li></ul><hr><p>运维命令</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo netplan apply 应用网卡服务</span><br></pre></td></tr></table></figure><h2 id="desktop"><a href="#desktop" class="headerlink" title="desktop"></a>desktop</h2><p>NetworkManager工具是Ubuntu桌面版的GUI设置工具。</p><p>这个工具推荐直接在GUI上操作，不建议用命令行进行管理，比如Wifi这些配置等。</p><p>当然，这个工具能带有命令行工具：nmcli，如果使用了NetworkManager进行配置网络，那么IP、网关、DNS都可以通过这个工具进行查询。</p><p>如果配置了命令行的网络设置，那么NetworkManager就会失效</p><p>你的所有连接信息都在/etc/NetworkManager/system-connections下</p><p>运维命令</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl start NetworkManager.service</span><br><span class="line">sudo systemctl sttop NetworkManager.service</span><br></pre></td></tr></table></figure><h1 id="DNS配置"><a href="#DNS配置" class="headerlink" title="DNS配置"></a>DNS配置</h1><h2 id="临时添加"><a href="#临时添加" class="headerlink" title="临时添加"></a>临时添加</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo vim &#x2F;etc&#x2F;resolv.conf</span><br><span class="line">添加 nameserver dns服务器的ip</span><br><span class="line">eg：nameserver 114.114.114.114</span><br></pre></td></tr></table></figure><h2 id="永久添加"><a href="#永久添加" class="headerlink" title="永久添加"></a>永久添加</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1.修改对应ubuntu版本的网络配置，上面已经说过，这里不在叙述</span><br><span class="line">2.sudo vim &#x2F;etc&#x2F;hosts</span><br><span class="line">直接加域名解析的地址，格式为： IP  域名</span><br><span class="line">eg：192.168.10.1    baidu.com</span><br><span class="line">保存后，你访问baidu.com就是访问192.168.10.1了</span><br></pre></td></tr></table></figure><h2 id="刷新dns"><a href="#刷新dns" class="headerlink" title="刷新dns"></a>刷新dns</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemd-resolve --flush-caches</span><br></pre></td></tr></table></figure><h1 id="route-查看路由表"><a href="#route-查看路由表" class="headerlink" title="route 查看路由表"></a>route 查看路由表</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">route</span><br></pre></td></tr></table></figure><h1 id="ss-netstat-查看端口"><a href="#ss-netstat-查看端口" class="headerlink" title="ss/netstat 查看端口"></a>ss/netstat 查看端口</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ss -lnt</span><br><span class="line">netstat -nap</span><br></pre></td></tr></table></figure><h1 id="ping-测试主机通信"><a href="#ping-测试主机通信" class="headerlink" title="ping 测试主机通信"></a>ping 测试主机通信</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ping IP&#x2F;域名</span><br></pre></td></tr></table></figure><p>ICMP全称为 Internet 控制报文协议（Internet Control Message Protocol）。它是一种面向无连接的协议，属于TCP/IP协议中的网络层</p><p>ping 命令会发送一份ICMP回显请求报文给目标主机，并等待目标主机返回ICMP回显应答。因为ICMP协议会要求目标主机在收到消息之后，必须返回ICMP应答消息给源主机，如果源主机在一定时间内收到了目标主机的应答，则表明两台主机之间网络是可达的。</p><p>但是Ping不通并不一定代表网络不通。ping是基于ICMP协议的命令，就是你发出去一个数据包，对方收到后返给你一个！就好比声纳。这个协议是可以禁止的！禁止后，如果你ping对方，对方收到后就不回馈给你，这样你就显示无法ping通，但实际你们还是连着的！</p><h1 id="telnet-测试IP-域名-端口是否通信"><a href="#telnet-测试IP-域名-端口是否通信" class="headerlink" title="telnet 测试IP/域名:端口是否通信"></a>telnet 测试IP/域名:端口是否通信</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">telnet IP&#x2F;域名:端口</span><br><span class="line"></span><br><span class="line"># 测试192.168.20.150的443端口是否开放</span><br><span class="line">telnet 192.168.20.150 443</span><br><span class="line">Trying 192.168.20.150...</span><br><span class="line"></span><br><span class="line">一直trying则说明不行</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">telnet 192.168.20.150 80</span><br><span class="line">Trying 192.168.20.150...</span><br><span class="line">Connected to 192.168.20.150.</span><br><span class="line">Escape character is &#39;^]&#39;.</span><br><span class="line"></span><br><span class="line">成功</span><br></pre></td></tr></table></figure><p>telnet是OSI模型中基于TCP协议之上应用层的一种协议，是一个通过创建虚拟终端提供连接到远程主机终端仿真的TCP/IP协议。</p><p>现在telnet用于测试IP：端口的通信较多，本质上telnet是登陆服务器的！服务没禁止就能登陆，一般来说会比ping更容易测试主机之间的通信问题（端口通信）</p><h1 id="链路追踪"><a href="#链路追踪" class="headerlink" title="链路追踪"></a>链路追踪</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">traceroute ip</span><br></pre></td></tr></table></figure><h1 id="最原汁原味的配置网络信息"><a href="#最原汁原味的配置网络信息" class="headerlink" title="最原汁原味的配置网络信息"></a>最原汁原味的配置网络信息</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#设置IP和子网掩码</span><br><span class="line">sudo ifconfig ens33 192.168.20.100 netmask 255.255.255.0</span><br><span class="line">#设置网关</span><br><span class="line">sudo route add default gw 192.168.20.1</span><br><span class="line">#设置DNS</span><br><span class="line">sudo echo &quot;nameserver 192.168.20.1&quot; &gt;&gt; &#x2F;etc&#x2F;resolv.conf</span><br></pre></td></tr></table></figure><h1 id="问题梳理"><a href="#问题梳理" class="headerlink" title="问题梳理"></a>问题梳理</h1><h2 id="关于desktop的网络配置"><a href="#关于desktop的网络配置" class="headerlink" title="关于desktop的网络配置"></a>关于desktop的网络配置</h2><p>在Desktop版本中，除了可以修改 /etc/network/interfaces 来进行配置以外；还可以直接在network-manager中配置。通过 interfaces修改的方法参照Server版本。network-manager的配置和直观，按照提示一步一步操作即可，有兴趣的朋友，可以自行Google或者Baidu。</p><p>但如果修改了interfaces，又配置了network-manager（以下简称nm），你就会发现出现了一些莫名其妙的问题：</p><p>1，interfaces和 nm中的网络设置不一样，系统实际的IP是哪个？</p><p>2，有时候莫名其妙的，界面右上角的网络连接图标就丢失了。</p><p>3，明明在nm中配置了正确的网络设置，为什么就上不了网呢？</p><p>其实，我们要知道 interfaces和 nm之间的关系，这些问题就不难解释了。</p><p>首先，当系统内没有第三方网络管理工具（比如nm）时，系统默认使用interfaces文件内的参数进行网络配置。（就像Server版本一样）</p><p>接着，当系统内安装了 nm之后，nm默认接管了系统的网络配置，使用nm 自己的网络配置参数来进行配置。</p><p>但是，如果用户在安装nm之后（Desktop版本默认安装了nm），自己手动修改了interfaces 文件，那nm 就自动停止对系统网络的管理，系统改使用interfaces 文件内的参数进行网络配置。</p><p>此时，再去修改nm 内的参数，不影响系统实际的网络配置。若要让nm 内的配置生效，必须重新启用nm 接管系统的网络配置。</p><p>现在知道了两者之间的工作关系，再看上面的三个问题：</p><p>1，要看nm是否接管，如果没有接管，系统实际的IP设置以interfaces 中的为准。反之，以nm 中的为准。</p><p>2，当nm 停止接管的时候，网络连接图标就丢失了。</p><p>3，同样是接管的问题。</p><p>如果用户希望在Desktop版本中，直接使用interfaces 进行网络配置，那可以关闭network-manager：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl stop network-manager</span><br></pre></td></tr></table></figure><p>vim /etc/network/interfaces修改之后</p><p>确保/etc/NetworkManager/Network-manager.conf内的managed=false(系统默认是false，但是你更改过的话需要改这里)</p><p>如果希望能继续使用nm 来进行网络配置，则需要进行如下操作：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl stop network-manager # 停止 nm服务</span><br><span class="line">sudo rm &#x2F;var&#x2F;lib&#x2F;NetworkManager&#x2F;NetworkManager.state # 移除nm 的状态文件</span><br><span class="line">sudo vim &#x2F;etc&#x2F;NetworkManager&#x2F;Network-manager.conf # 打开nm 的配置文件(managed&#x3D;true)</span><br><span class="line">sudo systemctl start network-manager</span><br></pre></td></tr></table></figure><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://www.cnblogs.com/jins-note/p/10153374.html" target="_blank" rel="noopener">Ubuntu中网络配置interfaces与界面网络配置NetworkManager</a></p><hr><p>版权声明：</p><p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>]]></content>
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p><hr><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>公司由于历史原因，很多服务器和同事的服务器都是安装的Ubuntu，有16.04也有18.04，每个版本差异比较大，这期先总结下网络方面的运维技术</p><h1 id="安装网络运维软件包"><a href="#安装网络运维软件包" class="headerlink" title="安装网络运维软件包"></a>安装网络运维软件包</h1><p>如果你是最小化安装，你需要额外装一些软件包</p><ul><li>traceroute  链路追踪</li><li>net-tools   NET-3网络分发的基础包(包括 arp, hostname, ifconfig, netstat, rarp, route, plipconfig, slattach, mii-tool and iptunnel and ipmaddr)</li><li>telnet      测试IP：端口是否能访问</li></ul><p>安装命令</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install -y traceroute net-tools telnet</span><br></pre></td></tr></table></figure><p>如果出现nothing to do则需要更新apt源</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br></pre></td></tr></table></figure><h1 id="查看网络信息"><a href="#查看网络信息" class="headerlink" title="查看网络信息"></a>查看网络信息</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ip add</span><br><span class="line">ifconfig</span><br><span class="line">nmcli device show</span><br></pre></td></tr></table></figure><h1 id="网络配置"><a href="#网络配置" class="headerlink" title="网络配置"></a>网络配置</h1><h2 id="16-04-server"><a href="#16-04-server" class="headerlink" title="16.04 server"></a>16.04 server</h2><p>配置文件   /etc/network/interfaces </p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sudo vim &#x2F;etc&#x2F;network&#x2F;interfaces </span><br><span class="line">auto ens33 网卡名字</span><br><span class="line">#iface ens33 inet dhcp动态的获取IP地址</span><br><span class="line">iface ens33 inet static 静态的获取IP地址</span><br><span class="line">address 192.168.1.100 设置IP地址</span><br><span class="line">gateway 192.168.1.1 设置网关</span><br><span class="line">netmask 255.255.255.0 设置子网掩码</span><br><span class="line">dns-nameserver 8.8.8.8 设置DNS，域名解析</span><br></pre></td></tr></table></figure><hr><p>运维命令</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl start networking 启动网卡服务</span><br><span class="line">sudo systemctl stop  networking 关闭网卡服务</span><br><span class="line">sudo systemctl restart networking 重启网卡服务</span><br></pre></td></tr></table></figure><h2 id="18-04-server"><a href="#18-04-server" class="headerlink" title="18.04 server"></a>18.04 server</h2><p>配置文件   /etc/netplan/下的一个yaml文件，名字可能各不相同</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">sudo vim &#x2F;etc&#x2F;netplan&#x2F;50-cloud-init.yaml</span><br><span class="line"># Let NetworkManager manage all devices on this system</span><br><span class="line">network:</span><br><span class="line">  version: 2</span><br><span class="line"> # renderer: NetworkManager</span><br><span class="line">  ethernets:</span><br><span class="line">     ens33: #配置的网卡名称,使用ifconfig  查看得到,且必须是空格缩进，netplan只认空格</span><br><span class="line">       dhcp4: no #no-dhcp4关闭 true-dhcp4开启</span><br><span class="line">       addresses: [192.168.1.100&#x2F;24, ] </span><br><span class="line">       gateway4: 192.168.1.1 #设置ipv4的默认网关</span><br><span class="line">       nameservers:  #设置DNS服务器</span><br><span class="line">         addresses: [114.114.114.114,8.8.8.8]  #多个DNS服务器之间用逗号隔开</span><br></pre></td></tr></table></figure><p>注意几个点</p><ul><li>修改权限必须为root</li><li>将/etc/netplan/01-network-manager-all.yaml文件中的renderer: NetworkManager注释，否则netplan命令无法生效</li><li>IP配置信息要按如上格式，使用yaml语法格式，每个配置项使用空格缩进表示层级</li><li>对应配置项后跟着冒号，之后要接个空格，否则netplan命令也会报错</li></ul><hr><p>运维命令</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo netplan apply 应用网卡服务</span><br></pre></td></tr></table></figure><h2 id="desktop"><a href="#desktop" class="headerlink" title="desktop"></a>desktop</h2><p>NetworkManager工具是Ubuntu桌面版的GUI设置工具。</p><p>这个工具推荐直接在GUI上操作，不建议用命令行进行管理，比如Wifi这些配置等。</p><p>当然，这个工具能带有命令行工具：nmcli，如果使用了NetworkManager进行配置网络，那么IP、网关、DNS都可以通过这个工具进行查询。</p><p>如果配置了命令行的网络设置，那么NetworkManager就会失效</p><p>你的所有连接信息都在/etc/NetworkManager/system-connections下</p><p>运维命令</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl start NetworkManager.service</span><br><span class="line">sudo systemctl sttop NetworkManager.service</span><br></pre></td></tr></table></figure><h1 id="DNS配置"><a href="#DNS配置" class="headerlink" title="DNS配置"></a>DNS配置</h1><h2 id="临时添加"><a href="#临时添加" class="headerlink" title="临时添加"></a>临时添加</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo vim &#x2F;etc&#x2F;resolv.conf</span><br><span class="line">添加 nameserver dns服务器的ip</span><br><span class="line">eg：nameserver 114.114.114.114</span><br></pre></td></tr></table></figure><h2 id="永久添加"><a href="#永久添加" class="headerlink" title="永久添加"></a>永久添加</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1.修改对应ubuntu版本的网络配置，上面已经说过，这里不在叙述</span><br><span class="line">2.sudo vim &#x2F;etc&#x2F;hosts</span><br><span class="line">直接加域名解析的地址，格式为： IP  域名</span><br><span class="line">eg：192.168.10.1    baidu.com</span><br><span class="line">保存后，你访问baidu.com就是访问192.168.10.1了</span><br></pre></td></tr></table></figure><h2 id="刷新dns"><a href="#刷新dns" class="headerlink" title="刷新dns"></a>刷新dns</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemd-resolve --flush-caches</span><br></pre></td></tr></table></figure><h1 id="route-查看路由表"><a href="#route-查看路由表" class="headerlink" title="route 查看路由表"></a>route 查看路由表</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">route</span><br></pre></td></tr></table></figure><h1 id="ss-netstat-查看端口"><a href="#ss-netstat-查看端口" class="headerlink" title="ss/netstat 查看端口"></a>ss/netstat 查看端口</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ss -lnt</span><br><span class="line">netstat -nap</span><br></pre></td></tr></table></figure><h1 id="ping-测试主机通信"><a href="#ping-测试主机通信" class="headerlink" title="ping 测试主机通信"></a>ping 测试主机通信</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ping IP&#x2F;域名</span><br></pre></td></tr></table></figure><p>ICMP全称为 Internet 控制报文协议（Internet Control Message Protocol）。它是一种面向无连接的协议，属于TCP/IP协议中的网络层</p><p>ping 命令会发送一份ICMP回显请求报文给目标主机，并等待目标主机返回ICMP回显应答。因为ICMP协议会要求目标主机在收到消息之后，必须返回ICMP应答消息给源主机，如果源主机在一定时间内收到了目标主机的应答，则表明两台主机之间网络是可达的。</p><p>但是Ping不通并不一定代表网络不通。ping是基于ICMP协议的命令，就是你发出去一个数据包，对方收到后返给你一个！就好比声纳。这个协议是可以禁止的！禁止后，如果你ping对方，对方收到后就不回馈给你，这样你就显示无法ping通，但实际你们还是连着的！</p><h1 id="telnet-测试IP-域名-端口是否通信"><a href="#telnet-测试IP-域名-端口是否通信" class="headerlink" title="telnet 测试IP/域名:端口是否通信"></a>telnet 测试IP/域名:端口是否通信</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">telnet IP&#x2F;域名:端口</span><br><span class="line"></span><br><span class="line"># 测试192.168.20.150的443端口是否开放</span><br><span class="line">telnet 192.168.20.150 443</span><br><span class="line">Trying 192.168.20.150...</span><br><span class="line"></span><br><span class="line">一直trying则说明不行</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">telnet 192.168.20.150 80</span><br><span class="line">Trying 192.168.20.150...</span><br><span class="line">Connected to 192.168.20.150.</span><br><span class="line">Escape character is &#39;^]&#39;.</span><br><span class="line"></span><br><span class="line">成功</span><br></pre></td></tr></table></figure><p>telnet是OSI模型中基于TCP协议之上应用层的一种协议，是一个通过创建虚拟终端提供连接到远程主机终端仿真的TCP/IP协议。</p><p>现在telnet用于测试IP：端口的通信较多，本质上telnet是登陆服务器的！服务没禁止就能登陆，一般来说会比ping更容易测试主机之间的通信问题（端口通信）</p><h1 id="traceroute链路追踪"><a href="#traceroute链路追踪" class="headerlink" title="traceroute链路追踪"></a>traceroute链路追踪</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">traceroute ip</span><br></pre></td></tr></table></figure><h1 id="最原汁原味的配置网络信息"><a href="#最原汁原味的配置网络信息" class="headerlink" title="最原汁原味的配置网络信息"></a>最原汁原味的配置网络信息</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#设置IP和子网掩码</span><br><span class="line">sudo ifconfig ens33 192.168.20.100 netmask 255.255.255.0</span><br><span class="line">#设置网关</span><br><span class="line">sudo route add default gw 192.168.20.1</span><br><span class="line">#设置DNS</span><br><span class="line">sudo echo &quot;nameserver 192.168.20.1&quot; &gt;&gt; &#x2F;etc&#x2F;resolv.conf</span><br></pre></td></tr></table></figure><h1 id="问题梳理"><a href="#问题梳理" class="headerlink" title="问题梳理"></a>问题梳理</h1><h2 id="关于desktop的网络配置"><a href="#关于desktop的网络配置" class="headerlink" title="关于desktop的网络配置"></a>关于desktop的网络配置</h2><p>在Desktop版本中，除了可以修改 /etc/network/interfaces 来进行配置以外；还可以直接在network-manager中配置。通过 interfaces修改的方法参照Server版本。network-manager的配置和直观，按照提示一步一步操作即可，有兴趣的朋友，可以自行Google或者Baidu。</p><p>但如果修改了interfaces，又配置了network-manager（以下简称nm），你就会发现出现了一些莫名其妙的问题：</p><p>1，interfaces和 nm中的网络设置不一样，系统实际的IP是哪个？</p><p>2，有时候莫名其妙的，界面右上角的网络连接图标就丢失了。</p><p>3，明明在nm中配置了正确的网络设置，为什么就上不了网呢？</p><p>其实，我们要知道 interfaces和 nm之间的关系，这些问题就不难解释了。</p><p>首先，当系统内没有第三方网络管理工具（比如nm）时，系统默认使用interfaces文件内的参数进行网络配置。（就像Server版本一样）</p><p>接着，当系统内安装了 nm之后，nm默认接管了系统的网络配置，使用nm 自己的网络配置参数来进行配置。</p><p>但是，如果用户在安装nm之后（Desktop版本默认安装了nm），自己手动修改了interfaces 文件，那nm 就自动停止对系统网络的管理，系统改使用interfaces 文件内的参数进行网络配置。</p><p>此时，再去修改nm 内的参数，不影响系统实际的网络配置。若要让nm 内的配置生效，必须重新启用nm 接管系统的网络配置。</p><p>现在知道了两者之间的工作关系，再看上面的三个问题：</p><p>1，要看nm是否接管，如果没有接管，系统实际的IP设置以interfaces 中的为准。反之，以nm 中的为准。</p><p>2，当nm 停止接管的时候，网络连接图标就丢失了。</p><p>3，同样是接管的问题。</p><p>如果用户希望在Desktop版本中，直接使用interfaces 进行网络配置，那可以关闭network-manager：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl stop network-manager</span><br></pre></td></tr></table></figure><p>vim /etc/network/interfaces修改之后</p><p>确保/etc/NetworkManager/Network-manager.conf内的managed=false(系统默认是false，但是你更改过的话需要改这里)</p><p>如果希望能继续使用nm 来进行网络配置，则需要进行如下操作：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl stop network-manager # 停止 nm服务</span><br><span class="line">sudo rm &#x2F;var&#x2F;lib&#x2F;NetworkManager&#x2F;NetworkManager.state # 移除nm 的状态文件</span><br><span class="line">sudo vim &#x2F;etc&#x2F;NetworkManager&#x2F;Network-manager.conf # 打开nm 的配置文件(managed&#x3D;true)</span><br><span class="line">sudo systemctl start network-manager</span><br></pre></td></tr></table></figure><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://www.cnblogs.com/jins-note/p/10153374.html" target="_blank" rel="noopener">Ubuntu中网络配置interfaces与界面网络配置NetworkManager</a></p><hr><p>版权声明：</p><p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>]]></content>
       
       
       <categories>
@@ -236,11 +261,11 @@
       
         <tags>
             
+            <tag> CI/CD </tag>
+            
             <tag> Devops </tag>
             
             <tag> 自动化 </tag>
-            
-            <tag> CI/CD </tag>
             
             <tag> Jenkins </tag>
             
@@ -296,9 +321,9 @@
             
             <tag> AWS </tag>
             
-            <tag> Operation Manual </tag>
-            
             <tag> Redis </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -383,11 +408,11 @@
             
             <tag> AWS </tag>
             
-            <tag> Operation Manual </tag>
-            
             <tag> RDS </tag>
             
             <tag> Mysql </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -495,9 +520,9 @@
       
         <tags>
             
-            <tag> Operation Manual </tag>
-            
             <tag> Redis </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -574,9 +599,9 @@
       
         <tags>
             
-            <tag> Operation Manual </tag>
-            
             <tag> Mysql </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -1097,9 +1122,9 @@
             
             <tag> Docker </tag>
             
-            <tag> Devops </tag>
-            
             <tag> Linux </tag>
+            
+            <tag> Devops </tag>
             
             <tag> 容器 </tag>
             
@@ -1126,11 +1151,11 @@
       
         <tags>
             
+            <tag> CI/CD </tag>
+            
             <tag> Devops </tag>
             
             <tag> 自动化 </tag>
-            
-            <tag> CI/CD </tag>
             
         </tags>
       
@@ -1159,9 +1184,9 @@
             
             <tag> Docker </tag>
             
-            <tag> Devops </tag>
-            
             <tag> Linux </tag>
+            
+            <tag> Devops </tag>
             
             <tag> 容器 </tag>
             
@@ -1306,9 +1331,9 @@
             
             <tag> Docker </tag>
             
-            <tag> Devops </tag>
-            
             <tag> Linux </tag>
+            
+            <tag> Devops </tag>
             
             <tag> 容器 </tag>
             
@@ -1484,9 +1509,9 @@
             
             <tag> Docker </tag>
             
-            <tag> Devops </tag>
-            
             <tag> Linux </tag>
+            
+            <tag> Devops </tag>
             
             <tag> 容器 </tag>
             
@@ -1730,15 +1755,15 @@
       
         <tags>
             
-            <tag> Devops </tag>
-            
-            <tag> 自动化 </tag>
-            
             <tag> CI/CD </tag>
+            
+            <tag> Devops </tag>
             
             <tag> 敏捷开发 </tag>
             
             <tag> 敏捷部署 </tag>
+            
+            <tag> 自动化 </tag>
             
         </tags>
       
@@ -1842,9 +1867,9 @@
       
         <tags>
             
-            <tag> Operation Manual </tag>
-            
             <tag> Mysql </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
