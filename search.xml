@@ -8,7 +8,7 @@
       <link href="/2020/11/20/kubernetes/Kubernetes-pod-dns/"/>
       <url>/2020/11/20/kubernetes/Kubernetes-pod-dns/</url>
       
-        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p><hr><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>最近把docker的服务迁移到k8s的过程发现一些问题，在滚动更新的时候一些容器不能解析部分DNS，导致了启动失败，但是多重启几次就又能正常解析了，一起来看看吧。</p><h1 id="现状"><a href="#现状" class="headerlink" title="现状"></a>现状</h1><p>公司的java程序启动前会连接mysql、redis、es、hadoop及几个业务接口，用的都是域名的方式。</p><p>从docker转到k8s上我突然发现一些域名会经常连不上</p><p>报错如下</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Exception during pool initialization., com.mysql.cj.jdbc.exceptions.CommunicationsException: Communications link failure||The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.|  at com.mysql.cj.jdbc.exceptions.SQLError.createCommunicationsException(SQLError.java:174)</span><br><span class="line"></span><br><span class="line">unable to connect to redis.test.com:6379</span><br></pre></td></tr></table></figure><p>奇怪的是容器多重启几次后又能解析到了，如下图所示</p><p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Kubernetes/kubernetes-pod-bug-restart.jpg"  alt="kubernetes-pod-bug-restart.jpg"></p><p>这事让我百思不得其解</p><h1 id="分析问题"><a href="#分析问题" class="headerlink" title="分析问题"></a>分析问题</h1><h2 id="首次排查"><a href="#首次排查" class="headerlink" title="首次排查"></a>首次排查</h2><p>先来网络运维的经典分析方法</p><p>我进入一个已经正常运行的k8s pod里telnet 域名：PORT</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ telnet redis.test.com 6379</span><br><span class="line">telnet: could not resolve redis.test.com&#x2F;6379: Name or service not known</span><br><span class="line">$ telnet mysql.test.com 3306</span><br><span class="line">telnet: could not resolve mysql.test.com&#x2F;3306: Name or service not known</span><br><span class="line">$ telnet redis.test.com 6379</span><br><span class="line">Trying 192.168.20.4...</span><br><span class="line">Connected to redis.test.com.</span><br><span class="line">Escape character is &#39;^]&#39;.</span><br></pre></td></tr></table></figure><p>这个结论说明有时候成功有时候失败，太不正常了</p><p>但是我还不确定到底是什么原因，为了进一步加强我的判断，我用了经典的控制变量法做了以下操作</p><ul><li>k8s pod telnet ip:port</li><li>k8s pod telnet 域名:port</li><li>k8s pod traceroute 域名</li><li>docker  telnet ip:port</li><li>docker  telnet 域名:port</li><li>docker traceroute 域名</li><li>宿主机 telnet ip:port</li><li>宿主机 telnet 域名:port</li><li>宿主机 traceroute 域名</li></ul><p>域名及ip包括mysql、redis、es、hadoop、jenkins、harbor</p><p>是否能通信| k8s pod |docker |宿主机<br>—|—|—|—|—<br>telnet  ip:port| 一定|一定|一定<br>telnet 域名:port | 不一定|一定|一定<br>traceroute 域名| 不一定|一定|一定</p><p>在不一定连通的类型里我又继续分类</p><table><thead><tr><th>是否能通信</th><th>域名</th></tr></thead><tbody><tr><td>mysql1(docker部署)</td><td>不一定</td></tr><tr><td>redis(docker部署)</td><td>不一定</td></tr><tr><td>es(docker部署)</td><td>不一定</td></tr><tr><td>hadoop(物理机部署)</td><td>不一定</td></tr><tr><td>mysql2(物理机部署)</td><td>一定</td></tr><tr><td>jenkins(docker部署)</td><td>一定</td></tr><tr><td>harbor(docker部署)</td><td>一定</td></tr></tbody></table><p>总结下来</p><p>k8s pod通过路由器的DNS服务有一定几率解析不到某2台机器的服务（包括docker启动和正常启动的服务）</p><p>说起来也奇怪，这2台机器都是公司最顶配的机器 32c 256g 2路2080TI </p><p>只不过由于历史原因，这台机器没有做虚拟化，还装的是ubuntu桌面版。。。</p><p>现在问题难就难在为什么k8s pod只不能DNS解析到这2台机器上来呢，可以正常解析到其他机器上</p><p>装k8s的时候和这2台机器没有任何关联，我真想不出来这两者之间的关联</p><p>也不是docker的原因</p><p>还是说有可能只是巧合，我试了至少100+次能正常解析到其他机器也只是巧合呢，如果失败一次我还真觉得就是巧合，可惜并没有</p><h2 id="进一步分析"><a href="#进一步分析" class="headerlink" title="进一步分析"></a>进一步分析</h2><p>仔细想想，这就是个dns的问题，因为pod通过ip是可以访问的，但是通过域名解析需要下面经过下面2个组件</p><ul><li>core-dns</li></ul><p>kubernetes V1.15用的dns组件是core-dns而不沿用kube-dns</p><p>如果你不知道core-dns是做什么的，那么请参考下面链接（包括但不限于）进行学习：</p><p><a href="https://coredns.io/" target="_blank" rel="noopener">core-dns</a></p><ul><li>路由器</li></ul><p>路由器是TP-LINK的TL-ER3220G，自带DNS服务</p><p>k8s pod的宿主机的首位DNS服务器就是路由器的IP</p><p>虽然现在路由器功能很多，但是这个DNS在TP-LINK的官网上就很简单的介绍</p><p>“支持DDNS及虚拟服务器功能，轻松搭建内网服务器及私有网站”</p><p>我觉得路由器的DNS出现问题的可能性不太大，因为宿主机之间的DNS解析都是正常的。只能从core-dns问题出发</p><p>网上说core-dns的负载可能顶不住这么多并发，我将默认的2个core-dns扩容到了6个，发现并不管用。</p><h1 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h1><p>正当我一筹莫展的时候，我突然想到了还有一个DNS服务器——Route53 可以作为k8s pod的第二层DNS服务</p><p>我尝试在Route53上添加这几条内网的DNS</p><p>然后再重启k8s pod发现可以解析了，测试了大概10多次，没有一个容器失败重启</p><p>不是很完美的方案（这样需要运维2个DNS服务器），但是还是解决了这个问题</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>其实我认为这个问题的根本原因还没有找出来，那就是K8s pod 为什么不能通过core-dns每次成功的解析到这2台机器上的服务，而是会断断续续地解析。</p><p>这个问题可能若干年后我继续深入了解core-dns之后再做解答</p><p>如果你有幸看到这篇文章可以一起讨论下，在评论区给我留言即可</p>]]></content>
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p><hr><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>最近把docker的服务迁移到k8s的过程发现一些问题，在滚动更新的时候一些容器不能解析部分DNS，导致了启动失败，但是多重启几次就又能正常解析了，一起来看看吧。</p><h1 id="现状"><a href="#现状" class="headerlink" title="现状"></a>现状</h1><p>公司的java程序启动前会连接mysql、redis、es、hadoop及几个业务接口，用的都是域名的方式。</p><p>从docker转到k8s上我突然发现一些域名会经常连不上</p><p>报错如下</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Exception during pool initialization., com.mysql.cj.jdbc.exceptions.CommunicationsException: Communications link failure||The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.|  at com.mysql.cj.jdbc.exceptions.SQLError.createCommunicationsException(SQLError.java:174)</span><br><span class="line"></span><br><span class="line">unable to connect to redis.test.com:6379</span><br></pre></td></tr></table></figure><p>奇怪的是容器多重启几次后又能解析到了，如下图所示</p><p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Kubernetes/kubernetes-pod-bug-restart.jpg"  alt="kubernetes-pod-bug-restart.jpg"></p><p>这事让我百思不得其解</p><h1 id="分析问题"><a href="#分析问题" class="headerlink" title="分析问题"></a>分析问题</h1><h2 id="首次排查"><a href="#首次排查" class="headerlink" title="首次排查"></a>首次排查</h2><p>先来网络运维的经典分析方法</p><p>我进入一个已经正常运行的k8s pod里telnet 域名：PORT</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ telnet redis.test.com 6379</span><br><span class="line">telnet: could not resolve redis.test.com&#x2F;6379: Name or service not known</span><br><span class="line">$ telnet mysql.test.com 3306</span><br><span class="line">telnet: could not resolve mysql.test.com&#x2F;3306: Name or service not known</span><br><span class="line">$ telnet redis.test.com 6379</span><br><span class="line">Trying 192.168.20.4...</span><br><span class="line">Connected to redis.test.com.</span><br><span class="line">Escape character is &#39;^]&#39;.</span><br></pre></td></tr></table></figure><p>这个结论说明有时候成功有时候失败，太不正常了</p><p>但是我还不确定到底是什么原因，为了进一步加强我的判断，我用了经典的控制变量法做了以下操作</p><p>对于不太了解这几个命令的可以阅读我之前写过的一篇网络运维文章 </p><p><a href="https://rugod.cn/2020/11/07/linux/ubuntu-network-manager/" target="_blank" rel="noopener">Ubuntu网络基础运维</a></p><ul><li>k8s pod telnet ip:port</li><li>k8s pod telnet 域名:port</li><li>k8s pod traceroute 域名</li><li>docker  telnet ip:port</li><li>docker  telnet 域名:port</li><li>docker traceroute 域名</li><li>宿主机 telnet ip:port</li><li>宿主机 telnet 域名:port</li><li>宿主机 traceroute 域名</li></ul><p>域名及ip包括mysql、redis、es、hadoop、jenkins、harbor</p><table><thead><tr><th>是否能通信</th><th>k8s pod</th><th>docker</th><th>宿主机</th></tr></thead><tbody><tr><td>telnet  ip:port</td><td>一定</td><td>一定</td><td>一定</td></tr><tr><td>telnet 域名:port</td><td>不一定</td><td>一定</td><td>一定</td></tr><tr><td>traceroute 域名</td><td>不一定</td><td>一定</td><td>一定</td></tr></tbody></table><p>在不一定连通的类型里我又继续分类</p><table><thead><tr><th>是否能通信</th><th>域名</th></tr></thead><tbody><tr><td>mysql1(docker部署)</td><td>不一定</td></tr><tr><td>redis(docker部署)</td><td>不一定</td></tr><tr><td>es(docker部署)</td><td>不一定</td></tr><tr><td>hadoop(物理机部署)</td><td>不一定</td></tr><tr><td>mysql2(物理机部署)</td><td>一定</td></tr><tr><td>jenkins(docker部署)</td><td>一定</td></tr><tr><td>harbor(docker部署)</td><td>一定</td></tr></tbody></table><p>总结下来</p><p>k8s pod通过路由器的DNS服务有一定几率解析不到某2台机器的服务（包括docker启动和正常启动的服务）</p><p>说起来也奇怪，这2台机器都是公司最顶配的机器 32c 256g 2路2080TI </p><p>只不过由于历史原因，这台机器没有做虚拟化，还装的是ubuntu桌面版。。。</p><p>现在问题难就难在为什么k8s pod只不能DNS解析到这2台机器上来呢，可以正常解析到其他机器上</p><p>装k8s的时候和这2台机器没有任何关联，我真想不出来这两者之间的关联</p><p>也不是docker的原因</p><p>还是说有可能只是巧合，我试了至少100+次能正常解析到其他机器也只是巧合呢，如果失败一次我还真觉得就是巧合，可惜并没有</p><h2 id="进一步分析"><a href="#进一步分析" class="headerlink" title="进一步分析"></a>进一步分析</h2><p>仔细想想，这就是个dns的问题，因为pod通过ip是可以访问的，但是通过域名解析需要下面经过下面2个组件</p><ul><li>core-dns</li></ul><p>kubernetes V1.15用的dns组件是core-dns而不沿用kube-dns</p><p>如果你不知道core-dns是做什么的，那么请参考下面链接（包括但不限于）进行学习：</p><p><a href="https://coredns.io/" target="_blank" rel="noopener">core-dns</a></p><ul><li>路由器</li></ul><p>路由器是TP-LINK的TL-ER3220G，自带DNS服务</p><p>k8s pod的宿主机的首位DNS服务器就是路由器的IP</p><p>虽然现在路由器功能很多，但是这个DNS在TP-LINK的官网上就很简单的介绍</p><p>“支持DDNS及虚拟服务器功能，轻松搭建内网服务器及私有网站”</p><p>我觉得路由器的DNS出现问题的可能性不太大，因为宿主机之间的DNS解析都是正常的。只能从core-dns问题出发</p><p>网上说core-dns的负载可能顶不住这么多并发，我将默认的2个core-dns扩容到了6个，发现并不管用。</p><h1 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h1><p>正当我一筹莫展的时候，我突然想到了还有一个DNS服务器——Route53 可以作为k8s pod的第二层DNS服务</p><p>我尝试在Route53上添加这几条内网的DNS</p><p>然后再重启k8s pod发现可以解析了，测试了大概10多次，没有一个容器失败重启</p><p>不是很完美的方案（这样需要运维2个DNS服务器），但是还是解决了这个问题</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>其实我认为这个问题的根本原因还没有找出来，那就是K8s pod 为什么不能通过core-dns每次成功的解析到这2台机器上的服务，而是会断断续续地解析，并且只有这两台机器的域名才会解析出问题，我还是不能排除偶然情况。</p><p>这个问题可能若干年后我继续深入了解core-dns之后再做解答</p><p>如果你有幸看到这篇文章可以一起讨论下，在评论区给我留言即可</p>]]></content>
       
       
       <categories>
@@ -406,9 +406,9 @@
             
             <tag> AWS </tag>
             
-            <tag> Operation Manual </tag>
-            
             <tag> Redis </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -493,11 +493,11 @@
             
             <tag> AWS </tag>
             
-            <tag> Operation Manual </tag>
-            
             <tag> RDS </tag>
             
             <tag> Mysql </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -605,9 +605,9 @@
       
         <tags>
             
-            <tag> Operation Manual </tag>
-            
             <tag> Redis </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -632,9 +632,9 @@
       
         <tags>
             
-            <tag> NVIDIA </tag>
-            
             <tag> Docker </tag>
+            
+            <tag> NVIDIA </tag>
             
         </tags>
       
@@ -684,9 +684,9 @@
       
         <tags>
             
-            <tag> Operation Manual </tag>
-            
             <tag> Mysql </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -1298,9 +1298,9 @@
       
         <tags>
             
-            <tag> Kubernetes </tag>
-            
             <tag> Helm </tag>
+            
+            <tag> Kubernetes </tag>
             
             <tag> 阿里云 </tag>
             
@@ -1952,9 +1952,9 @@
       
         <tags>
             
-            <tag> Operation Manual </tag>
-            
             <tag> Mysql </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
