@@ -398,11 +398,11 @@
       
         <tags>
             
-            <tag> CI/CD </tag>
-            
             <tag> Devops </tag>
             
             <tag> 自动化 </tag>
+            
+            <tag> CI/CD </tag>
             
             <tag> Jenkins </tag>
             
@@ -458,9 +458,9 @@
             
             <tag> AWS </tag>
             
-            <tag> Redis </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Redis </tag>
             
         </tags>
       
@@ -657,9 +657,9 @@
       
         <tags>
             
-            <tag> Redis </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Redis </tag>
             
         </tags>
       
@@ -1259,9 +1259,9 @@
             
             <tag> Docker </tag>
             
-            <tag> Linux </tag>
-            
             <tag> Devops </tag>
+            
+            <tag> Linux </tag>
             
             <tag> 容器 </tag>
             
@@ -1288,11 +1288,11 @@
       
         <tags>
             
-            <tag> CI/CD </tag>
-            
             <tag> Devops </tag>
             
             <tag> 自动化 </tag>
+            
+            <tag> CI/CD </tag>
             
         </tags>
       
@@ -1321,9 +1321,9 @@
             
             <tag> Docker </tag>
             
-            <tag> Linux </tag>
-            
             <tag> Devops </tag>
+            
+            <tag> Linux </tag>
             
             <tag> 容器 </tag>
             
@@ -1350,9 +1350,9 @@
       
         <tags>
             
-            <tag> Helm </tag>
-            
             <tag> Kubernetes </tag>
+            
+            <tag> Helm </tag>
             
             <tag> 阿里云 </tag>
             
@@ -1468,9 +1468,9 @@
             
             <tag> Docker </tag>
             
-            <tag> Linux </tag>
-            
             <tag> Devops </tag>
+            
+            <tag> Linux </tag>
             
             <tag> 容器 </tag>
             
@@ -1646,9 +1646,9 @@
             
             <tag> Docker </tag>
             
-            <tag> Linux </tag>
-            
             <tag> Devops </tag>
+            
+            <tag> Linux </tag>
             
             <tag> 容器 </tag>
             
@@ -1892,11 +1892,11 @@
       
         <tags>
             
-            <tag> CI/CD </tag>
-            
             <tag> Devops </tag>
             
             <tag> 自动化 </tag>
+            
+            <tag> CI/CD </tag>
             
             <tag> 敏捷开发 </tag>
             
