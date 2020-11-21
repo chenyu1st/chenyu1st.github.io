@@ -1,0 +1,199 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>利用LVM将磁盘二合一 | 宇神之息</title><meta name="description" content="利用LVM将磁盘二合一"><meta name="keywords" content="Storage,LVM"><meta name="author" content="Rugod"><meta name="copyright" content="Rugod"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.ico"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="https://www.google-analytics.com" crossorigin="crossorigin"/><link rel="preconnect" href="https://hm.baidu.com"/><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="crossorigin"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="twitter:card" content="summary"><meta name="twitter:title" content="利用LVM将磁盘二合一"><meta name="twitter:description" content="利用LVM将磁盘二合一"><meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Storage.jpg"><meta property="og:type" content="article"><meta property="og:title" content="利用LVM将磁盘二合一"><meta property="og:url" content="https://rugod.com/2020/11/21/storage/disk-combined-into-one/"><meta property="og:site_name" content="宇神之息"><meta property="og:description" content="利用LVM将磁盘二合一"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Storage.jpg"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>var autoChangeMode = '1'
+var t = Cookies.get("theme")
+if (autoChangeMode == '1'){
+  var isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+  var isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
+  var isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined){
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport){
+      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour < 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+  }
+  } else if (t == 'light') activateLightMode()
+  else activateDarkMode()
+
+} else if (autoChangeMode == '2'){
+  now = new Date();
+  hour = now.getHours();
+  isNight = hour < 6 || hour >= 18
+  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode() 
+} else {
+  if ( t == 'dark' ) activateDarkMode()
+  else if ( t == 'light') activateLightMode()
+}
+
+function activateDarkMode(){
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
+  }
+}
+function activateLightMode(){
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
+  }
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="canonical" href="https://rugod.com/2020/11/21/storage/disk-combined-into-one/"><link rel="next" title="包夜随笔——2020.11.20" href="https://rugod.com/2020/11/21/essay/Sangfor/"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?a29fc1f2b32c6a60aee5dbf412c89285";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-164950732-1', 'auto');
+ga('send', 'pageview');
+</script><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容:${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://www.rugod.cn/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: {"languages":{"author":"作者: Rugod","link":"链接: ","source":"来源: 宇神之息","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  ClickShowText: {"text":"宇神,牛逼","fontSize":"15px"},
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  baiduPush: true,
+  highlightCopy: true,
+  highlightLang: true,
+  highlightShrink: 'false',
+  isFontAwesomeV5: false,
+  isPhotoFigcaption: false
+  
+}</script><script>var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isSidebar: true  
+  }</script><noscript><style>
+#page-header {
+  opacity: 1
+}
+.justified-gallery img{
+  opacity: 1
+}
+</style></noscript><meta name="generator" content="Hexo 4.2.0"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Challenger.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">71</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">78</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">22</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于本人</span></a></div></div></div></div><i class="fa fa-arrow-right on" id="toggle-sidebar" aria-hidden="true">     </i><div id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#背景"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#准备工作"><span class="toc-number">2.</span> <span class="toc-text">准备工作</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#实现方法"><span class="toc-number">3.</span> <span class="toc-text">实现方法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#查看资源与安装基础软件包"><span class="toc-number">4.</span> <span class="toc-text">查看资源与安装基础软件包</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#查看xfs是否安装"><span class="toc-number">4.1.</span> <span class="toc-text">查看xfs是否安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装lvm系统及xfs文件系统并加载，如果已安装则可以忽略"><span class="toc-number">4.2.</span> <span class="toc-text">安装lvm系统及xfs文件系统并加载，如果已安装则可以忽略</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#合并步骤"><span class="toc-number">5.</span> <span class="toc-text">合并步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#磁盘分区"><span class="toc-number">5.1.</span> <span class="toc-text">磁盘分区</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建PV"><span class="toc-number">5.2.</span> <span class="toc-text">创建PV</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建VG"><span class="toc-number">5.3.</span> <span class="toc-text">创建VG</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#添加新的PV到VG中"><span class="toc-number">5.4.</span> <span class="toc-text">添加新的PV到VG中</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#查看VG"><span class="toc-number">5.5.</span> <span class="toc-text">查看VG</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建逻辑卷"><span class="toc-number">5.6.</span> <span class="toc-text">创建逻辑卷</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#格式化逻辑卷"><span class="toc-number">5.7.</span> <span class="toc-text">格式化逻辑卷</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建挂载目录并挂载"><span class="toc-number">5.8.</span> <span class="toc-text">创建挂载目录并挂载</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#查看是否挂载成功"><span class="toc-number">5.9.</span> <span class="toc-text">查看是否挂载成功</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#报错总结"><span class="toc-number">6.</span> <span class="toc-text">报错总结</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#错误“-run-lvm-lvmetad-socket：连接失败：没有这样的文件或目录”"><span class="toc-number">6.1.</span> <span class="toc-text">错误“ &#x2F;run&#x2F;lvm&#x2F;lvmetad.socket：连接失败：没有这样的文件或目录”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#未安装xfs"><span class="toc-number">6.2.</span> <span class="toc-text">未安装xfs</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">7.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考资料"><span class="toc-number">8.</span> <span class="toc-text">参考资料</span></a></li></ol></div></div></div><div id="body-wrap"><div class="post-bg" id="nav" style="background-image: url(https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Storage.jpg)"><div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">宇神之息</a></span><span class="pull_right menus"><div id="search_button"><a class="site-page social-icon search"><i class="fa fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于本人</span></a></div></div><span class="toggle-menu close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span></span></div><div id="post-info"><div id="post-title"><div class="posttitle">利用LVM将磁盘二合一</div></div><div id="post-meta"><div class="meta-firstline"><time class="post-meta__date"><span class="post-meta__date-created" title="发表于 2020-11-21 17:31:02"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2020-11-21</span><span class="post-meta__separator">|</span><span class="post-meta__date-updated" title="更新于 2020-11-21 17:43:03"><i class="fa fa-history" aria-hidden="true"></i> 更新于 2020-11-21</span></time><span class="post-meta__categories"><span class="post-meta__separator">|</span><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/Storage/">Storage</a></span></div><div class="meta-secondline"> <span class="post-meta-wordcount"><i class="post-meta__icon fa fa-file-word-o" aria-hidden="true"></i><span>字数总计:</span><span class="word-count">1.4k</span><span class="post-meta__separator">|</span><i class="post-meta__icon fa fa-clock-o" aria-hidden="true"></i><span>阅读时长: 5 分钟</span></span></div><div class="meta-thirdline"><span class="post-meta-pv-cv"><span class="post-meta__separator">|</span><i class="fa fa-eye post-meta__icon" aria-hidden="true"> </i><span>阅读量:</span><span id="busuanzi_value_page_pv"></span></span><span class="post-meta-commentcount"><span class="post-meta__separator">|</span><i class="post-meta__icon fa fa-comment-o" aria-hidden="true"></i><span>评论数:</span><a href="/2020/11/21/storage/disk-combined-into-one/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count comment-count" data-xid="/2020/11/21/storage/disk-combined-into-one/" itemprop="commentCount"></span></a></span></div></div></div></div><main class="layout_post" id="content-inner"><article id="post"><div id="article-container"><p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p>
+<hr>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>公司有需求存储大量数据，需要将生产环境文件同步到线下，但是存储是个问题，最近发现公司还有一台服务器有2块7.3T的磁盘，正好派上用场，来看看怎么添加存储的吧。</p>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><ul>
+<li>操作系统：ubuntu 16.04</li>
+<li>lvm版本：lvm2</li>
+<li>文件系统：xfs</li>
+<li>需要挂载的数据盘</li>
+</ul>
+<p>/dev/sda： 7.3T</p>
+<p>/dev/sdb： 7.3T</p>
+<ul>
+<li>挂载目录：/s3proxy</li>
+</ul>
+<h1 id="实现方法"><a href="#实现方法" class="headerlink" title="实现方法"></a>实现方法</h1><p>要想实现此需求，可使用LVM逻辑卷管理来做到。</p>
+<p>如果你不知道LVM是做什么的，那么请参考下面链接（包括但不限于）进行学习：</p>
+<p><a href="https://wiki.ubuntu.com/Lvm" target="_blank" rel="noopener">LVM</a></p>
+<p><a href="https://wiki.archlinux.org/index.php/LVM" target="_blank" rel="noopener">LVM-WIKI</a></p>
+<p><a href="https://cloud.tencent.com/developer/article/1582568" target="_blank" rel="noopener">LVM基础操作步骤梳理</a></p>
+<h1 id="查看资源与安装基础软件包"><a href="#查看资源与安装基础软件包" class="headerlink" title="查看资源与安装基础软件包"></a>查看资源与安装基础软件包</h1><h2 id="查看xfs是否安装"><a href="#查看xfs是否安装" class="headerlink" title="查看xfs是否安装"></a>查看xfs是否安装</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ modinfo xfs</span><br><span class="line">filename:       &#x2F;lib&#x2F;modules&#x2F;4.15.0-122-generic&#x2F;kernel&#x2F;fs&#x2F;xfs&#x2F;xfs.ko</span><br><span class="line">license:        GPL</span><br><span class="line">description:    SGI XFS with ACLs, security attributes, realtime, no debug enabled</span><br><span class="line">author:         Silicon Graphics, Inc.</span><br><span class="line">alias:          fs-xfs</span><br><span class="line">srcversion:     051B2E34F6018A435EC6D00</span><br><span class="line">depends:        libcrc32c</span><br><span class="line">retpoline:      Y</span><br><span class="line">intree:         Y</span><br><span class="line">name:           xfs</span><br><span class="line">vermagic:       4.15.0-122-generic SMP mod_unload</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="安装lvm系统及xfs文件系统并加载，如果已安装则可以忽略"><a href="#安装lvm系统及xfs文件系统并加载，如果已安装则可以忽略" class="headerlink" title="安装lvm系统及xfs文件系统并加载，如果已安装则可以忽略"></a>安装lvm系统及xfs文件系统并加载，如果已安装则可以忽略</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install lvm2  xfsprogs</span><br><span class="line">sudo systemctl enable lvm2-lvmetad.service</span><br><span class="line">sudo systemctl enable lvm2-lvmetad.socket</span><br><span class="line">sudo systemctl start lvm2-lvmetad.service</span><br><span class="line">sudo systemctl start lvm2-lvmetad.socket</span><br><span class="line">sudo modprobe -v xfs</span><br></pre></td></tr></table></figure>
+<p>查看磁盘</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ fdisk -l</span><br><span class="line">Disk &#x2F;dev&#x2F;sda: 7.3 TiB, 8001563222016 bytes, 15628053168 sectors</span><br><span class="line">Units: sectors of 1 * 512 &#x3D; 512 bytes</span><br><span class="line">Sector size (logical&#x2F;physical): 512 bytes &#x2F; 4096 bytes</span><br><span class="line">I&#x2F;O size (minimum&#x2F;optimal): 4096 bytes &#x2F; 4096 bytes</span><br><span class="line"></span><br><span class="line">Disk &#x2F;dev&#x2F;sdb: 7.3 TiB, 8001563222016 bytes, 15628053168 sectors</span><br><span class="line">Units: sectors of 1 * 512 &#x3D; 512 bytes</span><br><span class="line">Sector size (logical&#x2F;physical): 512 bytes &#x2F; 4096 bytes</span><br><span class="line">I&#x2F;O size (minimum&#x2F;optimal): 4096 bytes &#x2F; 4096 bytes</span><br></pre></td></tr></table></figure>
+<h1 id="合并步骤"><a href="#合并步骤" class="headerlink" title="合并步骤"></a>合并步骤</h1><h2 id="磁盘分区"><a href="#磁盘分区" class="headerlink" title="磁盘分区"></a>磁盘分区</h2><p>在将磁盘或者磁盘分区用作物理卷（PV）之前，需要对其进行初始化工作，即进行磁盘分区操作；因磁盘分区需求大于2T，所以fdisk无法实现管理，需要使用parted命令来做磁盘分区管理</p>
+<p>如果你不知道fdisk和parted的区别，那么请参考下面链接（包括但不限于）进行学习：</p>
+<p><a href="https://unix.stackexchange.com/questions/104238/fdisk-vs-parted" target="_blank" rel="noopener">fdisk-vs-parted</a></p>
+<ul>
+<li>分区sda</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># 新建&#x2F;dev&#x2F;sda的磁盘标签类型为GPT</span><br><span class="line">$ parted &#x2F;dev&#x2F;sda mklabel gpt </span><br><span class="line"># 将&#x2F;dev&#x2F;sda整个空间分给同一个分区</span><br><span class="line">$ parted &#x2F;dev&#x2F;sda mkpart primary 0 100%</span><br><span class="line">Warning: The resulting partition is not properly aligned for best performance.</span><br><span class="line">Ignore&#x2F;Cancel? I                                                          </span><br><span class="line">Information: You may need to update &#x2F;etc&#x2F;fstab.</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>分区sdb</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># 新建&#x2F;dev&#x2F;sdb的磁盘标签类型为GPT</span><br><span class="line">$ parted &#x2F;dev&#x2F;sdb mklabel gpt </span><br><span class="line"># 将&#x2F;dev&#x2F;sda整个空间分给同一个分区</span><br><span class="line">$ parted &#x2F;dev&#x2F;sdb mkpart primary 0 100%</span><br><span class="line">Warning: The resulting partition is not properly aligned for best performance.</span><br><span class="line">Ignore&#x2F;Cancel? I                                                          </span><br><span class="line">Information: You may need to update &#x2F;etc&#x2F;fstab.</span><br></pre></td></tr></table></figure>
+
+<h2 id="创建PV"><a href="#创建PV" class="headerlink" title="创建PV"></a>创建PV</h2><p>创建物理卷的命令为pvcreate；利用该命令将希望添加到卷组的所有分区或磁盘创建为物理卷；<br>将分区/dev/sdb1和/dev/sdc1分区创建为物理卷：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ pvcreate &#x2F;dev&#x2F;sda1</span><br><span class="line">Physical volume &quot;&#x2F;dev&#x2F;sda1&quot; successfully created.</span><br><span class="line">$ pvcreate &#x2F;dev&#x2F;sdb1</span><br><span class="line">Physical volume &quot;&#x2F;dev&#x2F;sdb1&quot; successfully created.</span><br></pre></td></tr></table></figure>
+
+<h2 id="创建VG"><a href="#创建VG" class="headerlink" title="创建VG"></a>创建VG</h2><p>创建卷组的命令为vgcreate；用此命令将使用pvcreate建立的物理卷创建为一个完整的VG</p>
+<p>将sda1的PV创建名为s3proxy的VG</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ vgcreate s3proxy &#x2F;dev&#x2F;sda1</span><br><span class="line"> Volume group &quot;s3proxy&quot; successfully created</span><br></pre></td></tr></table></figure>
+
+<h2 id="添加新的PV到VG中"><a href="#添加新的PV到VG中" class="headerlink" title="添加新的PV到VG中"></a>添加新的PV到VG中</h2><p>使用vgextend命令将其他PV添加到VG中</p>
+<p>将sdb1的PV添加到s3proxy的VG</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ vgextend s3proxy &#x2F;dev&#x2F;sdb1</span><br><span class="line">  Volume group &quot;s3proxy&quot; successfully extended</span><br></pre></td></tr></table></figure>
+
+<h2 id="查看VG"><a href="#查看VG" class="headerlink" title="查看VG"></a>查看VG</h2><p>查看卷组用vgs</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ vgs</span><br><span class="line">  VG      #PV #LV #SN Attr   VSize  VFree</span><br><span class="line">  s3proxy   2   1   0 wz--n- 14.55t 14.55t</span><br></pre></td></tr></table></figure>
+<p>即已经将2块磁盘容量合并了</p>
+<h2 id="创建逻辑卷"><a href="#创建逻辑卷" class="headerlink" title="创建逻辑卷"></a>创建逻辑卷</h2><p>创建逻辑卷的命令为lvcreate；用此命令将在使用vgcreate建立的卷组上创建逻辑卷；<br>在卷组s3proxy上创建一个名为lvs3proxy的逻辑卷，大小为14.55t；</p>
+<ul>
+<li>-n：指定逻辑卷名</li>
+<li>-L：指定逻辑卷大小</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$  lvcreate -L 14.55T -n lvs3proxy s3proxy</span><br><span class="line">  Rounding up size to full physical extent 14.55 TiB</span><br><span class="line">  Logical volume &quot;lvs3proxy&quot; created.</span><br></pre></td></tr></table></figure>
+
+<h2 id="格式化逻辑卷"><a href="#格式化逻辑卷" class="headerlink" title="格式化逻辑卷"></a>格式化逻辑卷</h2><p>将创建的lvs3proxy逻辑卷格式化为xfs</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mkfs -t xfs &#x2F;dev&#x2F;s3proxy&#x2F;lvs3proxy</span><br></pre></td></tr></table></figure>
+
+<h2 id="创建挂载目录并挂载"><a href="#创建挂载目录并挂载" class="headerlink" title="创建挂载目录并挂载"></a>创建挂载目录并挂载</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 创建s3proxy目录</span><br><span class="line">$ mkdir &#x2F;s3proxy</span><br><span class="line"># 挂载</span><br><span class="line">$ mount &#x2F;dev&#x2F;s3proxy&#x2F;lvs3proxy &#x2F;s3proxy&#x2F;</span><br><span class="line"># 开机自动挂载</span><br><span class="line">$ echo &#39;&#x2F;dev&#x2F;mapper&#x2F;s3proxy-lvs3proxy &#x2F;s3proxy xfs   defaults 0 0&#39; &gt;&#x2F;etc&#x2F;fstab</span><br></pre></td></tr></table></figure>
+
+<h2 id="查看是否挂载成功"><a href="#查看是否挂载成功" class="headerlink" title="查看是否挂载成功"></a>查看是否挂载成功</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ df -h</span><br><span class="line">Filesystem                     Size  Used Avail Use% Mounted on</span><br><span class="line">udev                           126G     0  126G   0% &#x2F;dev</span><br><span class="line">tmpfs                           26G  267M   25G   2% &#x2F;run</span><br><span class="line">&#x2F;dev&#x2F;sdc2                      439G  232G  185G  56% &#x2F;</span><br><span class="line">tmpfs                          126G  192K  126G   1% &#x2F;dev&#x2F;shm</span><br><span class="line">tmpfs                          5.0M  4.0K  5.0M   1% &#x2F;run&#x2F;lock</span><br><span class="line">tmpfs                          126G     0  126G   0% &#x2F;sys&#x2F;fs&#x2F;cgroup</span><br><span class="line">&#x2F;dev&#x2F;sdc1                      511M  3.7M  508M   1% &#x2F;boot&#x2F;efi</span><br><span class="line">tmpfs                           26G   28K   26G   1% &#x2F;run&#x2F;user&#x2F;108</span><br><span class="line">tmpfs                           26G  4.0K   26G   1% &#x2F;run&#x2F;user&#x2F;1000</span><br><span class="line">&#x2F;dev&#x2F;mapper&#x2F;s3proxy-lvs3proxy   15T  515G   15T   4% &#x2F;s3proxy</span><br></pre></td></tr></table></figure>
+
+<p>到这步就完成了</p>
+<h1 id="报错总结"><a href="#报错总结" class="headerlink" title="报错总结"></a>报错总结</h1><h2 id="错误“-run-lvm-lvmetad-socket：连接失败：没有这样的文件或目录”"><a href="#错误“-run-lvm-lvmetad-socket：连接失败：没有这样的文件或目录”" class="headerlink" title="错误“ /run/lvm/lvmetad.socket：连接失败：没有这样的文件或目录”"></a>错误“ /run/lvm/lvmetad.socket：连接失败：没有这样的文件或目录”</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;run&#x2F;lvm&#x2F;lvmetad.socket: connect failed: No such file or directory</span><br></pre></td></tr></table></figure>
+
+<p>解决方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">systemctl enable lvm2-lvmetad.service</span><br><span class="line">systemctl enable lvm2-lvmetad.socket</span><br><span class="line">systemctl start lvm2-lvmetad.service</span><br><span class="line">systemctl start lvm2-lvmetad.socket</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="未安装xfs"><a href="#未安装xfs" class="headerlink" title="未安装xfs"></a>未安装xfs</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkfs xfs command not found ubuntu</span><br></pre></td></tr></table></figure>
+
+<p>解决方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install   xfsprogs</span><br><span class="line">modinfo xfs</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>LVM是现在默认的磁盘分区工具了，之前只是在安装操作系统的时候用过，没有深入了解其工作原理，后面会出一期关于LVM的运维文章</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://www.cnblogs.com/wholj/p/10961705.html" target="_blank" rel="noopener">LVM实现将2块磁盘总空间“合二为一”并挂载到同一目录</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Rugod</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://rugod.com/2020/11/21/storage/disk-combined-into-one/">https://rugod.com/2020/11/21/storage/disk-combined-into-one/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://rugod.com" target="_blank">宇神之息</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Storage/">Storage</a><a class="post-meta__tags" href="/tags/LVM/">LVM</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Storage.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"/><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-button button--primary button--animated"> <i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lazyload post-qr-code__img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/wechat.JPG" alt="微信"/><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lazyload post-qr-code__img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/alipay.JPG" alt="支付宝"/><div class="post-qr-code__desc">支付宝</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="next-post pull-full"><a href="/2020/11/21/essay/Sangfor/"><img class="next_cover lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Essay.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">包夜随笔——2020.11.20</div></div></a></div></nav><hr><div id="post-comment"><div class="comment_headling"><i class="fa fa-comments fa-fw" aria-hidden="true"></i><span> 评论</span></div><div class="vcomment" id="vcomment"></div><script src="https://cdn.jsdelivr.net/gh/xaoxuu/volantis/js/volantis.min.js"></script><script>var GUEST_INFO = ['nick','mail','link'];
+var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+  return GUEST_INFO.indexOf(item) > -1
+});
+guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
+
+window.valine = new Valine({
+  el:'#vcomment',
+  notify: false,
+  verify: false,
+  appId: 'GkD8YSRxxCgXoW6LqFO3cKhd-gzGzoHsz',
+  appKey: 'DbbNrHwsCuK9Ehh2wgOw6UXL',
+  placeholder: '记得留下你的昵称和邮箱...可以快速收到回复哦',
+  avatar: 'monsterid',
+  meta: guest_info,
+  pageSize: '10',
+  lang: 'zh-cn',
+  recordIP: false,
+  serverURLs: ''
+});</script></div></article></main><footer id="footer" style="background-image: url(https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Storage.jpg)" data-type="photo"><div id="footer-wrap"><div class="copyright">&copy;2020 By Rugod</div><div class="footer_custom_text">弱小的人才习惯嘲讽和否定，而内心强大的人从不吝啬赞美和鼓励</div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="阅读模式"></i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换" target="_self">繁</a><i class="darkmode fa fa-moon-o" id="darkmode" title="夜间模式"></i></div><div id="rightside-config-show"><div id="rightside_config" title="设置"><i class="fa fa-cog" aria-hidden="true"></i></div><a id="to_comment" href="#post-comment" title="直达评论"><i class="scroll_to_comment fa fa-comments">  </i></a><i class="fa fa-list-ul close" id="mobile-toc-button" title="目录" aria-hidden="true"></i><i class="fa fa-arrow-up" id="go-up" title="回到顶部" aria-hidden="true"></i></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a href="https://github.com/wzpan/hexo-generator-search" target="_blank" rel="noopener" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script id="canvas_nest" color="255,0,0" opacity="0.7" zIndex="-1" count="99" mobile="false" src="/js/third-party/canvas-nest.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@latest/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/lazysizes@latest/lazysizes.min.js" async=""></script><script src="/js/third-party/ClickShowText.js"></script><script src="/js/search/local-search.js"></script></body></html>
