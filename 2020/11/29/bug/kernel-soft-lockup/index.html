@@ -1,0 +1,196 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>运维手册——Centos7内核软死锁 | 宇神之息</title><meta name="description" content="运维手册"><meta name="keywords" content="Operation Manual,Centos,Linux"><meta name="author" content="Rugod"><meta name="copyright" content="Rugod"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.ico"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="https://www.google-analytics.com" crossorigin="crossorigin"/><link rel="preconnect" href="https://hm.baidu.com"/><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="crossorigin"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="twitter:card" content="summary"><meta name="twitter:title" content="运维手册——Centos7内核软死锁"><meta name="twitter:description" content="运维手册"><meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Centos/Centos.jpg"><meta property="og:type" content="article"><meta property="og:title" content="运维手册——Centos7内核软死锁"><meta property="og:url" content="https://rugod.com/2020/11/29/bug/kernel-soft-lockup/"><meta property="og:site_name" content="宇神之息"><meta property="og:description" content="运维手册"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Centos/Centos.jpg"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>var autoChangeMode = '1'
+var t = Cookies.get("theme")
+if (autoChangeMode == '1'){
+  var isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+  var isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
+  var isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined){
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport){
+      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour < 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+  }
+  } else if (t == 'light') activateLightMode()
+  else activateDarkMode()
+
+} else if (autoChangeMode == '2'){
+  now = new Date();
+  hour = now.getHours();
+  isNight = hour < 6 || hour >= 18
+  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode() 
+} else {
+  if ( t == 'dark' ) activateDarkMode()
+  else if ( t == 'light') activateLightMode()
+}
+
+function activateDarkMode(){
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
+  }
+}
+function activateLightMode(){
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
+  }
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="canonical" href="https://rugod.com/2020/11/29/bug/kernel-soft-lockup/"><link rel="next" title="Centos7网络超时断开" href="https://rugod.com/2020/11/28/bug/network-timeout/"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?a29fc1f2b32c6a60aee5dbf412c89285";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-164950732-1', 'auto');
+ga('send', 'pageview');
+</script><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容:${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://www.rugod.cn/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: {"languages":{"author":"作者: Rugod","link":"链接: ","source":"来源: 宇神之息","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  ClickShowText: {"text":"宇神,牛逼","fontSize":"15px"},
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  baiduPush: true,
+  highlightCopy: true,
+  highlightLang: true,
+  highlightShrink: 'false',
+  isFontAwesomeV5: false,
+  isPhotoFigcaption: false
+  
+}</script><script>var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isSidebar: true  
+  }</script><noscript><style>
+#page-header {
+  opacity: 1
+}
+.justified-gallery img{
+  opacity: 1
+}
+</style></noscript><meta name="generator" content="Hexo 4.2.0"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Challenger.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">74</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">80</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">22</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于本人</span></a></div></div></div></div><i class="fa fa-arrow-right on" id="toggle-sidebar" aria-hidden="true">     </i><div id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#背景"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#现状"><span class="toc-number">2.</span> <span class="toc-text">现状</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#分析问题"><span class="toc-number">3.</span> <span class="toc-text">分析问题</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#内核软死锁"><span class="toc-number">3.1.</span> <span class="toc-text">内核软死锁</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#软死锁的原因"><span class="toc-number">3.2.</span> <span class="toc-text">软死锁的原因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#监控"><span class="toc-number">3.3.</span> <span class="toc-text">监控</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#解决问题"><span class="toc-number">4.</span> <span class="toc-text">解决问题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考资料"><span class="toc-number">6.</span> <span class="toc-text">参考资料</span></a></li></ol></div></div></div><div id="body-wrap"><div class="post-bg" id="nav" style="background-image: url(https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Centos/Centos.jpg)"><div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">宇神之息</a></span><span class="pull_right menus"><div id="search_button"><a class="site-page social-icon search"><i class="fa fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于本人</span></a></div></div><span class="toggle-menu close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span></span></div><div id="post-info"><div id="post-title"><div class="posttitle">运维手册——Centos7内核软死锁</div></div><div id="post-meta"><div class="meta-firstline"><time class="post-meta__date"><span class="post-meta__date-created" title="发表于 2020-11-29 13:36:12"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2020-11-29</span><span class="post-meta__separator">|</span><span class="post-meta__date-updated" title="更新于 2020-11-29 13:38:14"><i class="fa fa-history" aria-hidden="true"></i> 更新于 2020-11-29</span></time><span class="post-meta__categories"><span class="post-meta__separator">|</span><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/Linux/">Linux</a></span></div><div class="meta-secondline"> <span class="post-meta-wordcount"><i class="post-meta__icon fa fa-file-word-o" aria-hidden="true"></i><span>字数总计:</span><span class="word-count">2.6k</span><span class="post-meta__separator">|</span><i class="post-meta__icon fa fa-clock-o" aria-hidden="true"></i><span>阅读时长: 10 分钟</span></span></div><div class="meta-thirdline"><span class="post-meta-pv-cv"><span class="post-meta__separator">|</span><i class="fa fa-eye post-meta__icon" aria-hidden="true"> </i><span>阅读量:</span><span id="busuanzi_value_page_pv"></span></span><span class="post-meta-commentcount"><span class="post-meta__separator">|</span><i class="post-meta__icon fa fa-comment-o" aria-hidden="true"></i><span>评论数:</span><a href="/2020/11/29/bug/kernel-soft-lockup/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count comment-count" data-xid="/2020/11/29/bug/kernel-soft-lockup/" itemprop="commentCount"></span></a></span></div></div></div></div><main class="layout_post" id="content-inner"><article id="post"><div id="article-container"><p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p>
+<hr>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>最近准备做虚拟化，经过分析公司现有的设备后我选择了其中配置一样的两台机器并加装内存。</p>
+<p>加装后配置如下</p>
+<ul>
+<li>CPU:I5-9600KF</li>
+<li>内存:64G 2666MHZ</li>
+<li>磁盘:1THDD</li>
+</ul>
+<p>创建了几台虚拟机并稳定运行一段时间</p>
+<p>随着我把项目慢慢迁移到虚拟机上发现有一天突然所有机器都“似乎”挂掉了，一起来看看怎么回事吧。</p>
+<h1 id="现状"><a href="#现状" class="headerlink" title="现状"></a>现状</h1><p>研发人员有天突然发现有个服务挂了，让我查下原因，然后我发现有台机器上的pod状态处于Terminating 状态</p>
+<p>而且删除还没用</p>
+<p>google了一下出现Terminating的情况有以下几种</p>
+<ul>
+<li>磁盘空间不足</li>
+<li>存在 “i” 文件属性</li>
+<li>Docker 17 版本 bug</li>
+<li>存在 Finalizers</li>
+<li>低版本 kubelet list-watch 的 bug</li>
+<li>Dockerd 与 containerd 状态不同步</li>
+<li>Daemonset Controller Bug</li>
+</ul>
+<p>可惜发现目前的问题还不是由上面情况造成的</p>
+<p>后来观察了下，我又发现所有Terminating的pod都是一台机器上的</p>
+<p>然后执行kuberctl get nodes的时候发现</p>
+<p>这台机器的状态是notready</p>
+<p>好家伙，看来是服务器挂了，结果发现不仅这台机器挂了，还有几台机器我也ssh不进去了。</p>
+<p>它们又都是一台服务器虚拟化出来的机器</p>
+<h1 id="分析问题"><a href="#分析问题" class="headerlink" title="分析问题"></a>分析问题</h1><p>差不多定位到问题了，主机有问题，它虚拟化的机器当然有问题。</p>
+<p>我先ping这台机器，发现能通</p>
+<p>然后远程连接发现这台机器的CPU已经百分之100，然后一直恐怖地持续了1个多小时了。</p>
+<p>我在控制台上看虚拟机的界面都开启了，但实际上没有一台机器能运行</p>
+<p>目前这台机器跑了4台虚拟机</p>
+<p>我杀掉一台负载最高的一台虚拟机</p>
+<p>结果发现其他3台虚拟机又迅速把CPU吃满</p>
+<p>直到我杀掉所有进程</p>
+<p>把4台虚拟机释放，这才好起来了</p>
+<p>然后我了一台机器，正常运行</p>
+<p>进入这台机器看系统日志，发现报错如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: NMI watchdog: BUG: soft lockup - CPU#1 stuck for 23s! [kubelet:73052]</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: Modules linked in: veth vxlan ip6_udp_tunnel udp_tunnel xt_statistic xt_physdev xt_nat ip6table_nat nf_conntrack_ipv6 nf_defrag_ipv6 nf_nat_ipv6 ip6_tables xt_comment xt_mark xt_conntrack ipt_MASQUERADE nf_nat_masquerade_ipv4 nf_conntrack_netlink nfnetlink xt_addrtype iptable_filter iptable_nat nf_nat_ipv4 nf_nat overlay(T) vmw_vsock_vmci_transport vsock iosf_mbi crc32_pclmul ghash_clmulni_intel ppdev aesni_intel vmw_balloon lrw gf128mul glue_helper ablk_helper cryptd joydev pcspkr sg vmw_vmci i2c_piix4 parport_pc parport nf_conntrack_ipv4 nf_defrag_ipv4 br_netfilter bridge stp llc ip_vs_sh ip_vs_wrr ip_vs_rr ip_vs nf_conntrack sunrpc ip_tables xfs libcrc32c sr_mod cdrom sd_mod crc_t10dif crct10dif_generic ata_generic pata_acpi vmwgfx drm_kms_helper syscopyarea sysfillrect sysimgblt fb_sys_fops</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: ttm ata_piix drm nfit libata libnvdimm mptspi crct10dif_pclmul crct10dif_common scsi_transport_spi crc32c_intel mptscsih e1000 mptbase serio_raw drm_panel_orientation_quirks dm_mirror dm_region_hash dm_log dm_mod</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: CPU: 1 PID: 73052 Comm: kubelet Kdump: loaded Tainted: G               ------------ T 3.10.0-1127.el7.x86_64 #1</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: Hardware name: VMware, Inc. VMware Virtual Platform&#x2F;440BX Desktop Reference Platform, BIOS 6.00 02&#x2F;27&#x2F;2020</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: task: ffff88a5fe3862a0 ti: ffff88a60aaec000 task.ti: ffff88a60aaec000</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: RIP: 0010:[&lt;ffffffff9d716f62&gt;]  [&lt;ffffffff9d716f62&gt;] generic_exec_single+0x102&#x2F;0x1c0</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: RSP: 0000:ffff88a60aaefb60  EFLAGS: 00000202</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: RAX: 0000000000000080 RBX: ffff88a60aaefb30 RCX: 0000000000000003</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: RDX: ffffffff9de13b10 RSI: 0000000000000080 RDI: 0000000000000286</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: RBP: ffff88a60aaefba8 R08: ffffffff9de13b08 R09: ffffd4859e961580</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: R10: 0000000000004b35 R11: fffffffffffffffa R12: 0000000000000002</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: R13: ffff88a63ffd9008 R14: 0000000000000000 R15: 000000031d65acc0</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: FS:  00007f8c97fff700(0000) GS:ffff88a61d640000(0000) knlGS:0000000000000000</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: CR2: 00007f8cac560ee0 CR3: 0000000818c9a000 CR4: 00000000003607e0</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: Call Trace:</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: [&lt;ffffffff9d67e730&gt;] ? leave_mm+0x120&#x2F;0x120</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: [&lt;ffffffff9d67e730&gt;] ? leave_mm+0x120&#x2F;0x120</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: [&lt;ffffffff9d67e730&gt;] ? leave_mm+0x120&#x2F;0x120</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: [&lt;ffffffff9d71707f&gt;] smp_call_function_single+0x5f&#x2F;0xa0</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: [&lt;ffffffff9d984ee5&gt;] ? cpumask_next_and+0x35&#x2F;0x50</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: [&lt;ffffffff9d71762b&gt;] smp_call_function_many+0x22b&#x2F;0x270</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: [&lt;ffffffff9d67e8f8&gt;] native_flush_tlb_others+0xb8&#x2F;0xc0</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: [&lt;ffffffff9d67ea94&gt;] flush_tlb_page+0x54&#x2F;0xa0</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: [&lt;ffffffff9d8077f8&gt;] ptep_clear_flush+0x68&#x2F;0xa0</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: [&lt;ffffffff9d7ef345&gt;] wp_page_copy.isra.73+0x335&#x2F;0x5b0</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: [&lt;ffffffff9d7f176b&gt;] do_wp_page+0xfb&#x2F;0x720</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: [&lt;ffffffff9d871054&gt;] ? mntput+0x24&#x2F;0x40</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: [&lt;ffffffff9d85e266&gt;] ? path_openat+0x176&#x2F;0x5a0</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: [&lt;ffffffff9d7f5e02&gt;] handle_mm_fault+0xb22&#x2F;0xfb0</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: [&lt;ffffffff9dd8d653&gt;] __do_page_fault+0x213&#x2F;0x500</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: [&lt;ffffffff9dd8d975&gt;] do_page_fault+0x35&#x2F;0x90</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: [&lt;ffffffff9dd89778&gt;] page_fault+0x28&#x2F;0x30</span><br><span class="line">Nov 27 11:02:10 vm-20-41-k8s-node kernel: Code: 89 de 48 03 14 c5 e0 0f 35 9e 48 89 df e8 17 51 28 00 84 c0 75 53 45 85 ed 74 16 f6 43 20 01 74 10 0f 1f 84 00 00 00 00 00 f3 90 &lt;f6&gt; 43 20 01 75 f8 31 c0 48 8b 7c 24 28 65 48 33 3c 25 28 00 00</span><br></pre></td></tr></table></figure>
+
+<p>网上查了下资料发现这个报错叫作内核软死锁</p>
+<h2 id="内核软死锁"><a href="#内核软死锁" class="headerlink" title="内核软死锁"></a>内核软死锁</h2><p>这个bug没有让系统彻底死机，但是若干个进程（或者kernel thread）被锁死在了某个状态（一般在内核区域），很多情况下这个是由于内核锁的使用的问题。  </p>
+<p>Linux内核对于每一个cpu都有一个监控进程，在技术界这个叫做watchdog（看门狗）。通过ps –ef | grep watchdog能够看见，进程名称大概是watchdog/X（数字：cpu逻辑编号1/2/3/4之类的）。</p>
+<p>这个进程或者线程每一秒钟运行一次，否则会睡眠和待机。这个进程运行会收集每一个cpu运行时使用数据的时间并且存放到属于每个cpu自己的内核数据结构。在内核中有很多特定的中断函数。</p>
+<p>这些中断函数会调用soft lockup计数，他会使用当前的时间戳与特定（对应的）cpu的内核数据结构中保存的时间对比，如果发现当前的时间戳比对应cpu保存的时间大于设定的阀值，他就假设监测进程或看门狗线程在一个相当可观的时间还没有执。</p>
+<p>Cpu软锁为什么会产生，是怎么产生的？如果linux内核是经过精心设计安排的CPU调度访问，那么怎么会产生cpu软死锁？那么只能说由于用户开发的或者第三方软件引入，看我们服务器内核panic的原因就是qmgr进程引起。</p>
+<p>因为每一个无限的循环都会一直有一个cpu的执行流程（qmgr进程示一个后台邮件的消息队列服务进程），并且拥有一定的优先级。</p>
+<p>Cpu调度器调度一个驱动程序来运行，如果这个驱动程序有问题并且没有被检测到，那么这个驱动程序将会暂用cpu的很长时间。</p>
+<p>根据前面的描述，看门狗进程会抓住（catch）这一点并且抛出一个软死锁（soft lockup）错误。软死锁会挂起cpu使你的系统不可用。</p>
+<h2 id="软死锁的原因"><a href="#软死锁的原因" class="headerlink" title="软死锁的原因"></a>软死锁的原因</h2><ul>
+<li>服务器电源供电不足，导致CPU电压不稳导致CPU死锁</li>
+<li>虚机所在的宿主机的CPU太忙或磁盘IO太高</li>
+<li>BIOS KVM开启以后的相关bug，关闭KVM可解决，但关闭以后物理机不支持虚拟化</li>
+<li>VM网卡驱动存在bug，处理高水位流量时存在bug导致CPU死锁</li>
+<li>BIOS开启了超频，导致超频时电压不稳，容易出现CPU死锁</li>
+<li>Linux kernel存在bug</li>
+<li>KVM存在bug</li>
+</ul>
+<h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><p>万事离不开监控，通过我之前安装的K8S的监控可以清晰的发现，在之前Terminating的容器的生命周期里，最后CPU达到百分之100（2C），出现了2个这样Terminating的容器</p>
+<p>那么显而易见，这台虚拟机的进程把CPU跑满，导致这台虚拟机所在宿主机的CPU太慢，从而影响整个虚拟机集群</p>
+<h1 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h1><p>目前这台宿主机上虚拟化的4台配置如下</p>
+<p>三台2c 4g </p>
+<p>一台6c 48g</p>
+<p>而这台宿主机刚刚开始介绍说了是CPU I5-9600KF 只能虚拟化出来6c</p>
+<p>怪我当初太贪了，我想的是那3台机器应该占用不了2c，但是提高cpu上限能增加突发情况的CPU处理速度</p>
+<p>结果没考虑到当所有的机器都需要大量计算时，整体虚拟机的CPU核心数上限（12c）已经远远超过宿主机的CPU核心数（6c）</p>
+<p>最后我将这些机器老老实实改成3台1c的和一台3c的机器了，然后再更改pod的模板，将上限调低到1.2c 最多有2个容器在这个虚拟机上跑</p>
+<p>经过几天的测试后发现之前的问题已经不存在。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>总结其实没少好说的，贪了一手，毕竟我比较机智，目前只将部分测试环境的服务迁移到这些虚拟机上</p>
+<p>这个事件再次印证了一个道理，上生产之前一定要经过大量的测试，每一次暴露的问题都能让你少在生产重犯一些失误，敬畏你的工作——SRE。</p>
+<p>PS：至于为什么用酷睿的CPU，其实不是我想用，而是公司还剩很多主机，并且没有额外的服务器，只能拿主机当服务器使用了，就这么简单，我也想用至强的啊。。。</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://cloud.tencent.com/document/product/457/43238" target="_blank" rel="noopener">Pod 一直处于 Terminating 状态</a></p>
+<p><a href="https://www.cnblogs.com/RXDXB/p/12605529.html" target="_blank" rel="noopener">报错kernel:NMI watchdog: BUG: soft lockup - CPU#0 stuck for 22s</a></p>
+<hr>
+<p>版权声明：</p>
+<p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Rugod</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://rugod.com/2020/11/29/bug/kernel-soft-lockup/">https://rugod.com/2020/11/29/bug/kernel-soft-lockup/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://rugod.com" target="_blank">宇神之息</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Operation-Manual/">Operation Manual</a><a class="post-meta__tags" href="/tags/Centos/">Centos</a><a class="post-meta__tags" href="/tags/Linux/">Linux</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Centos/Centos.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"/><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-button button--primary button--animated"> <i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lazyload post-qr-code__img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/wechat.JPG" alt="微信"/><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lazyload post-qr-code__img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/alipay.JPG" alt="支付宝"/><div class="post-qr-code__desc">支付宝</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="next-post pull-full"><a href="/2020/11/28/bug/network-timeout/"><img class="next_cover lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Centos/Centos.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Centos7网络超时断开</div></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fa fa-fw fa-thumbs-up" aria-hidden="true"></i><span> 相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/2020/11/28/bug/network-timeout/" title="Centos7网络超时断开"><img class="relatedPosts_cover lazyload"data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Centos/Centos.jpg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-history fa-fw" aria-hidden="true"></i> 2020-11-28</div><div class="relatedPosts_title">Centos7网络超时断开</div></div></a></div><div class="relatedPosts_item"><a href="/2020/09/17/bug/reboot-mount/" title="运维手册——服务器重启后加载不了文件系统"><img class="relatedPosts_cover lazyload"data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Centos/Centos.jpg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-history fa-fw" aria-hidden="true"></i> 2020-10-11</div><div class="relatedPosts_title">运维手册——服务器重启后加载不了文件系统</div></div></a></div><div class="relatedPosts_item"><a href="/2020/10/11/linux/U-centos7-install/" title="U盘安装Centos7"><img class="relatedPosts_cover lazyload"data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Centos/Centos.jpg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-history fa-fw" aria-hidden="true"></i> 2020-10-11</div><div class="relatedPosts_title">U盘安装Centos7</div></div></a></div></div><div class="clear_both"></div></div><hr><div id="post-comment"><div class="comment_headling"><i class="fa fa-comments fa-fw" aria-hidden="true"></i><span> 评论</span></div><div class="vcomment" id="vcomment"></div><script src="https://cdn.jsdelivr.net/gh/xaoxuu/volantis/js/volantis.min.js"></script><script>var GUEST_INFO = ['nick','mail','link'];
+var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+  return GUEST_INFO.indexOf(item) > -1
+});
+guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
+
+window.valine = new Valine({
+  el:'#vcomment',
+  notify: false,
+  verify: false,
+  appId: 'GkD8YSRxxCgXoW6LqFO3cKhd-gzGzoHsz',
+  appKey: 'DbbNrHwsCuK9Ehh2wgOw6UXL',
+  placeholder: '记得留下你的昵称和邮箱...可以快速收到回复哦',
+  avatar: 'monsterid',
+  meta: guest_info,
+  pageSize: '10',
+  lang: 'zh-cn',
+  recordIP: false,
+  serverURLs: ''
+});</script></div></article></main><footer id="footer" style="background-image: url(https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Centos/Centos.jpg)" data-type="photo"><div id="footer-wrap"><div class="copyright">&copy;2020 By Rugod</div><div class="footer_custom_text">弱小的人才习惯嘲讽和否定，而内心强大的人从不吝啬赞美和鼓励</div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="阅读模式"></i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换" target="_self">繁</a><i class="darkmode fa fa-moon-o" id="darkmode" title="夜间模式"></i></div><div id="rightside-config-show"><div id="rightside_config" title="设置"><i class="fa fa-cog" aria-hidden="true"></i></div><a id="to_comment" href="#post-comment" title="直达评论"><i class="scroll_to_comment fa fa-comments">  </i></a><i class="fa fa-list-ul close" id="mobile-toc-button" title="目录" aria-hidden="true"></i><i class="fa fa-arrow-up" id="go-up" title="回到顶部" aria-hidden="true"></i></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a href="https://github.com/wzpan/hexo-generator-search" target="_blank" rel="noopener" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script id="canvas_nest" color="255,0,0" opacity="0.7" zIndex="-1" count="99" mobile="false" src="/js/third-party/canvas-nest.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@latest/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/lazysizes@latest/lazysizes.min.js" async=""></script><script src="/js/third-party/ClickShowText.js"></script><script src="/js/search/local-search.js"></script></body></html>
