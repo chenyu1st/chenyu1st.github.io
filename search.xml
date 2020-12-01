@@ -4,6 +4,35 @@
   
     
     <entry>
+      <title>运维手册——Ubuntu自动更新导致Docker挂掉</title>
+      <link href="/2020/12/01/bug/ubuntu-stop-docker/"/>
+      <url>/2020/12/01/bug/ubuntu-stop-docker/</url>
+      
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p><hr><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>最近研发告诉我es的接口有问题，让我看看有什么异常，我进入服务器发现docker莫名其妙的关闭了，一起来看看什么情况吧。</p><h1 id="现状"><a href="#现状" class="headerlink" title="现状"></a>现状</h1><p>进入服务器执行docker ps</p><p>报错Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?</p><p>什么情况？docker居然挂了</p><p>然后我启动docker</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker ps </span><br><span class="line">efe0e0e6afb6        docker.elastic.co&#x2F;elasticsearch&#x2F;elasticsearch:7.6.1   &quot;&#x2F;usr&#x2F;local&#x2F;bin&#x2F;dock…&quot;   5 months ago        Exited (143) 8 minutes ago          0.0.0.0:9200-&gt;9200&#x2F;tcp, 0.0.0.0:9300-&gt;9300&#x2F;tcp   elasticsearch</span><br></pre></td></tr></table></figure><p>es还没加入docker自启，没办法，再手动执行下启动。</p><p>然后让研发去看业务情况</p><p>已恢复正常</p><p>docker莫名其妙挂掉是我从认识docker到现在第一次遇见的问题（又是一个很好的案例）</p><p>我开始排查问题了</p><h1 id="分析问题"><a href="#分析问题" class="headerlink" title="分析问题"></a>分析问题</h1><p>这台机器运行很久了es，按道理来说不会出现很大的问题，但是我还是先看看es的日志</p><h2 id="查看es的日志"><a href="#查看es的日志" class="headerlink" title="查看es的日志"></a>查看es的日志</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">docker logs --since&#x3D;10m elasticsearch</span><br><span class="line">&#123;&quot;type&quot;: &quot;server&quot;, &quot;timestamp&quot;: &quot;2020-12-01T06:12:13,007Z&quot;, &quot;level&quot;: &quot;INFO&quot;, &quot;component&quot;: &quot;o.e.n.Node&quot;, &quot;cluster.name&quot;: &quot;docker-cluster&quot;, &quot;node.name&quot;: &quot;a46b64546571&quot;, &quot;message&quot;: &quot;stopping ...&quot;, &quot;cluster.uuid&quot;: &quot;szpCxH1aSs-_lhcrNkWsHA&quot;, &quot;node.id&quot;: &quot;gqNUYDc3Q3-GEHODoSu_Hw&quot;  &#125;</span><br><span class="line">&#123;&quot;type&quot;: &quot;server&quot;, &quot;timestamp&quot;: &quot;2020-12-01T06:12:13,031Z&quot;, &quot;level&quot;: &quot;INFO&quot;, &quot;component&quot;: &quot;o.e.x.w.WatcherService&quot;, &quot;cluster.name&quot;: &quot;docker-cluster&quot;, &quot;node.name&quot;: &quot;a46b64546571&quot;, &quot;message&quot;: &quot;stopping watch service, reason [shutdown initiated]&quot;, &quot;cluster.uuid&quot;: &quot;szpCxH1aSs-_lhcrNkWsHA&quot;, &quot;node.id&quot;: &quot;gqNUYDc3Q3-GEHODoSu_Hw&quot;  &#125;</span><br><span class="line">&#123;&quot;type&quot;: &quot;server&quot;, &quot;timestamp&quot;: &quot;2020-12-01T06:12:13,033Z&quot;, &quot;level&quot;: &quot;INFO&quot;, &quot;component&quot;: &quot;o.e.x.w.WatcherLifeCycleService&quot;, &quot;cluster.name&quot;: &quot;docker-cluster&quot;, &quot;node.name&quot;: &quot;a46b64546571&quot;, &quot;message&quot;: &quot;watcher has stopped and shutdown&quot;, &quot;cluster.uuid&quot;: &quot;szpCxH1aSs-_lhcrNkWsHA&quot;, &quot;node.id&quot;: &quot;gqNUYDc3Q3-GEHODoSu_Hw&quot;  &#125;</span><br><span class="line">&#123;&quot;type&quot;: &quot;server&quot;, &quot;timestamp&quot;: &quot;2020-12-01T06:12:13,222Z&quot;, &quot;level&quot;: &quot;INFO&quot;, &quot;component&quot;: &quot;o.e.x.m.p.l.CppLogMessageHandler&quot;, &quot;cluster.name&quot;: &quot;docker-cluster&quot;, &quot;node.name&quot;: &quot;a46b64546571&quot;, &quot;message&quot;: &quot;[controller&#x2F;107] [Main.cc@150] Ml controller exiting&quot;, &quot;cluster.uuid&quot;: &quot;szpCxH1aSs-_lhcrNkWsHA&quot;, &quot;node.id&quot;: &quot;gqNUYDc3Q3-GEHODoSu_Hw&quot;  &#125;</span><br><span class="line">&#123;&quot;type&quot;: &quot;server&quot;, &quot;timestamp&quot;: &quot;2020-12-01T06:12:13,223Z&quot;, &quot;level&quot;: &quot;INFO&quot;, &quot;component&quot;: &quot;o.e.x.m.p.NativeController&quot;, &quot;cluster.name&quot;: &quot;docker-cluster&quot;, &quot;node.name&quot;: &quot;a46b64546571&quot;, &quot;message&quot;: &quot;Native controller process has stopped - no new native processes can be started&quot;, &quot;cluster.uuid&quot;: &quot;szpCxH1aSs-_lhcrNkWsHA&quot;, &quot;node.id&quot;: &quot;gqNUYDc3Q3-GEHODoSu_Hw&quot;  &#125;</span><br><span class="line">&#123;&quot;type&quot;: &quot;server&quot;, &quot;timestamp&quot;: &quot;2020-12-01T06:12:13,254Z&quot;, &quot;level&quot;: &quot;INFO&quot;, &quot;component&quot;: &quot;o.e.n.Node&quot;, &quot;cluster.name&quot;: &quot;docker-cluster&quot;, &quot;node.name&quot;: &quot;a46b64546571&quot;, &quot;message&quot;: &quot;stopped&quot;, &quot;cluster.uuid&quot;: &quot;szpCxH1aSs-_lhcrNkWsHA&quot;, &quot;node.id&quot;: &quot;gqNUYDc3Q3-GEHODoSu_Hw&quot;  &#125;</span><br><span class="line">&#123;&quot;type&quot;: &quot;server&quot;, &quot;timestamp&quot;: &quot;2020-12-01T06:12:13,254Z&quot;, &quot;level&quot;: &quot;INFO&quot;, &quot;component&quot;: &quot;o.e.n.Node&quot;, &quot;cluster.name&quot;: &quot;docker-cluster&quot;, &quot;node.name&quot;: &quot;a46b64546571&quot;, &quot;message&quot;: &quot;closing ...&quot;, &quot;cluster.uuid&quot;: &quot;szpCxH1aSs-_lhcrNkWsHA&quot;, &quot;node.id&quot;: &quot;gqNUYDc3Q3-GEHODoSu_Hw&quot;  &#125;</span><br><span class="line">&#123;&quot;type&quot;: &quot;server&quot;, &quot;timestamp&quot;: &quot;2020-12-01T06:12:13,283Z&quot;, &quot;level&quot;: &quot;INFO&quot;, &quot;component&quot;: &quot;o.e.n.Node&quot;, &quot;cluster.name&quot;: &quot;docker-cluster&quot;, &quot;node.name&quot;: &quot;a46b64546571&quot;, &quot;message&quot;: &quot;closed&quot;, &quot;cluster.uuid&quot;: &quot;szpCxH1aSs-_lhcrNkWsHA&quot;, &quot;node.id&quot;: &quot;gqNUYDc3Q3-GEHODoSu_Hw&quot;  &#125;</span><br><span class="line">OpenJDK 64-Bit Server VM warning: Option UseConcMarkSweepGC was deprecated in version 9.0 and will likely be removed in a future release.</span><br><span class="line">&#123;&quot;type&quot;: &quot;server&quot;, &quot;timestamp&quot;: &quot;2020-12-01T06:20:32,884Z&quot;, &quot;level&quot;: &quot;INFO&quot;, &quot;component&quot;: &quot;o.e.e.NodeEnvironment&quot;, &quot;cluster.name&quot;: &quot;docker-cluster&quot;, &quot;node.name&quot;: &quot;a46b64546571&quot;, &quot;message&quot;: &quot;using [1] data paths, mounts [[&#x2F;usr&#x2F;share&#x2F;elasticsearch&#x2F;data (&#x2F;dev&#x2F;xvda1)]], net usable_space [115.9gb], net total_space [290.7gb], types [ext4]&quot; &#125;</span><br><span class="line">&#123;&quot;type&quot;: &quot;server&quot;, &quot;timestamp&quot;: &quot;2020-12-01T06:20:32,887Z&quot;, &quot;level&quot;: &quot;INFO&quot;, &quot;component&quot;: &quot;o.e.e.NodeEnvironment&quot;, &quot;cluster.name&quot;: &quot;docker-cluster&quot;, &quot;node.name&quot;: &quot;a46b64546571&quot;, &quot;message&quot;: &quot;heap size [989.8mb], compressed ordinary object pointers [true]&quot; &#125;</span><br><span class="line">&#123;&quot;type&quot;: &quot;server&quot;, &quot;timestamp&quot;: &quot;2020-12-01T06:20:33,107Z&quot;, &quot;level&quot;: &quot;INFO&quot;, &quot;component&quot;: &quot;o.e.n.Node&quot;, &quot;cluster.name&quot;: &quot;docker-cluster&quot;, &quot;node.name&quot;: &quot;a46b64546571&quot;, &quot;message&quot;: &quot;node name [a46b64546571], node ID [gqNUYDc3Q3-GEHODoSu_Hw], cluster name [docker-cluster]&quot; &#125;</span><br><span class="line">&#123;&quot;type&quot;: &quot;server&quot;, &quot;timestamp&quot;: &quot;2020-12-01T06:20:33,107Z&quot;, &quot;level&quot;: &quot;INFO&quot;, &quot;component&quot;: &quot;o.e.n.Node&quot;, &quot;cluster.name&quot;: &quot;docker-cluster&quot;, &quot;node.name&quot;: &quot;a46b64546571&quot;, &quot;message&quot;: &quot;version[7.6.1], pid[1], build[default&#x2F;docker&#x2F;aa751e09be0a5072e8570670309b1f12348f023b&#x2F;2020-02-29T00:15:25.529771Z], OS[Linux&#x2F;4.4.0-1107-aws&#x2F;amd64], JVM[AdoptOpenJDK&#x2F;OpenJDK 64-Bit Server VM&#x2F;13.0.2&#x2F;13.0.2+8]&quot; &#125;</span><br><span class="line">&#123;&quot;type&quot;: &quot;server&quot;, &quot;timestamp&quot;: &quot;2020-12-01T06:20:33,108Z&quot;, &quot;level&quot;: &quot;INFO&quot;, &quot;component&quot;: &quot;o.e.n.Node&quot;, &quot;cluster.name&quot;: &quot;docker-cluster&quot;, &quot;node.name&quot;: &quot;a46b64546571&quot;, &quot;message&quot;: &quot;JVM home [&#x2F;usr&#x2F;share&#x2F;elasticsearch&#x2F;jdk]&quot; &#125;</span><br><span class="line">&#123;&quot;type&quot;: &quot;server&quot;, &quot;timestamp&quot;: &quot;2020-12-01T06:20:33,108Z&quot;, &quot;level&quot;: &quot;INFO&quot;, &quot;component&quot;: &quot;o.e.n.Node&quot;, &quot;cluster.name&quot;: &quot;docker-cluster&quot;, &quot;node.name&quot;: &quot;a46b64546571&quot;, &quot;message&quot;: &quot;JVM arguments [-Des.networkaddress.cache.ttl&#x3D;60, -Des.networkaddress.cache.negative.ttl&#x3D;10, -XX:+AlwaysPreTouch, -Xss1m, -Djava.awt.headless&#x3D;true, -Dfile.encoding&#x3D;UTF-8, -Djna.nosys&#x3D;true, -XX:-OmitStackTraceInFastThrow, -Dio.netty.noUnsafe&#x3D;true, -Dio.netty.noKeySetOptimization&#x3D;true, -Dio.netty.recycler.maxCapacityPerThread&#x3D;0, -Dio.netty.allocator.numDirectArenas&#x3D;0, -Dlog4j.shutdownHookEnabled&#x3D;false, -Dlog4j2.disable.jmx&#x3D;true, -Djava.locale.providers&#x3D;COMPAT, -Xms1g, -Xmx1g, -XX:+UseConcMarkSweepGC, -XX:CMSInitiatingOccupancyFraction&#x3D;75, -XX:+UseCMSInitiatingOccupancyOnly, -Djava.io.tmpdir&#x3D;&#x2F;tmp&#x2F;elasticsearch-10754764247634730824, -XX:+HeapDumpOnOutOfMemoryError, -XX:HeapDumpPath&#x3D;data, -XX:ErrorFile&#x3D;logs&#x2F;hs_err_pid%p.log, -Xlog:gc*,gc+age&#x3D;trace,safepoint:file&#x3D;logs&#x2F;gc.log:utctime,pid,tags:filecount&#x3D;32,filesize&#x3D;64m, -Des.cgroups.hierarchy.override&#x3D;&#x2F;, -XX:MaxDirectMemorySize&#x3D;536870912, -Des.path.home&#x3D;&#x2F;usr&#x2F;share&#x2F;elasticsearch, -Des.path.conf&#x3D;&#x2F;usr&#x2F;share&#x2F;elasticsearch&#x2F;config, -Des.distribution.flavor&#x3D;default, -Des.distribution.type&#x3D;docker, -Des.bundled_jdk&#x3D;true]&quot; &#125;</span><br><span class="line">&#123;&quot;type&quot;: &quot;server&quot;, &quot;timestamp&quot;: &quot;2020-12-01T06:20:35,100Z&quot;, &quot;level&quot;: &quot;INFO&quot;, &quot;component&quot;: &quot;o.e.p.PluginsService&quot;, &quot;cluster.name&quot;: &quot;docker-cluster&quot;, &quot;node.name&quot;: &quot;a46b64546571&quot;, &quot;message&quot;: &quot;loaded module [aggs-matrix-stats]&quot; &#125;</span><br></pre></td></tr></table></figure><p>没有发现异常的报错</p><p>在06:12:13 es shutdown initiated，然后就是在我重启es时候的启动日志</p><h2 id="查看系统日志"><a href="#查看系统日志" class="headerlink" title="查看系统日志"></a>查看系统日志</h2><p>其实docker服务端挂了应该查看系统日志的，由于该系统是ubuntu，系统日志和centos的文件名不一样</p><ul><li>ubuntu:/var/log/syslog</li><li>centos:/var/log/message</li></ul><p>查看系统日志</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">Dec  1 06:12:06 ip-172-31-9-211 systemd[1]: Starting Daily apt upgrade and clean activities...</span><br><span class="line">Dec  1 06:12:12 ip-172-31-9-211 systemd[1]: Stopping Docker Application Container Engine...</span><br><span class="line">Dec  1 06:12:12 ip-172-31-9-211 dockerd[9207]: time&#x3D;&quot;2020-12-01T06:12:12.888077281Z&quot; level&#x3D;info msg&#x3D;&quot;Processing signal &#39;terminated&#39;&quot;</span><br><span class="line">Dec  1 06:12:13 ip-172-31-9-211 containerd[9012]: time&#x3D;&quot;2020-12-01T06:12:13.644972637Z&quot; level&#x3D;info msg&#x3D;&quot;shim reaped&quot; id&#x3D;a46b645465716f6a73d53e469e5309374203ac66a22a8cb24e580fa5e323bf94</span><br><span class="line">Dec  1 06:12:13 ip-172-31-9-211 dockerd[9207]: time&#x3D;&quot;2020-12-01T06:12:13.656582665Z&quot; level&#x3D;info msg&#x3D;&quot;ignoring event&quot; module&#x3D;libcontainerd namespace&#x3D;moby topic&#x3D;&#x2F;tasks&#x2F;delete type&#x3D;&quot;*events.TaskDelete&quot;</span><br><span class="line">Dec  1 06:12:13 ip-172-31-9-211 kernel: [16150387.556365] docker0: port 1(veth0648dd7) entered disabled state</span><br><span class="line">Dec  1 06:12:13 ip-172-31-9-211 kernel: [16150387.556413] vetha405001: renamed from eth0</span><br><span class="line">Dec  1 06:12:13 ip-172-31-9-211 kernel: [16150387.602825] docker0: port 1(veth0648dd7) entered disabled state</span><br><span class="line">Dec  1 06:12:13 ip-172-31-9-211 kernel: [16150387.605100] device veth0648dd7 left promiscuous mode</span><br><span class="line">Dec  1 06:12:13 ip-172-31-9-211 kernel: [16150387.605102] docker0: port 1(veth0648dd7) entered disabled state</span><br><span class="line">Dec  1 06:12:13 ip-172-31-9-211 dockerd[9207]: time&#x3D;&quot;2020-12-01T06:12:13.891197598Z&quot; level&#x3D;info msg&#x3D;&quot;stopping event stream following graceful shutdown&quot; error&#x3D;&quot;&lt;nil&gt;&quot; module&#x3D;libcontainerd namespace&#x3D;moby</span><br><span class="line">Dec  1 06:12:13 ip-172-31-9-211 systemd[1]: Stopped Docker Application Container Engine.</span><br><span class="line">Dec  1 06:12:13 ip-172-31-9-211 systemd[1]: Stopping containerd container runtime...</span><br><span class="line">Dec  1 06:12:13 ip-172-31-9-211 systemd[1]: Closed Docker Socket for the API.</span><br><span class="line">Dec  1 06:12:13 ip-172-31-9-211 containerd[9012]: time&#x3D;&quot;2020-12-01T06:12:13.897714411Z&quot; level&#x3D;info msg&#x3D;&quot;Stop CRI service&quot;</span><br><span class="line">Dec  1 06:12:13 ip-172-31-9-211 systemd[1]: Stopped containerd container runtime.</span><br><span class="line">Dec  1 06:12:15 ip-172-31-9-211 systemd[1]: Reloading.</span><br><span class="line">Dec  1 06:12:15 ip-172-31-9-211 systemd[1]: Started ACPI event daemon.</span><br><span class="line">Dec  1 06:12:15 ip-172-31-9-211 systemd[1]: Reloading.</span><br><span class="line">Dec  1 06:12:15 ip-172-31-9-211 systemd[1]: Started ACPI event daemon.</span><br><span class="line">Dec  1 06:12:16 ip-172-31-9-211 systemd[1]: Reloading.</span><br><span class="line">Dec  1 06:12:16 ip-172-31-9-211 systemd[1]: Started ACPI event daemon.</span><br><span class="line">Dec  1 06:12:16 ip-172-31-9-211 systemd[1]: Starting containerd container runtime...</span><br><span class="line">Dec  1 06:12:16 ip-172-31-9-211 systemd[1]: Started containerd container runtime.</span><br><span class="line">Dec  1 06:12:16 ip-172-31-9-211 containerd[23029]: time&#x3D;&quot;2020-12-01T06:12:16.488707190Z&quot; level&#x3D;info msg&#x3D;&quot;starting containerd&quot; revision&#x3D; version&#x3D;&quot;1.2.6-0ubuntu1~16.04.5&quot;</span><br><span class="line">Dec  1 06:12:16 ip-172-31-9-211 containerd[23029]: time&#x3D;&quot;2020-12-01T06:12:16.489313544Z&quot; level&#x3D;info msg&#x3D;&quot;loading plugin &quot;io.containerd.content.v1.content&quot;...&quot; type&#x3D;io.containerd.content.v1</span><br><span class="line">Dec  1 06:12:16 ip-172-31-9-211 containerd[23029]: time&#x3D;&quot;2020-12-01T06:12:16.489354448Z&quot; level&#x3D;info msg&#x3D;&quot;loading plugin &quot;io.containerd.snapshotter.v1.btrfs&quot;...&quot; type&#x3D;io.containerd.snapshotter.v1</span><br><span class="line">Dec  1 06:12:16 ip-172-31-9-211 containerd[23029]: time&#x3D;&quot;2020-12-01T06:12:16.489512243Z&quot; level&#x3D;warning msg&#x3D;&quot;failed to load plugin io.containerd.snapshotter.v1.btrfs&quot; error&#x3D;&quot;path &#x2F;var&#x2F;lib&#x2F;containerd&#x2F;io.containerd.snapshotter.v1.btrfs must be a btrfs filesystem to be used with the btrfs snapshotter&quot;</span><br><span class="line">Dec  1 06:12:16 ip-172-31-9-211 containerd[23029]: time&#x3D;&quot;2020-12-01T06:12:16.489526672Z&quot; level&#x3D;info msg&#x3D;&quot;loading plugin &quot;io.containerd.snapshotter.v1.aufs&quot;...&quot; type&#x3D;io.containerd.snapshotter.v1</span><br><span class="line">Dec  1 06:12:16 ip-172-31-9-211 containerd[23029]: time&#x3D;&quot;2020-12-01T06:12:16.491827595Z&quot; level&#x3D;info msg&#x3D;&quot;loading plugin &quot;io.containerd.snapshotter.v1.native&quot;...&quot; type&#x3D;io.containerd.snapshotter.v1</span><br><span class="line">Dec  1 06:12:16 ip-172-31-9-211 containerd[23029]: time&#x3D;&quot;2020-12-01T06:12:16.491861430Z&quot; level&#x3D;info msg&#x3D;&quot;loading plugin &quot;io.containerd.snapshotter.v1.overlayfs&quot;...&quot; type&#x3D;io.containerd.snapshotter.v1</span><br><span class="line">Dec  1 06:12:16 ip-172-31-9-211 containerd[23029]: time&#x3D;&quot;2020-12-01T06:12:16.492928937Z&quot; level&#x3D;info msg&#x3D;&quot;loading plugin &quot;io.containerd.snapshotter.v1.zfs&quot;...&quot; type&#x3D;io.containerd.snapshotter.v1</span><br><span class="line">Dec  1 06:12:16 ip-172-31-9-211 containerd[23029]: time&#x3D;&quot;2020-12-01T06:12:16.493102743Z&quot; level&#x3D;warning msg&#x3D;&quot;failed to load plugin io.containerd.snapshotter.v1.zfs&quot; error&#x3D;&quot;path &#x2F;var&#x2F;lib&#x2F;containerd&#x2F;io.containerd.snapshotter.v1.zfs must be a zfs filesystem to be used with the zfs snapshotter&quot;</span><br><span class="line">Dec  1 06:12:16 ip-172-31-9-211 containerd[23029]: time&#x3D;&quot;2020-12-01T06:12:16.493123074Z&quot; level&#x3D;info msg&#x3D;&quot;loading plugin &quot;io.containerd.metadata.v1.bolt&quot;...&quot; type&#x3D;io.containerd.metadata.v1</span><br><span class="line">Dec  1 06:12:16 ip-172-31-9-211 containerd[23029]: time&#x3D;&quot;2020-12-01T06:12:16.493137475Z&quot; level&#x3D;warning msg&#x3D;&quot;could not use snapshotter zfs in metadata plugin&quot; error&#x3D;&quot;path &#x2F;var&#x2F;lib&#x2F;containerd&#x2F;io.containerd.snapshotter.v1.zfs must be a zfs filesystem to be used with the zfs snapshotter&quot;</span><br><span class="line">Dec  1 06:12:16 ip-172-31-9-211 containerd[23029]: time&#x3D;&quot;2020-12-01T06:12:16.493161028Z&quot; level&#x3D;warning msg&#x3D;&quot;could not use snapshotter btrfs in metadata plugin&quot; error&#x3D;&quot;path &#x2F;var&#x2F;lib&#x2F;containerd&#x2F;io.containerd.snapshotter.v1.btrfs must be a btrfs filesystem to be used with the btrfs snapshotter&quot;</span><br></pre></td></tr></table></figure><p>果然发现问题</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Starting Daily apt upgrade and clean activities</span><br><span class="line">Stopping Docker Application Container Engine</span><br></pre></td></tr></table></figure><p>问了下专业玩ubuntu的研发，他说这个是ubuntu的自动更新，默认ubuntu是开启了这个自动更新</p><p>但是他也不明白为什么自动更新会关闭Docker </p><p>google发现网上有很多吐槽ubuntu自动更新的。。。</p><p>网上随便截几个例子</p><ul><li><p>自动更新导致Mysql关闭</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">May 17 06:53:19 campaygn-production systemd[1]: Starting Daily apt upgrade and clean activities...</span><br><span class="line">May 17 06:53:27 campaygn-production systemd[1]: Reloading.</span><br><span class="line">May 17 06:53:27 campaygn-production systemd[1]: Started ACPI event daemon.</span><br><span class="line">May 17 06:53:27 campaygn-production systemd[1]: Stopping MySQL Community Server...</span><br><span class="line">May 17 06:53:36 campaygn-production systemd[1]: Stopped MySQL Community Server.</span><br></pre></td></tr></table></figure></li><li><p>自动更新导致系统时区会莫名其妙的变成美国时区</p></li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Jan  3 06:39:19 s1 systemd[1]: Starting Daily apt upgrade and clean activities...</span><br><span class="line">Jan  3 06:39:39 s1 systemd[1]: Started Daily apt upgrade and clean activities.</span><br></pre></td></tr></table></figure><p>这样看起来，至少我认为生产环境不应该开启自动更新。。。</p><h2 id="刨根问底"><a href="#刨根问底" class="headerlink" title="刨根问底"></a>刨根问底</h2><p>到底是自动更新了什么，导致docker重启？</p><p>google了ubuntu的更新日志存放位置为/var/log/apt/</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">$:&#x2F;var&#x2F;log&#x2F;apt# ll -rth</span><br><span class="line">total 112K</span><br><span class="line">-rw-r-----  1 root adm    1.3K Dec 17  2019 term.log.12.gz</span><br><span class="line">-rw-r--r--  1 root root    464 Dec 17  2019 history.log.12.gz</span><br><span class="line">-rw-r-----  1 root adm    2.1K Jan 29  2020 term.log.11.gz</span><br><span class="line">-rw-r--r--  1 root root    811 Jan 29  2020 history.log.11.gz</span><br><span class="line">-rw-r-----  1 root adm    1.9K Feb 25  2020 term.log.10.gz</span><br><span class="line">-rw-r--r--  1 root root    602 Feb 25  2020 history.log.10.gz</span><br><span class="line">-rw-r-----  1 root adm    1.5K Mar 26  2020 term.log.9.gz</span><br><span class="line">-rw-r--r--  1 root root    480 Mar 26  2020 history.log.9.gz</span><br><span class="line">-rw-r-----  1 root adm    1.9K Apr 30  2020 term.log.8.gz</span><br><span class="line">-rw-r--r--  1 root root    659 Apr 30  2020 history.log.8.gz</span><br><span class="line">-rw-r-----  1 root adm    2.1K May 29  2020 term.log.7.gz</span><br><span class="line">-rw-r--r--  1 root root    767 May 29  2020 history.log.7.gz</span><br><span class="line">-rw-r-----  1 root adm    1.7K Jun 29 06:51 term.log.6.gz</span><br><span class="line">-rw-r--r--  1 root root    545 Jun 29 06:51 history.log.6.gz</span><br><span class="line">-rw-r-----  1 root adm    2.2K Jul 31 06:42 term.log.5.gz</span><br><span class="line">-rw-r--r--  1 root root    701 Jul 31 06:42 history.log.5.gz</span><br><span class="line">-rw-r-----  1 root adm    2.1K Aug 28 06:16 term.log.4.gz</span><br><span class="line">-rw-r--r--  1 root root    735 Aug 28 06:16 history.log.4.gz</span><br><span class="line">-rw-r-----  1 root adm    1.8K Sep 23 06:27 term.log.3.gz</span><br><span class="line">-rw-r--r--  1 root root    585 Sep 23 06:27 history.log.3.gz</span><br><span class="line">-rw-r-----  1 root adm    2.4K Oct 30 06:42 term.log.2.gz</span><br><span class="line">-rw-r--r--  1 root root    864 Oct 30 06:42 history.log.2.gz</span><br><span class="line">-rw-r-----  1 root adm    1.2K Dec  1 06:12 term.log.1.gz</span><br><span class="line">-rw-r--r--  1 root root    556 Dec  1 06:12 history.log.1.gz</span><br><span class="line">-rw-r-----  1 root adm     782 Dec  1 08:29 term.log</span><br><span class="line">-rw-r--r--  1 root root    164 Dec  1 08:29 history.log</span><br></pre></td></tr></table></figure><p>我的天，都从2019年更新到现在了，太牛了</p><p>看下Dec  1 06:12的日志</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Start-Date: 2020-12-01  06:12:11</span><br><span class="line">Commandline: &#x2F;usr&#x2F;bin&#x2F;unattended-upgrade</span><br><span class="line">Upgrade: containerd:amd64 (1.2.6-0ubuntu1~16.04.4, 1.2.6-0ubuntu1~16.04.5)</span><br><span class="line">End-Date: 2020-12-01  06:12:16</span><br></pre></td></tr></table></figure><p>containerd ？？？</p><p>这个不是CNCF的毕业项目——标准的容器进行时吗</p><p>为了防止docker一家独大，docker当年的实现被拆分出了几个标准化的模块，标准化的目的是模块是可被其他实现替换的，不由任何一个厂商控制。</p><p>docker由 docker-client ,dockerd,containerd,docker-shim,runc组成，所以containerd是docker的基础组件之一</p><p>如果你不知道containerd是做什么的，那么请参考下面链接（包括但不限于）进行学习：</p><p><a href="https://github.com/containerd/containerd" target="_blank" rel="noopener">github-containerd</a></p><p>然后我去看github上的项目发现它刚刚更新了，虽然是10多个小时前更新的，但是要把稳定的包上传到apt源上应该还需要一定时间，这样就对上了。</p><h1 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h1><p>为了保证生产环境系统的稳定性，建议关闭自动更新，有需求时可以手动执行apt update</p><p>关闭命令如下</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get remove unattended-upgrades</span><br><span class="line">sudo systemctl stop apt-daily.timer</span><br><span class="line">sudo systemctl disable apt-daily.timer</span><br><span class="line">sudo systemctl disable apt-daily.service</span><br><span class="line">sudo systemctl daemon-reload</span><br></pre></td></tr></table></figure><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>本次案例从发现问题到本能解决问题花了8分钟，如果按一天的可靠性来算，我只能达到2个9的标准，监控体系正在构建中，我太难了啊。</p><p>加油吧。</p><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://superuser.com/questions/1327884/how-to-disable-daily-upgrade-and-clean-on-ubuntu-16-04" target="_blank" rel="noopener">How to disable daily upgrade and clean on Ubuntu 16.04</a></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Docker </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Operation Manual </tag>
+            
+            <tag> Docker </tag>
+            
+            <tag> Ubuntu </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>《SRE：Google运维解密》读书心得(三)——SRE团队指导思想（上）</title>
       <link href="/2020/11/29/sre/google-sre-3/"/>
       <url>/2020/11/29/sre/google-sre-3/</url>
@@ -512,11 +541,11 @@
       
         <tags>
             
+            <tag> CI/CD </tag>
+            
             <tag> Devops </tag>
             
             <tag> 自动化 </tag>
-            
-            <tag> CI/CD </tag>
             
             <tag> Jenkins </tag>
             
@@ -570,11 +599,11 @@
       
         <tags>
             
+            <tag> Operation Manual </tag>
+            
             <tag> AWS </tag>
             
             <tag> Redis </tag>
-            
-            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -657,13 +686,13 @@
       
         <tags>
             
+            <tag> Operation Manual </tag>
+            
             <tag> AWS </tag>
             
             <tag> RDS </tag>
             
             <tag> Mysql </tag>
-            
-            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -771,9 +800,9 @@
       
         <tags>
             
-            <tag> Redis </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Redis </tag>
             
         </tags>
       
@@ -850,9 +879,9 @@
       
         <tags>
             
-            <tag> Mysql </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Mysql </tag>
             
         </tags>
       
@@ -1402,11 +1431,11 @@
       
         <tags>
             
+            <tag> CI/CD </tag>
+            
             <tag> Devops </tag>
             
             <tag> 自动化 </tag>
-            
-            <tag> CI/CD </tag>
             
         </tags>
       
@@ -1665,9 +1694,9 @@
       
         <tags>
             
-            <tag> Redis </tag>
-            
             <tag> Docker </tag>
+            
+            <tag> Redis </tag>
             
             <tag> Nacos </tag>
             
@@ -1725,11 +1754,11 @@
       
         <tags>
             
-            <tag> Redis </tag>
-            
             <tag> Mysql </tag>
             
             <tag> Docker </tag>
+            
+            <tag> Redis </tag>
             
             <tag> Mongodb </tag>
             
@@ -2006,11 +2035,11 @@
       
         <tags>
             
+            <tag> CI/CD </tag>
+            
             <tag> Devops </tag>
             
             <tag> 自动化 </tag>
-            
-            <tag> CI/CD </tag>
             
             <tag> 敏捷开发 </tag>
             
@@ -2118,9 +2147,9 @@
       
         <tags>
             
-            <tag> Mysql </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Mysql </tag>
             
         </tags>
       
