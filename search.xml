@@ -4,6 +4,37 @@
   
     
     <entry>
+      <title>运维手册——kubernetes节点重启无法加入集群</title>
+      <link href="/2020/12/09/bug/kubelet-docker-cgroup/"/>
+      <url>/2020/12/09/bug/kubelet-docker-cgroup/</url>
+      
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p><hr><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>最近大楼检查消防验收，验收时公司会断电，我提前写好ansbile自动安全关机及开机自启脚本，结果验收后开机自启时，有2台k8s node节点没有加入到集群里，一起来看看什么情况吧。</p><h1 id="现状"><a href="#现状" class="headerlink" title="现状"></a>现状</h1><p>开机后检查集群情况</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@20-52-k8s-node ~]# kubectl get nodes</span><br><span class="line">172.30.20.21   Ready      etcd,lb,master   21d   v1.15.5</span><br><span class="line">172.30.20.22   Ready      etcd,lb,master   21d   v1.15.5</span><br><span class="line">172.30.20.23   Ready      etcd,lb,master   21d   v1.15.5</span><br><span class="line">172.30.20.31   Ready      worker           21d   v1.15.5</span><br><span class="line">172.30.20.41   Ready      worker           21d   v1.15.5</span><br><span class="line">172.30.20.51   Ready      worker           21d   v1.15.5</span><br><span class="line">172.30.20.52   NotReady   worker           15d   v1.15.5</span><br><span class="line">172.30.20.53   NotReady   worker           15d   v1.15.5</span><br></pre></td></tr></table></figure><p>有2台机器not ready</p><p>进服务器看，正常开机，但是容器一个没启动,而且kubelet也没启动</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@20-52-k8s-node ~]# docker ps -a</span><br><span class="line">3dd7230db6c8        registry.aliyuncs.com&#x2F;google_containers&#x2F;pause:3.2              &quot;&#x2F;pause&quot;                 6 days ago          Exited (0) 30 hours ago                         k8s_POD_bees360ai-7d8bc48896-g77np_test_76f32465-7a9a-4c74-a609-c929f8ec2f3b_0</span><br><span class="line">d49a621b255e        4e9f801d2217                                                   &quot;&#x2F;opt&#x2F;bin&#x2F;flanneld -…&quot;   2 weeks ago         Exited (137) 30 hours ago                       k8s_kube-flannel_kube-flannel-ds-amd64-kbqhs_kube-system_cd1d68d1-40ef-4f29-9cc7-f7032a38a2ee_0</span><br><span class="line">17d8fdf6a663        registry.cn-shanghai.aliyuncs.com&#x2F;kubeadm-ha&#x2F;coreos_flannel    &quot;cp -f &#x2F;etc&#x2F;kube-fla…&quot;   2 weeks ago         Exited (0) 2 weeks ago                          k8s_install-cni_kube-flannel-ds-amd64-kbqhs_kube-system_cd1d68d1-40ef-4f29-9cc7-f7032a38a2ee_0</span><br><span class="line">2db691e5fbc3        registry.aliyuncs.com&#x2F;google_containers&#x2F;kube-proxy             &quot;&#x2F;usr&#x2F;local&#x2F;bin&#x2F;kube…&quot;   2 weeks ago         Exited (2) 30 hours ago                         k8s_kube-proxy_kube-proxy-kk97x_kube-system_d7d38aa3-c4c5-4009-a8d7-8ed8d47b1a1a_0</span><br><span class="line">101d2d7e6fff        registry.aliyuncs.com&#x2F;google_containers&#x2F;pause:3.2              &quot;&#x2F;pause&quot;                 2 weeks ago         Exited (0) 30 hours ago                         k8s_POD_kube-flannel-ds-amd64-kbqhs_kube-system_cd1d68d1-40ef-4f29-9cc7-f7032a38a2ee_0</span><br><span class="line">551d3f12bc19        registry.aliyuncs.com&#x2F;google_containers&#x2F;pause:3.2              &quot;&#x2F;pause&quot;                 2 weeks ago         Exited (0) 30 hours ago                         k8s_POD_kube-proxy-kk97x_kube-system_d7d38aa3-c4c5-4009-a8d7-8ed8d47b1a1a_0</span><br><span class="line">[root@20-52-k8s-node ~]# ps -aux|grep kubelet</span><br><span class="line">root     12470  0.0  0.0 112812   968 pts&#x2F;0    S+   16:10   0:00 grep --color&#x3D;auto kubelet</span><br></pre></td></tr></table></figure><h1 id="分析问题"><a href="#分析问题" class="headerlink" title="分析问题"></a>分析问题</h1><p>我第一反应，开启docker自启后容器没有restart？ </p><p>然后我尝试重启docker服务和再次重启机器，仍然没用</p><p>尝试执行docker start 容器</p><p>报错</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@20-52-k8s-node ~]# docker start k8s_install-cni_kube-flannel-ds-amd64-kbqhs_kube-system_cd1d68d1-40ef-4f29-9cc7-f7032a38a2ee_0</span><br><span class="line">Error response from daemon: cgroup-parent for systemd cgroup should be a valid slice named as &quot;xxx.slice&quot;</span><br></pre></td></tr></table></figure><p>查看kubelet的日志</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@20-52-k8s-node ~]# journalctl -u kubelet &gt; kubelet.log</span><br><span class="line">[root@20-52-k8s-node ~]# cat kubelet.log|grep cgroup</span><br><span class="line">Dec 09 15:37:29 20-52-k8s-node kubelet[10326]: F1209 15:37:29.940824   10326 server.go:273] failed to run Kubelet: failed to create kubelet: misconfiguration: kubelet cgroup driver: &quot;cgroupfs&quot; is different from docker cgroup driver: &quot;systemd&quot;</span><br></pre></td></tr></table></figure><p>google有类似问题的解决方案</p><ul><li>docker<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">If you update the docker daemon.json for different cgroupdriver you should update the kubelet parameters too .</span><br></pre></td></tr></table></figure></li><li>kubelet<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Check on the worker nodes file &#x2F;var&#x2F;lib&#x2F;kubelet&#x2F;kubeadm-flags.env and in KUBELET_KUBEADM_ARGS I had --cgroup-driver&#x3D;cgroupfs. Changed to systemd and kubelet started working again.</span><br></pre></td></tr></table></figure></li></ul><p>查看docker的daemon.json里cgroupdriver</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@20-52-k8s-node ~]# cat &#x2F;etc&#x2F;docker&#x2F;daemon.json |grep cgroup</span><br><span class="line">  &quot;exec-opts&quot;: [&quot;native.cgroupdriver&#x3D;systemd&quot;],</span><br></pre></td></tr></table></figure><p>查看kubelet的cgroupdriver</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@20-52-k8s-node ~]# cat &#x2F;var&#x2F;lib&#x2F;kubelet&#x2F;kubeadm-flags.env |grep cgroup</span><br><span class="line">KUBELET_KUBEADM_ARGS&#x3D;&quot;--cgroup-driver&#x3D;cgroupfs --hostname-override&#x3D;172.30.20.52 --network-plugin&#x3D;cni --pod-infra-container-image&#x3D;registry.aliyuncs.com&#x2F;google_containers&#x2F;pause:3.2 --root-dir&#x3D;&#x2F;var&#x2F;lib&#x2F;kubelet&quot;</span><br></pre></td></tr></table></figure><p>对比后发现 果然不一样</p><h1 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h1><p>修改/var/lib/kubelet/kubeadm-flags.env的cgroup-driver=systemd即可</p><p>重启后服务陆陆续续地启动成功了</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这问题仔细Google后发现是由于Kubelet中使用了Cgroup驱动程序。Kubelet和Docker应该使用Systemd驱动程序或Cgroupfs运行。建议使用Systemd。</p><p>但是不知道什么原因导致kubelet的cgroup更换了，因为我在其他的node节点上看的就是systemd</p><p>不追究这个问题了，解决完就好。</p><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://github.com/kubernetes/kubernetes/issues/89682" target="_blank" rel="noopener">kubernetes/issues/89682</a></p><p><a href="https://github.com/kubernetes/kubernetes/issues/43805" target="_blank" rel="noopener">kubernetes/issues/43805</a></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Kubernetes </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Operation Manual </tag>
+            
+            <tag> Kubernetes </tag>
+            
+            <tag> Kubelet </tag>
+            
+            <tag> Cgroup </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>个人总结(2020.11)</title>
       <link href="/2020/12/07/summary/summary-2020-11/"/>
       <url>/2020/12/07/summary/summary-2020-11/</url>
@@ -155,11 +186,11 @@
       
         <tags>
             
+            <tag> Operation Manual </tag>
+            
             <tag> Centos </tag>
             
             <tag> Linux </tag>
-            
-            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -184,11 +215,11 @@
       
         <tags>
             
+            <tag> Operation Manual </tag>
+            
             <tag> Centos </tag>
             
             <tag> Linux </tag>
-            
-            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -620,11 +651,11 @@
       
         <tags>
             
+            <tag> CI/CD </tag>
+            
             <tag> Devops </tag>
             
             <tag> 自动化 </tag>
-            
-            <tag> CI/CD </tag>
             
             <tag> Jenkins </tag>
             
@@ -680,9 +711,9 @@
             
             <tag> AWS </tag>
             
-            <tag> Redis </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Redis </tag>
             
         </tags>
       
@@ -707,11 +738,11 @@
       
         <tags>
             
+            <tag> Operation Manual </tag>
+            
             <tag> Centos </tag>
             
             <tag> Linux </tag>
-            
-            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -879,9 +910,9 @@
       
         <tags>
             
-            <tag> Redis </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Redis </tag>
             
         </tags>
       
@@ -1172,9 +1203,9 @@
       
         <tags>
             
-            <tag> Linux </tag>
-            
             <tag> Docker </tag>
+            
+            <tag> Linux </tag>
             
             <tag> 容器 </tag>
             
@@ -1228,9 +1259,9 @@
       
         <tags>
             
-            <tag> Ansible </tag>
-            
             <tag> Kubernetes </tag>
+            
+            <tag> Ansible </tag>
             
         </tags>
       
@@ -1365,9 +1396,9 @@
       
         <tags>
             
-            <tag> Linux </tag>
-            
             <tag> Docker </tag>
+            
+            <tag> Linux </tag>
             
             <tag> 容器 </tag>
             
@@ -1477,11 +1508,11 @@
       
         <tags>
             
-            <tag> Linux </tag>
-            
             <tag> Dockerfile </tag>
             
             <tag> Docker </tag>
+            
+            <tag> Linux </tag>
             
             <tag> Devops </tag>
             
@@ -1510,11 +1541,11 @@
       
         <tags>
             
+            <tag> CI/CD </tag>
+            
             <tag> Devops </tag>
             
             <tag> 自动化 </tag>
-            
-            <tag> CI/CD </tag>
             
         </tags>
       
@@ -1539,11 +1570,11 @@
       
         <tags>
             
-            <tag> Linux </tag>
-            
             <tag> Dockerfile </tag>
             
             <tag> Docker </tag>
+            
+            <tag> Linux </tag>
             
             <tag> Devops </tag>
             
@@ -1572,9 +1603,9 @@
       
         <tags>
             
-            <tag> Helm </tag>
-            
             <tag> Kubernetes </tag>
+            
+            <tag> Helm </tag>
             
             <tag> 阿里云 </tag>
             
@@ -1688,9 +1719,9 @@
       
         <tags>
             
-            <tag> Linux </tag>
-            
             <tag> Docker </tag>
+            
+            <tag> Linux </tag>
             
             <tag> Devops </tag>
             
@@ -1866,9 +1897,9 @@
       
         <tags>
             
-            <tag> Linux </tag>
-            
             <tag> Docker </tag>
+            
+            <tag> Linux </tag>
             
             <tag> Devops </tag>
             
@@ -2114,11 +2145,11 @@
       
         <tags>
             
+            <tag> CI/CD </tag>
+            
             <tag> Devops </tag>
             
             <tag> 自动化 </tag>
-            
-            <tag> CI/CD </tag>
             
             <tag> 敏捷开发 </tag>
             
