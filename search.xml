@@ -13,7 +13,7 @@
       
       <categories>
           
-          <category> Docker </category>
+          <category> Elasticsearch </category>
           
       </categories>
       
@@ -489,9 +489,9 @@
             
             <tag> Operation Manual </tag>
             
-            <tag> NVIDIA </tag>
-            
             <tag> Ubuntu </tag>
+            
+            <tag> NVIDIA </tag>
             
         </tags>
       
@@ -678,11 +678,11 @@
       
         <tags>
             
-            <tag> CI/CD </tag>
-            
             <tag> Devops </tag>
             
             <tag> 自动化 </tag>
+            
+            <tag> CI/CD </tag>
             
             <tag> Jenkins </tag>
             
@@ -738,9 +738,9 @@
             
             <tag> AWS </tag>
             
-            <tag> Operation Manual </tag>
-            
             <tag> Redis </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -825,11 +825,11 @@
             
             <tag> AWS </tag>
             
-            <tag> Operation Manual </tag>
-            
             <tag> RDS </tag>
             
             <tag> Mysql </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -937,9 +937,9 @@
       
         <tags>
             
-            <tag> Operation Manual </tag>
-            
             <tag> Redis </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -1016,9 +1016,9 @@
       
         <tags>
             
-            <tag> Operation Manual </tag>
-            
             <tag> Mysql </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -1230,9 +1230,9 @@
       
         <tags>
             
-            <tag> Linux </tag>
-            
             <tag> Docker </tag>
+            
+            <tag> Linux </tag>
             
             <tag> 容器 </tag>
             
@@ -1423,9 +1423,9 @@
       
         <tags>
             
-            <tag> Linux </tag>
-            
             <tag> Docker </tag>
+            
+            <tag> Linux </tag>
             
             <tag> 容器 </tag>
             
@@ -1537,9 +1537,9 @@
             
             <tag> Dockerfile </tag>
             
-            <tag> Linux </tag>
-            
             <tag> Docker </tag>
+            
+            <tag> Linux </tag>
             
             <tag> Devops </tag>
             
@@ -1568,11 +1568,11 @@
       
         <tags>
             
-            <tag> CI/CD </tag>
-            
             <tag> Devops </tag>
             
             <tag> 自动化 </tag>
+            
+            <tag> CI/CD </tag>
             
         </tags>
       
@@ -1599,9 +1599,9 @@
             
             <tag> Dockerfile </tag>
             
-            <tag> Linux </tag>
-            
             <tag> Docker </tag>
+            
+            <tag> Linux </tag>
             
             <tag> Devops </tag>
             
@@ -1746,9 +1746,9 @@
       
         <tags>
             
-            <tag> Linux </tag>
-            
             <tag> Docker </tag>
+            
+            <tag> Linux </tag>
             
             <tag> Devops </tag>
             
@@ -1891,9 +1891,9 @@
       
         <tags>
             
-            <tag> Mysql </tag>
-            
             <tag> Redis </tag>
+            
+            <tag> Mysql </tag>
             
             <tag> Docker </tag>
             
@@ -1924,9 +1924,9 @@
       
         <tags>
             
-            <tag> Linux </tag>
-            
             <tag> Docker </tag>
+            
+            <tag> Linux </tag>
             
             <tag> Devops </tag>
             
@@ -2172,11 +2172,11 @@
       
         <tags>
             
-            <tag> CI/CD </tag>
-            
             <tag> Devops </tag>
             
             <tag> 自动化 </tag>
+            
+            <tag> CI/CD </tag>
             
             <tag> 敏捷开发 </tag>
             
@@ -2284,9 +2284,9 @@
       
         <tags>
             
-            <tag> Operation Manual </tag>
-            
             <tag> Mysql </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
