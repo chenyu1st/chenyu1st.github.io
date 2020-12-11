@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>elasticsearch启动报错</title>
+      <link href="/2020/12/11/bug/elasticsearch-permission-denied/"/>
+      <url>/2020/12/11/bug/elasticsearch-permission-denied/</url>
+      
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第一家互联网公司学习的内容</p><hr><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>最近搭建了EKF测试日志的稳定性，全部用Docker部署，把中间出现的一些ES相关的报错总结下</p><h1 id="问题一：启动报错"><a href="#问题一：启动报错" class="headerlink" title="问题一：启动报错"></a>问题一：启动报错</h1><h2 id="启动命令"><a href="#启动命令" class="headerlink" title="启动命令"></a>启动命令</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo mkdir -p &#x2F;data&#x2F;elasticsearch&#x2F;data</span><br><span class="line">sudo mkdir -p &#x2F;data&#x2F;elasticsearch&#x2F;logs</span><br><span class="line">sudo docker run --privileged&#x3D;true  -p 9200:9200 -p 9300:9300 -v   &#x2F;data&#x2F;elasticsearch&#x2F;logs&#x2F;:&#x2F;usr&#x2F;share&#x2F;elasticsearch&#x2F;logs&#x2F;  -v   &#x2F;data&#x2F;elasticsearch&#x2F;data&#x2F;:&#x2F;usr&#x2F;share&#x2F;elasticsearch&#x2F;data&#x2F;  --name   elasticsearch -e &quot;discovery.type&#x3D;single-node&quot; -d   docker.elastic.co&#x2F;elasticsearch&#x2F;elasticsearch:7.6.1</span><br></pre></td></tr></table></figure><h2 id="报错如下"><a href="#报错如下" class="headerlink" title="报错如下"></a>报错如下</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Error: Could not create the Java Virtual Machine.</span><br><span class="line">Error: A fatal exception has occurred. Program will exit.</span><br><span class="line">[0.001s][error][logging] Error opening log file &#39;logs&#x2F;gc.log&#39;: Permission denied</span><br><span class="line">[0.001s][error][logging] Initialization of output &#39;file&#x3D;logs&#x2F;gc.log&#39; using options &#39;filecount&#x3D;32,filesize&#x3D;64m&#39; failed.</span><br></pre></td></tr></table></figure><h2 id="原因分析"><a href="#原因分析" class="headerlink" title="原因分析"></a>原因分析</h2><p>直接创建的文件夹没有给容器的写权限</p><h2 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chmod 777 -R &#x2F;data&#x2F;</span><br></pre></td></tr></table></figure><p>再重启容器即可</p><h1 id="问题二：迁移es数据报错"><a href="#问题二：迁移es数据报错" class="headerlink" title="问题二：迁移es数据报错"></a>问题二：迁移es数据报错</h1><p>我在部署完EFK并试运行1个星期后，觉得比较稳定了，然后我准备把EKF迁移到一台单独的机器上。</p><h2 id="迁移操作"><a href="#迁移操作" class="headerlink" title="迁移操作"></a>迁移操作</h2><ul><li>中断ES容器</li><li>拷贝elasticsearch/data下文件到新机器上（相对路径不变）</li><li>相同的命令启动es</li><li>报错</li></ul><h2 id="报错如下-1"><a href="#报错如下-1" class="headerlink" title="报错如下"></a>报错如下</h2><p>es起不来的原因是</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java.lang.IllegalStateException: failed to obtain node locks, tried [[&#x2F;usr&#x2F;share&#x2F;elasticsearch&#x2F;data]] with lock id [0]; maybe these locations are not writable or multiple nodes were started without increasing [node.max_local_storage_nodes] (was [1])?</span><br></pre></td></tr></table></figure><h2 id="分析问题"><a href="#分析问题" class="headerlink" title="分析问题"></a>分析问题</h2><p>Google到一个案例的解释</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">这是由于目录权限错误（不是Elasticsearch用户所有）引起的。</span><br><span class="line"></span><br><span class="line">目前，存储库nodes在卸载时不会删除目录，但是会删除elasticsearch拥有该目录的用户&#x2F;组。因此，当重新安装Elasticsearch时，将elasticsearch创建一个新的不同的用户&#x2F;组，从而使旧nodes目录仍然存在，但由旧的UID &#x2F; GID拥有。然后这会发生冲突并导致错误。</span><br></pre></td></tr></table></figure><p>这个是物理机安装的，不是docker安装的，但是也可以看到一个文档，就是es的权限设置不对。</p><p>由于数据迁移，两台机器都是root用户启动的，所以我感觉应该不是用户组的关系</p><p>但是尝试chown -R elasticsearch:elasticsearch /data</p><p>启动成功了</p><h2 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h2><p>授权/data目录的es账号权限即可</p><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://stackoverflow.com/questions/28932178/elasticsearch-failed-to-obtain-node-lock-is-the-following-location-writable" target="_blank" rel="noopener">Elasticsearch, Failed to obtain node lock, is the following location writable</a></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Docker </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Operation Manual </tag>
+            
+            <tag> Elasticsearch </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>运维手册——kubernetes节点重启无法加入集群</title>
       <link href="/2020/12/09/bug/kubelet-docker-cgroup/"/>
       <url>/2020/12/09/bug/kubelet-docker-cgroup/</url>
@@ -798,11 +825,11 @@
             
             <tag> AWS </tag>
             
+            <tag> Operation Manual </tag>
+            
             <tag> RDS </tag>
             
             <tag> Mysql </tag>
-            
-            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -989,9 +1016,9 @@
       
         <tags>
             
-            <tag> Mysql </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Mysql </tag>
             
         </tags>
       
@@ -1203,9 +1230,9 @@
       
         <tags>
             
-            <tag> Docker </tag>
-            
             <tag> Linux </tag>
+            
+            <tag> Docker </tag>
             
             <tag> 容器 </tag>
             
@@ -1396,9 +1423,9 @@
       
         <tags>
             
-            <tag> Docker </tag>
-            
             <tag> Linux </tag>
+            
+            <tag> Docker </tag>
             
             <tag> 容器 </tag>
             
@@ -1510,9 +1537,9 @@
             
             <tag> Dockerfile </tag>
             
-            <tag> Docker </tag>
-            
             <tag> Linux </tag>
+            
+            <tag> Docker </tag>
             
             <tag> Devops </tag>
             
@@ -1572,9 +1599,9 @@
             
             <tag> Dockerfile </tag>
             
-            <tag> Docker </tag>
-            
             <tag> Linux </tag>
+            
+            <tag> Docker </tag>
             
             <tag> Devops </tag>
             
@@ -1719,9 +1746,9 @@
       
         <tags>
             
-            <tag> Docker </tag>
-            
             <tag> Linux </tag>
+            
+            <tag> Docker </tag>
             
             <tag> Devops </tag>
             
@@ -1897,9 +1924,9 @@
       
         <tags>
             
-            <tag> Docker </tag>
-            
             <tag> Linux </tag>
+            
+            <tag> Docker </tag>
             
             <tag> Devops </tag>
             
@@ -2257,9 +2284,9 @@
       
         <tags>
             
-            <tag> Mysql </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Mysql </tag>
             
         </tags>
       
