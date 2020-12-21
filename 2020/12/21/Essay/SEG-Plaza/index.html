@@ -1,0 +1,155 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>随笔——二刷赛格广场 | 宇神之息</title><meta name="description" content="随笔"><meta name="keywords" content="Essay"><meta name="author" content="Rugod"><meta name="copyright" content="Rugod"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.ico"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="https://www.google-analytics.com" crossorigin="crossorigin"/><link rel="preconnect" href="https://hm.baidu.com"/><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="crossorigin"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="twitter:card" content="summary"><meta name="twitter:title" content="随笔——二刷赛格广场"><meta name="twitter:description" content="随笔"><meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Essay.jpg"><meta property="og:type" content="article"><meta property="og:title" content="随笔——二刷赛格广场"><meta property="og:url" content="https://rugod.com/2020/12/21/Essay/SEG-Plaza/"><meta property="og:site_name" content="宇神之息"><meta property="og:description" content="随笔"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Essay.jpg"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>var autoChangeMode = '1'
+var t = Cookies.get("theme")
+if (autoChangeMode == '1'){
+  var isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+  var isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
+  var isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined){
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport){
+      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour < 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+  }
+  } else if (t == 'light') activateLightMode()
+  else activateDarkMode()
+
+} else if (autoChangeMode == '2'){
+  now = new Date();
+  hour = now.getHours();
+  isNight = hour < 6 || hour >= 18
+  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode() 
+} else {
+  if ( t == 'dark' ) activateDarkMode()
+  else if ( t == 'light') activateLightMode()
+}
+
+function activateDarkMode(){
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
+  }
+}
+function activateLightMode(){
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
+  }
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="canonical" href="https://rugod.com/2020/12/21/Essay/SEG-Plaza/"><link rel="next" title="运维手册——Centos7网络超时断开(后传)" href="https://rugod.com/2020/12/17/bug/network-timeout-2/"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?a29fc1f2b32c6a60aee5dbf412c89285";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-164950732-1', 'auto');
+ga('send', 'pageview');
+</script><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容:${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://www.rugod.cn/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: {"languages":{"author":"作者: Rugod","link":"链接: ","source":"来源: 宇神之息","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  ClickShowText: {"text":"宇神,牛逼","fontSize":"15px"},
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  baiduPush: true,
+  highlightCopy: true,
+  highlightLang: true,
+  highlightShrink: 'false',
+  isFontAwesomeV5: false,
+  isPhotoFigcaption: false
+  
+}</script><script>var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isSidebar: true  
+  }</script><noscript><style>
+#page-header {
+  opacity: 1
+}
+.justified-gallery img{
+  opacity: 1
+}
+</style></noscript><meta name="generator" content="Hexo 4.2.0"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Challenger.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">83</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">84</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">23</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于本人</span></a></div></div></div></div><i class="fa fa-arrow-right on" id="toggle-sidebar" aria-hidden="true">     </i><div id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">1.</span> <span class="toc-text">总结</span></a></li></ol></div></div></div><div id="body-wrap"><div class="post-bg" id="nav" style="background-image: url(https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Essay.jpg)"><div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">宇神之息</a></span><span class="pull_right menus"><div id="search_button"><a class="site-page social-icon search"><i class="fa fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于本人</span></a></div></div><span class="toggle-menu close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span></span></div><div id="post-info"><div id="post-title"><div class="posttitle">随笔——二刷赛格广场</div></div><div id="post-meta"><div class="meta-firstline"><time class="post-meta__date"><span class="post-meta__date-created" title="发表于 2020-12-21 20:32:07"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2020-12-21</span><span class="post-meta__separator">|</span><span class="post-meta__date-updated" title="更新于 2020-12-21 20:48:11"><i class="fa fa-history" aria-hidden="true"></i> 更新于 2020-12-21</span></time><span class="post-meta__categories"><span class="post-meta__separator">|</span><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/Essay/">Essay</a></span></div><div class="meta-secondline"> <span class="post-meta-wordcount"><i class="post-meta__icon fa fa-file-word-o" aria-hidden="true"></i><span>字数总计:</span><span class="word-count">1.1k</span><span class="post-meta__separator">|</span><i class="post-meta__icon fa fa-clock-o" aria-hidden="true"></i><span>阅读时长: 3 分钟</span></span></div><div class="meta-thirdline"><span class="post-meta-pv-cv"><span class="post-meta__separator">|</span><i class="fa fa-eye post-meta__icon" aria-hidden="true"> </i><span>阅读量:</span><span id="busuanzi_value_page_pv"></span></span><span class="post-meta-commentcount"><span class="post-meta__separator">|</span><i class="post-meta__icon fa fa-comment-o" aria-hidden="true"></i><span>评论数:</span><a href="/2020/12/21/Essay/SEG-Plaza/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count comment-count" data-xid="/2020/12/21/Essay/SEG-Plaza/" itemprop="commentCount"></span></a></span></div></div></div></div><main class="layout_post" id="content-inner"><article id="post"><div id="article-container"><blockquote>
+<p>du lange in einen Abgrund blickst, blickt der Abgrund auch in dich hinein. </p>
+</blockquote>
+<p>周末去了一次赛格广场，还记得第一次去赛格广场的时候是3年前我参加学校的创新创业营第一次来深圳时去的。</p>
+<p>那个时候赛格广场给我的就一个感觉，人山人海，电子产品琳琅满目，我依稀记得在赛格广场一个卖电脑硬盘的商贩，大概20岁左右，操着一口流利的粤语和别人交谈，转眼间，来了两个老外，他又马上切换成英语跟别人对话。</p>
+<p>那时的我感觉到，能在这个地方扎根还得会英语，这群人真厉害。</p>
+<p>最后买了一块品胜的充电宝，用到现在还能用，好像不到50块钱，质量很好。</p>
+<p>周末，第二次来到这个地方，从华强南走到华新，我感觉人没有以前多了，再进到赛格广场，门口贴满了广告，大多是卖挖矿机的和出租、转让门面的。</p>
+<p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Essay/seg.jpg"  alt="seg.jpg"></p>
+<p>我走进一家卖矿机的门面，机箱里展示着他的镇店之宝”挖矿利器”一台超大服务器搭16张1080TI的显卡，挂着低价处理的牌子，看样子是已经挖不动了，但是也没接盘侠。</p>
+<p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Essay/kuangka.jpg"  alt="kuangka.jpg"></p>
+<p>我又走进一家卖Apple的产品的门面，老板正在交货，一堆工人从里面拖箱子，估计箱子里装的都是Airpods pro，我问老板这个多少钱，他说199，我说这是仿制品吗。</p>
+<p>老板饶有趣味地告诉我</p>
+<ul>
+<li>低情商：假货、仿制品</li>
+<li>高情商：几乎和真品一样的体验，抄底(超低)的价格</li>
+</ul>
+<p>然后他拿了一副给我试试，开盖自动连接iphone，并且手机上也显示是Airpods pro<br>正好我带了mac，想测试下能不能无缝iphone和mac切换，老板直接说还没做到这点</p>
+<p>我又试了下降噪的功能，由于没有真的airpods pro，我拿我的studio3带上对比下了，差距还是很明显的，完全不是一个产品，但是这款有降噪功能，比普通耳机应该会好点。</p>
+<p>我问老板保质期多少，他说3个月，我说那这个耳机就只能用3个月吗，他说你用坏了可以来这修，3个月内直接换新的，超过3个月就要花钱。</p>
+<p>我把耳机还给他，摇了摇头，他说要不149卖你，我说我再看看吧。</p>
+<p>后来陆陆续续走了几家店</p>
+<ul>
+<li>iphone8s plus 799</li>
+<li>iphonexr 1399</li>
+<li>iphone12 4399</li>
+</ul>
+<p>就连我前段时间想买的ipad air4 这里只要2799，那老板直接跟我说，小作坊逆向研发的产品，先把硬件缝合好，然后开机改爱思和一些第三方平台的数据，然后装机，出售，他说有的ipad用的甚至是3000毫安的电池，有的cpu都给换了，各种破解，缝合，让我瞠目结舌。</p>
+<p>二手的苹果基本都被拆过，没拆的价格基本上闲鱼、转转也可能淘到。</p>
+<p>后面又转了一会，我准备买个手机壳，有家店卖手机壳，直接说批发价5块，还送一个钢化膜，说着时，一辆货拉拉的车停过来了，下来了3 5个人开始般手机壳，我问老板这个手机壳运到哪，他说淘宝的商家啊，他们卖出去就要10-20多不等了，现在淘宝没以前赚钱了，需求也没以前大，我准备卖到过年就关门。</p>
+<p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Essay/huolala.jpg"  alt="huolala.jpg"></p>
+<p>走出赛格广场，外面货拉拉的车停满了，进出广场的除了搬货的工人，还有大量的黄蓝骑手，向我这种散客很少。</p>
+<p>这里的价值观，用一张图展示</p>
+<p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Essay/jiazhi.jpg"  alt="jiazhi.jpg"></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>两次来赛格广场的感受完全不一样，这里已没有当年的风光</p>
+<p>这一路走来我在想个问题，为什么这些店家越来越少，生意越来越难做，但卖假货还在大肆敛财，互联网的发展带来的真的是大量失业吗？</p>
+<p>这些值得我们深思</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Rugod</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://rugod.com/2020/12/21/Essay/SEG-Plaza/">https://rugod.com/2020/12/21/Essay/SEG-Plaza/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://rugod.com" target="_blank">宇神之息</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Essay/">Essay</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Essay.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"/><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-button button--primary button--animated"> <i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lazyload post-qr-code__img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/wechat.JPG" alt="微信"/><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lazyload post-qr-code__img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/alipay.JPG" alt="支付宝"/><div class="post-qr-code__desc">支付宝</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="next-post pull-full"><a href="/2020/12/17/bug/network-timeout-2/"><img class="next_cover lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Centos/Centos.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">运维手册——Centos7网络超时断开(后传)</div></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fa fa-fw fa-thumbs-up" aria-hidden="true"></i><span> 相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/2020/11/21/Essay/Sangfor/" title="包夜随笔——2020.11.20"><img class="relatedPosts_cover lazyload"data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Essay.jpg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-history fa-fw" aria-hidden="true"></i> 2020-11-21</div><div class="relatedPosts_title">包夜随笔——2020.11.20</div></div></a></div></div><div class="clear_both"></div></div><hr><div id="post-comment"><div class="comment_headling"><i class="fa fa-comments fa-fw" aria-hidden="true"></i><span> 评论</span></div><div class="vcomment" id="vcomment"></div><script src="https://cdn.jsdelivr.net/gh/xaoxuu/volantis/js/volantis.min.js"></script><script>var GUEST_INFO = ['nick','mail','link'];
+var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+  return GUEST_INFO.indexOf(item) > -1
+});
+guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
+
+window.valine = new Valine({
+  el:'#vcomment',
+  notify: false,
+  verify: false,
+  appId: 'GkD8YSRxxCgXoW6LqFO3cKhd-gzGzoHsz',
+  appKey: 'DbbNrHwsCuK9Ehh2wgOw6UXL',
+  placeholder: '记得留下你的昵称和邮箱...可以快速收到回复哦',
+  avatar: 'monsterid',
+  meta: guest_info,
+  pageSize: '10',
+  lang: 'zh-cn',
+  recordIP: false,
+  serverURLs: ''
+});</script></div></article></main><footer id="footer" style="background-image: url(https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Essay.jpg)" data-type="photo"><div id="footer-wrap"><div class="copyright">&copy;2020 By Rugod</div><div class="footer_custom_text">弱小的人才习惯嘲讽和否定，而内心强大的人从不吝啬赞美和鼓励</div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="阅读模式"></i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换" target="_self">繁</a><i class="darkmode fa fa-moon-o" id="darkmode" title="夜间模式"></i></div><div id="rightside-config-show"><div id="rightside_config" title="设置"><i class="fa fa-cog" aria-hidden="true"></i></div><a id="to_comment" href="#post-comment" title="直达评论"><i class="scroll_to_comment fa fa-comments">  </i></a><i class="fa fa-list-ul close" id="mobile-toc-button" title="目录" aria-hidden="true"></i><i class="fa fa-arrow-up" id="go-up" title="回到顶部" aria-hidden="true"></i></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a href="https://github.com/wzpan/hexo-generator-search" target="_blank" rel="noopener" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script id="canvas_nest" color="255,0,0" opacity="0.7" zIndex="-1" count="99" mobile="false" src="/js/third-party/canvas-nest.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@latest/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/lazysizes@latest/lazysizes.min.js" async=""></script><script src="/js/third-party/ClickShowText.js"></script><script src="/js/search/local-search.js"></script></body></html>
