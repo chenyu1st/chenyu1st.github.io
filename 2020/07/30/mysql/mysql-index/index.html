@@ -1,0 +1,238 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>跟我学Mysql之索引篇 | 宇神之息</title><meta name="description" content="跟我学Mysql之索引篇"><meta name="keywords" content="Mysql,索引,INNODB"><meta name="author" content="Rugod"><meta name="copyright" content="Rugod"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.ico"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="https://www.google-analytics.com" crossorigin="crossorigin"/><link rel="preconnect" href="https://hm.baidu.com"/><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="crossorigin"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="twitter:card" content="summary"><meta name="twitter:title" content="跟我学Mysql之索引篇"><meta name="twitter:description" content="跟我学Mysql之索引篇"><meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/mysql.jpg"><meta property="og:type" content="article"><meta property="og:title" content="跟我学Mysql之索引篇"><meta property="og:url" content="https://rugod.com/2020/07/30/mysql/mysql-index/"><meta property="og:site_name" content="宇神之息"><meta property="og:description" content="跟我学Mysql之索引篇"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/mysql.jpg"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>var autoChangeMode = '1'
+var t = Cookies.get("theme")
+if (autoChangeMode == '1'){
+  var isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+  var isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
+  var isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined){
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport){
+      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour < 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+  }
+  } else if (t == 'light') activateLightMode()
+  else activateDarkMode()
+
+} else if (autoChangeMode == '2'){
+  now = new Date();
+  hour = now.getHours();
+  isNight = hour < 6 || hour >= 18
+  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode() 
+} else {
+  if ( t == 'dark' ) activateDarkMode()
+  else if ( t == 'light') activateLightMode()
+}
+
+function activateDarkMode(){
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
+  }
+}
+function activateLightMode(){
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
+  }
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="canonical" href="https://rugod.com/2020/07/30/mysql/mysql-index/"><link rel="prev" title="部署Mysql监控工具pmm" href="https://rugod.com/2020/07/30/mysql/mysql-pmm/"><link rel="next" title="Mongodb3.4离线升级到4.2" href="https://rugod.com/2020/07/30/mongodb/mongodb-update/"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?a29fc1f2b32c6a60aee5dbf412c89285";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-164950732-1', 'auto');
+ga('send', 'pageview');
+</script><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容:${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://www.rugod.cn/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: {"languages":{"author":"作者: Rugod","link":"链接: ","source":"来源: 宇神之息","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  ClickShowText: {"text":"宇神,牛逼","fontSize":"15px"},
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  baiduPush: true,
+  highlightCopy: true,
+  highlightLang: true,
+  highlightShrink: 'false',
+  isFontAwesomeV5: false,
+  isPhotoFigcaption: false
+  
+}</script><script>var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isSidebar: true  
+  }</script><noscript><style>
+#page-header {
+  opacity: 1
+}
+.justified-gallery img{
+  opacity: 1
+}
+</style></noscript><meta name="generator" content="Hexo 4.2.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Challenger.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">84</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">87</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">24</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于本人</span></a></div></div></div></div><i class="fa fa-arrow-right on" id="toggle-sidebar" aria-hidden="true">     </i><div id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#索引是什么"><span class="toc-number">1.</span> <span class="toc-text">索引是什么</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#索引分类"><span class="toc-number">2.</span> <span class="toc-text">索引分类</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#聚簇索引"><span class="toc-number">2.1.</span> <span class="toc-text">聚簇索引</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#二级索引"><span class="toc-number">2.2.</span> <span class="toc-text">二级索引</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#联合索引"><span class="toc-number">2.3.</span> <span class="toc-text">联合索引</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#索引前缀"><span class="toc-number">2.4.</span> <span class="toc-text">索引前缀</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#索引的数据结构"><span class="toc-number">3.</span> <span class="toc-text">索引的数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#常见的几种索引数据结构"><span class="toc-number">3.1.</span> <span class="toc-text">常见的几种索引数据结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#InnoDB的索引模型"><span class="toc-number">3.2.</span> <span class="toc-text">InnoDB的索引模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#多个索引模型"><span class="toc-number">3.2.1.</span> <span class="toc-text">多个索引模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#索引维护"><span class="toc-number">3.2.2.</span> <span class="toc-text">索引维护</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#最左前缀原则"><span class="toc-number">3.2.3.</span> <span class="toc-text">最左前缀原则</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#检查索引是否被使用"><span class="toc-number">3.3.</span> <span class="toc-text">检查索引是否被使用</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#浅谈索引的构建过程"><span class="toc-number">4.</span> <span class="toc-text">浅谈索引的构建过程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#排序索引构建"><span class="toc-number">4.1.</span> <span class="toc-text">排序索引构建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#修改数据"><span class="toc-number">4.2.</span> <span class="toc-text">修改数据</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考资料"><span class="toc-number">6.</span> <span class="toc-text">参考资料</span></a></li></ol></div></div></div><div id="body-wrap"><div class="post-bg" id="nav" style="background-image: url(https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/mysql.jpg)"><div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">宇神之息</a></span><span class="pull_right menus"><div id="search_button"><a class="site-page social-icon search"><i class="fa fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于本人</span></a></div></div><span class="toggle-menu close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span></span></div><div id="post-info"><div id="post-title"><div class="posttitle">跟我学Mysql之索引篇</div></div><div id="post-meta"><div class="meta-firstline"><time class="post-meta__date"><span class="post-meta__date-created" title="发表于 2020-07-30 16:05:20"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2020-07-30</span><span class="post-meta__separator">|</span><span class="post-meta__date-updated" title="更新于 2020-07-30 16:05:20"><i class="fa fa-history" aria-hidden="true"></i> 更新于 2020-07-30</span></time><span class="post-meta__categories"><span class="post-meta__separator">|</span><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/Mysql/">Mysql</a></span></div><div class="meta-secondline"> <span class="post-meta-wordcount"><i class="post-meta__icon fa fa-file-word-o" aria-hidden="true"></i><span>字数总计:</span><span class="word-count">5k</span><span class="post-meta__separator">|</span><i class="post-meta__icon fa fa-clock-o" aria-hidden="true"></i><span>阅读时长: 15 分钟</span></span></div><div class="meta-thirdline"><span class="post-meta-pv-cv"><span class="post-meta__separator">|</span><i class="fa fa-eye post-meta__icon" aria-hidden="true"> </i><span>阅读量:</span><span id="busuanzi_value_page_pv"></span></span><span class="post-meta-commentcount"><span class="post-meta__separator">|</span><i class="post-meta__icon fa fa-comment-o" aria-hidden="true"></i><span>评论数:</span><a href="/2020/07/30/mysql/mysql-index/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count comment-count" data-xid="/2020/07/30/mysql/mysql-index/" itemprop="commentCount"></span></a></span></div></div></div></div><main class="layout_post" id="content-inner"><article id="post"><div id="article-container"><p>声明:这是我在大学毕业后进入第一家互联网公司学习的内容</p>
+<hr>
+<h1 id="索引是什么"><a href="#索引是什么" class="headerlink" title="索引是什么"></a>索引是什么</h1><p>索引用于快速查找具有特定列值的行。没有索引，MySQL必须从第一行开始，然后通读整个表以找到相关的行。表越大，花费越多。如果表中有相关列的索引，MySQL可以快速确定要在数据文件中间查找的位置，而不必查看所有数据。这比顺序读取每一行要快得多。</p>
+<p>如果上面的描述还不足够让你理解，我可以先给大家讲一个例子，假如你需要在一本字典里查找一个生僻字（首先你不知道它的发音，你就不会去找字母目录，而是会去找偏旁目录）如果你不找目录，你就必须要把字典全部翻一遍一个一个对比这个字（我的天，有这么麻烦吗）前提是你确实不知道这个字的发音，而且你也不想找偏旁索引，那你只能这样麻烦地做了，然后你找到偏旁所在的页数后，你就会去那一页找到相关的字，最终找到你想查找的生僻字的全部信息。</p>
+<p>数据库索引也是如此，查询一张表的某一行的信息（不是查全表数据）。</p>
+<p>select * from test where a=”1”</p>
+<p>如果你不用索引，那么查询过程是这样的：先获取这张表的所有数据，然后依次遍历，将a=1的行筛选出来，最后返回</p>
+<p>如果你使用索引，那么查询过程是这样的：直接去索引里找到a=1的所有行，返回。</p>
+<p>当然我这么说不太准确，只是为了帮助大家更好的理解索引，因为索引也分几种，具体实现的底层逻辑也不太一样，下面我就讲讲索引的分类。</p>
+<h1 id="索引分类"><a href="#索引分类" class="headerlink" title="索引分类"></a>索引分类</h1><p>由于在Mysql5.7中，InnoDB是默认的MySQL存储引擎。所以下面我讲到的索引都是基于InnoDB下的。</p>
+<h2 id="聚簇索引"><a href="#聚簇索引" class="headerlink" title="聚簇索引"></a>聚簇索引</h2><p>每个InnoDB表都有一个特殊的索引，称为聚簇索引（也叫主键索引、一级索引） ，用于存储行数据。通常，聚簇索引与主键同义，也就是说主键的字段默认给它上了聚簇索引 。使用InnoDB聚簇索引为每个表优化最常见的查找和DML操作。</p>
+<p>官方解释：</p>
+<ul>
+<li>在PRIMARY KEY表上定义a 时，InnoDB将其用作聚簇索引。为创建的每个表定义一个主键。如果没有逻辑唯一且非空的列或列集，请添加一个新的 自动递增列，其值将自动填充。</li>
+<li>如果没有PRIMARY KEY为表定义，MySQL找到所有列都不为空且唯一的第一个UNIQUE索引，InnoDB将其用作聚集索引。</li>
+<li>如果表没有索引PRIMARY KEY或没有合适的 UNIQUE索引，则在InnoDB 内部生成一个隐藏的聚集索引GEN_CLUST_INDEX，该索引在包含行ID值的合成列上命名 。这些行由InnoDB分配给该表中各行的ID排序 。行ID是一个6字节的字段，随着插入新行而单调增加。因此，按行ID排序的行实际上在插入顺序上。</li>
+</ul>
+<p>下面有几点需要注意：</p>
+<ul>
+<li>聚簇索引必须是唯一索引，也就是该字段的值必须唯一且非空。</li>
+<li>如果一个表有主键，那么该主键也作聚簇索引。</li>
+<li>如果一个表无主键，但是有很多索引，那么第一个非空且唯一的索引会被转化成聚簇索引。</li>
+<li>如果一个表无主键（实战基本不可能），且整个表的所有索引都不满足（既不为空，而且唯一），则InnoDB为了保证表的完整性，会给隐藏字段中6字节的DB_ROW_ID上主键和聚簇索引，只不过不能被外部调用。</li>
+</ul>
+<p>在实战中，一般来说主键最好设为自增id，而且尽量避免用业务id作为主键，这样会减少索引的存储空间以及提高搜索效率，具体原因我会我后面进行讲解。</p>
+<h2 id="二级索引"><a href="#二级索引" class="headerlink" title="二级索引"></a>二级索引</h2><p>除聚簇索引之外的所有索引都称为二级索引（也叫辅助索引、非聚簇索引）。在中InnoDB，二级索引中的每个记录都包含该行的主键列以及为辅助索引指定的列。InnoDB使用此主键值在聚簇索引中搜索行。</p>
+<p>也就是说如果你需要通过一个二级索引去查找一行的值，那么你得先通过二级索引去找到二级索引所存储的聚簇索引的值，然后再通过聚簇索引去找到该行的值，这个过程叫做回表。</p>
+<p>如果主键较长，则辅助索引将使用更多空间，因此具有短的主键是有利的。这也是上文说的主键最好设为自增id，且与业务无关。</p>
+<h2 id="联合索引"><a href="#联合索引" class="headerlink" title="联合索引"></a>联合索引</h2><p>由于二级索引的回表操作会再次查询聚簇索引的值，这是一件比较耗时的操作，如果你需要高频率地查找某些字段，这时候就可以用联合索引（覆盖索引），将你基于查询的字段和最终想查询到的字段组合一起。一个联合索引最多可以包含16列，可以被认为是排序数组，其行包含通过串联索引列的值而创建的值。</p>
+<p>比如一张用户信息表的结构如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE &#96;user&#96; (</span><br><span class="line">  &#96;id&#96; int(11) NOT NULL,</span><br><span class="line">  &#96;id_card&#96; varchar(32) DEFAULT NULL,</span><br><span class="line">  &#96;name&#96; varchar(32) DEFAULT NULL,</span><br><span class="line">  &#96;age&#96; int(11) DEFAULT NULL,</span><br><span class="line">  &#96;ismale&#96; tinyint(1) DEFAULT NULL,</span><br><span class="line">  PRIMARY KEY (&#96;id&#96;),</span><br><span class="line">  KEY &#96;id_card&#96; (&#96;id_card&#96;),</span><br><span class="line">  KEY &#96;name_age&#96; (&#96;name&#96;,&#96;age&#96;)</span><br><span class="line">) ENGINE&#x3D;InnoDB</span><br></pre></td></tr></table></figure>
+<p>id是主键，idcard是唯一信息，但是长度是varchar类型且长度很大不适合做聚簇索引，所以设为二级索引，这个时候你可以通过idcard去查询每个用户的所有信息。</p>
+<p>此时你有需要通过名字去查年龄的需求，这个时候可以把名字和年龄上一个联合索引，名字在前，年龄在后（顺序很重要，后面在讲索引的结构会讲到为什么要这样排序）。你每次通过年龄索引查询的值为主键id和age，这个时候可以直接取到age的值，这样就不用重新通过主键id再去查询age一次了（回表操作）。</p>
+<p>但是联合索引是比较占资源，如果你不需要高频请求，建议不要随便使用联合索引，索引的维护总是有代价的。</p>
+<h2 id="索引前缀"><a href="#索引前缀" class="headerlink" title="索引前缀"></a>索引前缀</h2><p>使用字符串列的索引规范中的语法，您可以创建仅使用列首字符的索引 。以这种方式仅索引列值的前缀可以使索引文件小得多。</p>
+<p>例如给一个字符串的字段上索引，一般定义这个字段的前N位字符串来建立索引。<br>CREATE TABLE test (blob_col BLOB, INDEX(blob_col(10)));</p>
+<p>前缀最长可以为1000个字节（InnoDB表中为767个字节 ，除非已 innodb_large_prefix设置）。</p>
+<p>如果搜索词超过索引前缀长度，则使用索引排除不匹配的行，然后检查其余行是否可能匹配。</p>
+<p>例如在刚刚的那张表，执行<br>select * from test where blob_col=’abcdefghijklmn’</p>
+<p>索引会去匹配字段前10位为’abcdefghij’的所有行，然后依次比较剩下的匹配’klmn’的值，返回。</p>
+<h1 id="索引的数据结构"><a href="#索引的数据结构" class="headerlink" title="索引的数据结构"></a>索引的数据结构</h1><p>索引的数据结构是怎么都逃不走的一块，我比较难理解，所以也不在讲索引分类的时候讲了。</p>
+<h2 id="常见的几种索引数据结构"><a href="#常见的几种索引数据结构" class="headerlink" title="常见的几种索引数据结构"></a>常见的几种索引数据结构</h2><p>我先介绍常见的几种索引的数据结构</p>
+<ul>
+<li>key-value：这种数据结构应该比较常见，键值对也叫哈希表，实现也比较简单，用一个哈希函数把key换算成一个确定的value，然后把value放在数组这个位置，对于可能出现不同的key换算成了一个相同的value这种情况，可以在value处加上一个链表，保存相同value值的key信息。如果没有出现这种情况（不同的key换算成了相同的value），查询、插入速度是很快的。但是一旦出现上述情况，哈希索引在做链表区间查询是很慢的，因为你通过键值对查询后需要遍历后面链表的所有用户。</li>
+</ul>
+<p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Mysql/index/hash.png"  alt="hash.png"></p>
+<ul>
+<li>有序数组： 假设索引没有重复，那么数组会按着这个索引字段的值递增顺序保存。如果你需要查询某个字段的值，通过二分法可以快速找到，时间复杂度为O(log(N)。<br>只看查询速度，有序数组是接近完美的，但是更新数据的时候比较麻烦，如果你在中间插入一条数据需要将后面所有数据的下标往后挪一位，这个成本是很高的。</li>
+</ul>
+<p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Mysql/index/list.png"  alt="list.png"></p>
+<ul>
+<li>二叉树：二叉树的规则是，每个节点的左儿子小于父节点，父节点又小于右儿子，这种数据结构的查询时间复杂度是O(log(N))，并且为了维持O(log(N))的查询速度，你还得保持这棵树是平衡二叉树。为了做这个保证，更新的时间复杂度也是O(log(N))。单看查询和插入二叉树接近完美了，但是二叉树有一个坏处，就是占空间，因为索引不只是存在内存，还要写到磁盘上。假如你存储100w条数据，那么用平衡二叉树的话，树高就是20。一次查询你最多需要访问20个数据块，也就是最多读20次磁盘，为了让一个查询最少地读磁盘，我们就应该使用N叉树，这里的N取决于数据块的大小。这也是大多数数据库的存储选择的基础数据结构N叉树，并在基础上进行改造。</li>
+</ul>
+<p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Mysql/index/tree.png"  alt="tree.png"></p>
+<p>总结：</p>
+<p>哈希表结构适合等值查询的场景，比如非关系型数据库</p>
+<p>有序数组适合静态存储的场景，比如你保存某年某个城市所有人口信息，并且不会修改数据了。</p>
+<p>N叉树适合大部分数据库引擎，有着良好的读写性能优点以及适配磁盘的访问模式。</p>
+<h2 id="InnoDB的索引模型"><a href="#InnoDB的索引模型" class="headerlink" title="InnoDB的索引模型"></a>InnoDB的索引模型</h2><p>在InnoDB中，表都是根据主键顺序以索引的形式存放的，InnoDB使用了B+树索引模型，所以数据都是存在B+树的。</p>
+<p>每一个索引都对应一颗B+树,对于B+树这种数据结构,我简单的介绍一下它的特征和优势。参考资料里有详细介绍B+树的链接，有兴趣的可以学下具体是如何实现的。</p>
+<p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Mysql/index/B+tree.png"  alt="B+tree.png"></p>
+<p>B+树的特征：</p>
+<p>1.有k个子树的中间节点包含有k个元素，每个元素不保存数据，只用来索引，所有数据都保存在叶子节点。</p>
+<p>2.所有的叶子结点中包含了全部元素的信息，及指向含这些元素记录的指针，且叶子结点本身依关键字的大小自小而大顺序链接。</p>
+<p>3.所有的中间节点元素都同时存在于子节点，在子节点元素中是最大（或最小）元素。</p>
+<p>B+树的优势：</p>
+<p>1.单一节点存储更多的元素，使得查询的IO次数更少。</p>
+<p>2.所有查询都要查找到叶子节点，查询性能稳定。</p>
+<p>3.所有叶子节点形成有序链表，便于范围查询。</p>
+<p>总结：InnoDB的索引结构始终保持排序，从而可以快速查找精确匹配（等于运算符）和范围（例如，大于，小于和BETWEEN 运算符）</p>
+<h3 id="多个索引模型"><a href="#多个索引模型" class="headerlink" title="多个索引模型"></a>多个索引模型</h3><p>前面我讲过索引的分类，一般实战中最常见的一张表结构都含有聚簇索引（主键）配合一个二级索引组成的，那么通过了解InnoDB的索引模型，我们应该能很清晰的看到二级索引的实现过程了。</p>
+<p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Mysql/index/two_index.jpg"  alt="two_index.jpg"></p>
+<p>如图所示，有这么一个表，ID是聚簇索引（主键），K是二级索引（唯一）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">select * from table where ID&#x3D;100</span><br><span class="line">mysql会用聚簇索引进行查找，通过B+树迅速查询到ID&#x3D;100的叶子节点，拿到这一行的全部数据，返回。</span><br><span class="line"></span><br><span class="line">select * from table where k&#x3D;1</span><br><span class="line">mysql会用二级索引进行查找，通过B+树迅速查询到k&#x3D;1的叶子节点，拿到当k&#x3D;1时，主键的ID的值&#x3D;100，然后通过ID&#x3D;100再去另外一颗B+树去查询到ID&#x3D;100的叶子节点，拿到这一行的全部数据，返回。</span><br></pre></td></tr></table></figure>
+
+<p>所以基于聚簇索引查询只需要搜索一棵树，而基于二级索引需要多扫描一棵树。因此我们应该在应用中尽量使用主键查询。不过问题来了，为什么上文我说主键最好使用与业务无关的自增id，如果无关的话，你怎么知道你想查询数据的主键ID是什么呢？因为我们还需要考虑到维护索引的代价。</p>
+<h3 id="索引维护"><a href="#索引维护" class="headerlink" title="索引维护"></a>索引维护</h3><p>B+树为了维护索引的有序性，在插入数据的时候会做必要的维护。比如上图，你要插入主键ID为700的行数据，你只需要在600后面插入一个新数据即可。但是你要是插入的主键ID为400，那么就需要逻辑上移动后面的数据，把这个数据空出来让ID=400的数据插入。</p>
+<p>更麻烦的是如果600是数据页最后一个数据，即该数据页满了，为了插入ID=400 ，你必须重新创建一个新数据页，将ID=600的数据放过去，然后才能将ID=400的数据插入到原数据页。这个过程叫做页分裂，在这种情况，查询就会多扫一张数据页，而且空间利用率会降低百分之50，因为本来只用存放在一页的数据，现在分到2页了。</p>
+<p>不过有分裂页有合并，相邻的两页由于删除了数据，利用率变低后，会将数据页做合并。</p>
+<p>所以回到上一个问题，为什么虽然通过聚簇索引查询很快，但我们仍然使用二级索引查询，因为主键索引如果不是自增的话，很难保证你的插入是有序的，如果你插入不是有序，那么就可能触发页分裂，影响性能和存储空间。所以得使用自增主键，这样的话主键也就是无业务意义的，我们也不能通过一个无意义的字段去做查询吧。</p>
+<h3 id="最左前缀原则"><a href="#最左前缀原则" class="headerlink" title="最左前缀原则"></a>最左前缀原则</h3><p>上文我讲过对于联合索引的创建，顺序很重要，因为联合索引需要遵循最左前缀原则，具体看下面例子。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE test (</span><br><span class="line">    id         INT NOT NULL,</span><br><span class="line">    last_name  CHAR(30) NOT NULL,</span><br><span class="line">    first_name CHAR(30) NOT NULL,</span><br><span class="line">    PRIMARY KEY (id),</span><br><span class="line">    INDEX name (last_name,first_name)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>这个表，name为联合索引，它可用于查询指定在已知范围内的last_name和first_name 值组合的值。它也可以用于仅指定last_name值的查询， 因为该列是索引的最左前缀。</p>
+<p>下面的sql是可以通过name索引进行查找的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM test WHERE last_name&#x3D;&#39;Jones&#39;;</span><br><span class="line"></span><br><span class="line">SELECT * FROM test</span><br><span class="line">  WHERE last_name&#x3D;&#39;Jones&#39; AND first_name&#x3D;&#39;John&#39;;</span><br><span class="line"></span><br><span class="line">SELECT * FROM test</span><br><span class="line">  WHERE last_name&#x3D;&#39;Jones&#39;</span><br><span class="line">  AND (first_name&#x3D;&#39;John&#39; OR first_name&#x3D;&#39;Jon&#39;);</span><br><span class="line"></span><br><span class="line">SELECT * FROM test</span><br><span class="line">  WHERE last_name&#x3D;&#39;Jones&#39;</span><br><span class="line">  AND first_name &gt;&#x3D;&#39;M&#39; AND first_name &lt; &#39;N&#39;;</span><br></pre></td></tr></table></figure>
+
+<p>但是，在以下查询中不能用name索引进行查找：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM test WHERE first_name&#x3D;&#39;John&#39;;</span><br><span class="line"></span><br><span class="line">SELECT * FROM test</span><br><span class="line">  WHERE last_name&#x3D;&#39;Jones&#39; OR first_name&#x3D;&#39;John&#39;;</span><br></pre></td></tr></table></figure>
+
+<p>为什么必须通过联合索引的最左字段查询呢？因为索引的实质是B+树，对于非聚簇索引（联合索引属于非聚簇索引）叶子节点存储的是主键的值(如果是联合索引，还会存联合索引的非最左字段)</p>
+<p>结论：如果表具有联合索引，则优化器可以使用索引的任何最左前缀来查找行。举例来说，如果你有一个三列的索引(col1, col2, col3)，你有索引的搜索功能 (col1)，(col1, col2)以及 (col1, col2, col3)。</p>
+<h2 id="检查索引是否被使用"><a href="#检查索引是否被使用" class="headerlink" title="检查索引是否被使用"></a>检查索引是否被使用</h2><p>始终检查所有查询是否真的使用您在表中创建的索引。可以使用 EXPLAIN语句</p>
+<p>EXPLAIN可以为 SELECT， DELETE， INSERT， REPLACE，和 UPDATE语句工作。</p>
+<p>当EXPLAIN与可解释的语句一起使用时，MySQL将显示来自优化器的有关语句执行计划的信息。也就是说，MySQL解释了它将如何处理该语句，包括有关如何连接表以及以何种顺序连接表的信息。</p>
+<p>在EXPLAIN的帮助下，您可以看到应该在表中添加索引的位置，以便通过使用索引查找行来使语句更快地执行。</p>
+<p>具体由EXPLAIN输出字段的详细意义请查看  <a href="https://dev.mysql.com/doc/refman/5.7/en/explain-output.html" target="_blank" rel="noopener">EXPLAIN Output Columns</a></p>
+<h1 id="浅谈索引的构建过程"><a href="#浅谈索引的构建过程" class="headerlink" title="浅谈索引的构建过程"></a>浅谈索引的构建过程</h1><h2 id="排序索引构建"><a href="#排序索引构建" class="headerlink" title="排序索引构建"></a>排序索引构建</h2><p>在创建或重建索引时，InnoDB执行批量加载，而不是一次插入一个索引记录。这种索引创建方法也称为排序索引构建。排序索引构建不支持空间索引(Spatial Indexes)。</p>
+<p>索引构建分为三个阶段</p>
+<ul>
+<li>扫描聚簇索引，并生成索引条目并将其添加到排序缓冲区，当排序缓冲区已满时，将对条目进行排序并将其写到临时中间文件中。此过程也称为”RUN”</li>
+<li>将一个或多个”RUN”写入临时中间文件后，将对文件中的所有条目执行合并排序。</li>
+<li>排序后的条目将插入到B+树中。</li>
+</ul>
+<h2 id="修改数据"><a href="#修改数据" class="headerlink" title="修改数据"></a>修改数据</h2><p>由于InnoDB多版本并发控制（MVCC）的存在，增删改的操作对二级索引的处理方式不同于对聚簇索引的处理方式。如果忘了MVCC请复习一下 <a href="https://rugod.cn/2020/06/08/mysql/mysql-trx/" target="_blank" rel="noopener">跟我学Mysql之事务篇</a></p>
+<ul>
+<li>聚簇索引</li>
+</ul>
+<p>聚簇索引中的记录将就地更新，其隐藏的系统列指向撤消日志条目，可以从中重建记录的早期版本。</p>
+<p>在聚簇索引中，DB_TRX_ID检查记录的记录，如果在启动读取事务后修改了记录，则从撤消日志中检索记录的正确版本。</p>
+<ul>
+<li>二级索引</li>
+</ul>
+<p>二级索引记录不包含隐藏的系统列，也不会就地更新。</p>
+<p>更新二级索引列时，将对旧的二级索引记录进行删除标记，将新记录插入，并最终清除带有删除标记的记录。当二级索引记录被删除标记或二级索引页被较新的事务更新时，InnoDB在聚簇索引中查找数据库记录。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>本篇讲解了索引的基本数据结构与分类，和INNODB模型和底层实现基本原理，后期会更加详细的介绍INNODB索引的具体实现过程。</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://blog.csdn.net/qq_26222859/article/details/80631121" target="_blank" rel="noopener">B+树图文详解</a></p>
+<p><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-index-types.html" target="_blank" rel="noopener">INNODB索引-官方文档</a></p>
+<hr>
+<p>版权声明：</p>
+<p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Rugod</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://rugod.com/2020/07/30/mysql/mysql-index/">https://rugod.com/2020/07/30/mysql/mysql-index/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://rugod.com" target="_blank">宇神之息</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Mysql/">Mysql</a><a class="post-meta__tags" href="/tags/%E7%B4%A2%E5%BC%95/">索引</a><a class="post-meta__tags" href="/tags/INNODB/">INNODB</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/opencv.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"/><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-button button--primary button--animated"> <i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lazyload post-qr-code__img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/wechat.JPG" alt="微信"/><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lazyload post-qr-code__img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/alipay.JPG" alt="支付宝"/><div class="post-qr-code__desc">支付宝</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="prev-post pull_left"><a href="/2020/07/30/mysql/mysql-pmm/"><img class="prev_cover lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/mysql.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">部署Mysql监控工具pmm</div></div></a></div><div class="next-post pull_right"><a href="/2020/07/30/mongodb/mongodb-update/"><img class="next_cover lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Mongodb/mongodb.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Mongodb3.4离线升级到4.2</div></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fa fa-fw fa-thumbs-up" aria-hidden="true"></i><span> 相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/2020/09/16/aws/aws-rds-migrate/" title="迁移自建Mysql至AWS的RDS"><img class="relatedPosts_cover lazyload"data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/mysql.jpg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-history fa-fw" aria-hidden="true"></i> 2020-09-16</div><div class="relatedPosts_title">迁移自建Mysql至AWS的RDS</div></div></a></div><div class="relatedPosts_item"><a href="/2020/09/05/bug/mysql-climbing/" title="运维手册——Mysql导入导出亿条数据（排坑篇）"><img class="relatedPosts_cover lazyload"data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/mysql.jpg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-history fa-fw" aria-hidden="true"></i> 2020-09-05</div><div class="relatedPosts_title">运维手册——Mysql导入导出亿条数据（排坑篇）</div></div></a></div><div class="relatedPosts_item"><a href="/2020/09/05/bug/mysql-key-long/" title="运维手册——Mysql索引字段长度太长报错"><img class="relatedPosts_cover lazyload"data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/mysql.jpg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-history fa-fw" aria-hidden="true"></i> 2020-09-05</div><div class="relatedPosts_title">运维手册——Mysql索引字段长度太长报错</div></div></a></div></div><div class="clear_both"></div></div><hr><div id="post-comment"><div class="comment_headling"><i class="fa fa-comments fa-fw" aria-hidden="true"></i><span> 评论</span></div><div class="vcomment" id="vcomment"></div><script src="https://cdn.jsdelivr.net/gh/xaoxuu/volantis/js/volantis.min.js"></script><script>var GUEST_INFO = ['nick','mail','link'];
+var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+  return GUEST_INFO.indexOf(item) > -1
+});
+guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
+
+window.valine = new Valine({
+  el:'#vcomment',
+  notify: false,
+  verify: false,
+  appId: 'GkD8YSRxxCgXoW6LqFO3cKhd-gzGzoHsz',
+  appKey: 'DbbNrHwsCuK9Ehh2wgOw6UXL',
+  placeholder: '记得留下你的昵称和邮箱...可以快速收到回复哦',
+  avatar: 'monsterid',
+  meta: guest_info,
+  pageSize: '10',
+  lang: 'zh-cn',
+  recordIP: false,
+  serverURLs: ''
+});</script></div></article></main><footer id="footer" style="background-image: url(https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/mysql.jpg)" data-type="photo"><div id="footer-wrap"><div class="copyright">&copy;2020 By Rugod</div><div class="footer_custom_text">弱小的人才习惯嘲讽和否定，而内心强大的人从不吝啬赞美和鼓励</div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="阅读模式"></i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换" target="_self">繁</a><i class="darkmode fa fa-moon-o" id="darkmode" title="夜间模式"></i></div><div id="rightside-config-show"><div id="rightside_config" title="设置"><i class="fa fa-cog" aria-hidden="true"></i></div><a id="to_comment" href="#post-comment" title="直达评论"><i class="scroll_to_comment fa fa-comments">  </i></a><i class="fa fa-list-ul close" id="mobile-toc-button" title="目录" aria-hidden="true"></i><i class="fa fa-arrow-up" id="go-up" title="回到顶部" aria-hidden="true"></i></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a href="https://github.com/wzpan/hexo-generator-search" target="_blank" rel="noopener" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script id="canvas_nest" color="255,0,0" opacity="0.7" zIndex="-1" count="99" mobile="false" src="/js/third-party/canvas-nest.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@latest/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/lazysizes@latest/lazysizes.min.js" async=""></script><script src="/js/third-party/ClickShowText.js"></script><script src="/js/search/local-search.js"></script></body></html>
