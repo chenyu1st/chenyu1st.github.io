@@ -1,0 +1,189 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Centos7安装Matlab2017a | 宇神之息</title><meta name="description" content="Centos7安装Matlab2017a"><meta name="keywords" content="C,Matlab"><meta name="author" content="Rugod"><meta name="copyright" content="Rugod"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.ico"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="https://www.google-analytics.com" crossorigin="crossorigin"/><link rel="preconnect" href="https://hm.baidu.com"/><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="crossorigin"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Centos7安装Matlab2017a"><meta name="twitter:description" content="Centos7安装Matlab2017a"><meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/matlab.jpg"><meta property="og:type" content="article"><meta property="og:title" content="Centos7安装Matlab2017a"><meta property="og:url" content="https://rugod.com/2021/01/18/gpu/matlab-install/"><meta property="og:site_name" content="宇神之息"><meta property="og:description" content="Centos7安装Matlab2017a"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/matlab.jpg"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>var autoChangeMode = '1'
+var t = Cookies.get("theme")
+if (autoChangeMode == '1'){
+  var isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+  var isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
+  var isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined){
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport){
+      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour < 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+  }
+  } else if (t == 'light') activateLightMode()
+  else activateDarkMode()
+
+} else if (autoChangeMode == '2'){
+  now = new Date();
+  hour = now.getHours();
+  isNight = hour < 6 || hour >= 18
+  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode() 
+} else {
+  if ( t == 'dark' ) activateDarkMode()
+  else if ( t == 'light') activateLightMode()
+}
+
+function activateDarkMode(){
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
+  }
+}
+function activateLightMode(){
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
+  }
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="canonical" href="https://rugod.com/2021/01/18/gpu/matlab-install/"><link rel="next" title="运维手册——Centos7网络超时断开(后传)" href="https://rugod.com/2021/01/04/bug/network-timeout-2/"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?a29fc1f2b32c6a60aee5dbf412c89285";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-164950732-1', 'auto');
+ga('send', 'pageview');
+</script><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容:${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://www.rugod.cn/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: {"languages":{"author":"作者: Rugod","link":"链接: ","source":"来源: 宇神之息","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  ClickShowText: {"text":"宇神,牛逼","fontSize":"15px"},
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  baiduPush: true,
+  highlightCopy: true,
+  highlightLang: true,
+  highlightShrink: 'false',
+  isFontAwesomeV5: false,
+  isPhotoFigcaption: false
+  
+}</script><script>var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isSidebar: true  
+  }</script><noscript><style>
+#page-header {
+  opacity: 1
+}
+.justified-gallery img{
+  opacity: 1
+}
+</style></noscript><meta name="generator" content="Hexo 4.2.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/Challenger.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">86</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">88</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">25</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于本人</span></a></div></div></div></div><i class="fa fa-arrow-right on" id="toggle-sidebar" aria-hidden="true">     </i><div id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#背景"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Matlab"><span class="toc-number">2.</span> <span class="toc-text">Matlab</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#准备"><span class="toc-number">3.</span> <span class="toc-text">准备</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#安装"><span class="toc-number">4.</span> <span class="toc-text">安装</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#下载文件到下面目录"><span class="toc-number">4.1.</span> <span class="toc-text">下载文件到下面目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#挂载ISO文件"><span class="toc-number">4.2.</span> <span class="toc-text">挂载ISO文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#静默安装"><span class="toc-number">4.3.</span> <span class="toc-text">静默安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装iso1"><span class="toc-number">4.3.1.</span> <span class="toc-text">安装iso1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安装iso2"><span class="toc-number">4.3.2.</span> <span class="toc-text">安装iso2</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安装成功"><span class="toc-number">4.3.3.</span> <span class="toc-text">安装成功</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#激活"><span class="toc-number">4.4.</span> <span class="toc-text">激活</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试验证"><span class="toc-number">4.5.</span> <span class="toc-text">测试验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#添加环境变量"><span class="toc-number">4.6.</span> <span class="toc-text">添加环境变量</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#matlab报错总结"><span class="toc-number">5.</span> <span class="toc-text">matlab报错总结</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#lib64-libstdc-so-6-version-CXXABI-1-3-8’-not-found"><span class="toc-number">5.1.</span> <span class="toc-text">&#x2F;lib64&#x2F;libstdc++.so.6: version &#96;CXXABI_1.3.8’ not found</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考资料"><span class="toc-number">6.</span> <span class="toc-text">参考资料</span></a></li></ol></div></div></div><div id="body-wrap"><div class="post-bg" id="nav" style="background-image: url(https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/matlab.jpg)"><div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">宇神之息</a></span><span class="pull_right menus"><div id="search_button"><a class="site-page social-icon search"><i class="fa fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于本人</span></a></div></div><span class="toggle-menu close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span></span></div><div id="post-info"><div id="post-title"><div class="posttitle">Centos7安装Matlab2017a</div></div><div id="post-meta"><div class="meta-firstline"><time class="post-meta__date"><span class="post-meta__date-created" title="发表于 2021-01-18 20:00:00"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2021-01-18</span><span class="post-meta__separator">|</span><span class="post-meta__date-updated" title="更新于 2021-01-18 19:00:55"><i class="fa fa-history" aria-hidden="true"></i> 更新于 2021-01-18</span></time><span class="post-meta__categories"><span class="post-meta__separator">|</span><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/Matlab/">Matlab</a></span></div><div class="meta-secondline"> <span class="post-meta-wordcount"><i class="post-meta__icon fa fa-file-word-o" aria-hidden="true"></i><span>字数总计:</span><span class="word-count">905</span><span class="post-meta__separator">|</span><i class="post-meta__icon fa fa-clock-o" aria-hidden="true"></i><span>阅读时长: 3 分钟</span></span></div><div class="meta-thirdline"><span class="post-meta-pv-cv"><span class="post-meta__separator">|</span><i class="fa fa-eye post-meta__icon" aria-hidden="true"> </i><span>阅读量:</span><span id="busuanzi_value_page_pv"></span></span><span class="post-meta-commentcount"><span class="post-meta__separator">|</span><i class="post-meta__icon fa fa-comment-o" aria-hidden="true"></i><span>评论数:</span><a href="/2021/01/18/gpu/matlab-install/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count comment-count" data-xid="/2021/01/18/gpu/matlab-install/" itemprop="commentCount"></span></a></span></div></div></div></div><main class="layout_post" id="content-inner"><article id="post"><div id="article-container"><p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>公司有图像处理的项目需要安装Matlab，开始学习下Matlab相关知识</p>
+<h1 id="Matlab"><a href="#Matlab" class="headerlink" title="Matlab"></a>Matlab</h1><p>MATLAB（Matrix Laboratory，矩阵实验室）是由美国The MathWorks公司出品的商业数学软件。MATLAB是一种用于算法开发、数据可视化、数据分析以及数值计算的高级技术计算语言和交互式环境。除矩阵运算、绘制函数/数据图像等常用功能外，MATLAB还可用来创建用户界面，以及调用其它语言（包括C、C++、Java、Python、FORTRAN）编写的程序。</p>
+<p>MATLAB主要用于数值运算，但利用为数众多的附加工具箱，它也适合不同领域的应用，例如控制系统设计与分析、影像处理、深度学习、信号处理与通讯、金融建模和分析等。另外还有配套软件包Simulink提供可视化开发环境，常用于系统模拟、动态/嵌入式系统开发等方面。</p>
+<p>在R2017b后的MATLAB版本更发布了深度学习的工具，使其能够可视化的快速创建AI模型，并透过各种转码器，部属于嵌入式硬件之中。</p>
+<p>截至2020年，MATLAB在全球拥有超过400万用户。MATLAB用户来自工程，科学和经济学领域。</p>
+<h1 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h1><ul>
+<li>Matlab文件</li>
+</ul>
+<p>R2017a_glnxa64_dvd1.iso</p>
+<p>R2017a_glnxa64_dvd2.iso</p>
+<p>Matlab 2017a Linux64 Crack.tar.gz</p>
+<p>文件自行百度，这里不提供</p>
+<ul>
+<li>ISO存储目录</li>
+</ul>
+<p>/opt/2017a</p>
+<ul>
+<li>安装进行时目录</li>
+</ul>
+<p>/opt/matlab</p>
+<ul>
+<li>存储目录</li>
+</ul>
+<p>/opt/MATLAB</p>
+<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><h2 id="下载文件到下面目录"><a href="#下载文件到下面目录" class="headerlink" title="下载文件到下面目录"></a>下载文件到下面目录</h2><pre><code>ll /opt/2017a
+license_standalone.lic
+libmwservices.so
+R2017a_glnxa64_dvd1.iso
+R2017a_glnxa64_dvd2.iso 
+activate.ini 
+
+activate.int文件内容
+
+isSilent=true
+activateCommand=activateOffline
+licenseFile=/opt/2017a/license_standalone.lic   </code></pre><h2 id="挂载ISO文件"><a href="#挂载ISO文件" class="headerlink" title="挂载ISO文件"></a>挂载ISO文件</h2><pre><code>mkdir /opt/matlab
+sudo mount -t auto -o loop /opt/2017a/R2017a_glnxa64_dvd1.iso /opt/matlab</code></pre><h2 id="静默安装"><a href="#静默安装" class="headerlink" title="静默安装"></a>静默安装</h2><h3 id="安装iso1"><a href="#安装iso1" class="headerlink" title="安装iso1"></a>安装iso1</h3><pre><code>/opt/matlab/install -destinationFolder /opt/MATLAB/R2017a -fileInstallationKey 09806-07443-53955-64350-21751-41297 -agreeToLicense yes -outputFile /opt/2017a/matlab_install.log -mode silent -activationPropertiesFile  -licensePath /opt/2017a/license_standalone.lic</code></pre><h3 id="安装iso2"><a href="#安装iso2" class="headerlink" title="安装iso2"></a>安装iso2</h3><p>安装过程中提示Info: Eject DVD 1 and insert DVD 2 to continue.</p>
+<p>再开一个终端执行</p>
+<pre><code>sudo mount -t auto -o loop /opt/2017a/R2017a_glnxa64_dvd2.iso /opt/matlab</code></pre><h3 id="安装成功"><a href="#安装成功" class="headerlink" title="安装成功"></a>安装成功</h3><pre><code>Exiting with status 0
+End - Successful.
+Finished</code></pre><h2 id="激活"><a href="#激活" class="headerlink" title="激活"></a>激活</h2><pre><code>cp /opt/2017a/libmwservices.so /opt/MATLAB/R2017a/bin/glnxa64/
+
+/opt/MATLAB/R2017a/bin/activate_matlab.sh -propertiesFile /opt/2017a/activate.ini </code></pre><h2 id="测试验证"><a href="#测试验证" class="headerlink" title="测试验证"></a>测试验证</h2><pre><code>vim test.m
+disp(&quot;hello, world!&quot;)
+disp(argument1)
+
+执行shell命令:
+matlab -nodisplay -r &quot;argument1=10010;test&quot;
+
+输出结果
+hello, world!
+   10010</code></pre><h2 id="添加环境变量"><a href="#添加环境变量" class="headerlink" title="添加环境变量"></a>添加环境变量</h2><pre><code>vim /etc/profile
+export MATLAB_HOME=/opt/2017a
+export PATH=$PATH:$MATLAB_HOME/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MATLAB_HOME/runtime/glnxa64
+
+source /etc/profile</code></pre><h1 id="matlab报错总结"><a href="#matlab报错总结" class="headerlink" title="matlab报错总结"></a>matlab报错总结</h1><h2 id="lib64-libstdc-so-6-version-CXXABI-1-3-8’-not-found"><a href="#lib64-libstdc-so-6-version-CXXABI-1-3-8’-not-found" class="headerlink" title="/lib64/libstdc++.so.6: version `CXXABI_1.3.8’ not found"></a>/lib64/libstdc++.so.6: version `CXXABI_1.3.8’ not found</h2><pre><code>[main] org.apache.hadoop.mapred.YarnChild: Error running child : java.lang.UnsatisfiedLinkError: /data/2017a/bin/glnxa64/libnativedl.so: /lib64/libstdc++.so.6: version `CXXABI_1.3.8&apos; not found (required by /data/2017a/bin/glnxa64/libnativedl.so)</code></pre><p>问题分析</p>
+<p>因为与MATLAB一起打包的该特定库的版本和Linux操作系统随附的版本对比要旧一些，这会导致兼容性问题。</p>
+<p>解决方案</p>
+<p>使用conda的lib包作为系统默认的包或者去网上下载libstdc++的最新源码编译后更换现有的包</p>
+<p>注意:由于操作系统、系统lib包、conda的安装目录可能不相同，请不要随意用网上的so文件或直接照搬命令里的绝对路径</p>
+<p>例如下面是centos7的绝对路径</p>
+<pre><code>cp /opt/anaconda3/lib/libstdc++.so.6.0.26 /usr/lib64/
+
+ln -sf  /usr/lib64/libstdc++.so.6.0.26  /usr/lib64/libstdc++.so.6</code></pre><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://blog.csdn.net/weixin_43839173/article/details/103232861" target="_blank" rel="noopener">centos 7安装matlab的两种方法（桌面安装和命令行安装）
+</a></p>
+<p><a href="https://zh.wikipedia.org/wiki/MATLAB" target="_blank" rel="noopener">MATLAB百科</a></p>
+<hr>
+<p>版权声明：</p>
+<p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Rugod</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://rugod.com/2021/01/18/gpu/matlab-install/">https://rugod.com/2021/01/18/gpu/matlab-install/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://rugod.com" target="_blank">宇神之息</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/C/">C</a><a class="post-meta__tags" href="/tags/Matlab/">Matlab</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/matlab.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"/><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-button button--primary button--animated"> <i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lazyload post-qr-code__img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/wechat.JPG" alt="微信"/><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lazyload post-qr-code__img" src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/alipay.JPG" alt="支付宝"/><div class="post-qr-code__desc">支付宝</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="next-post pull-full"><a href="/2021/01/04/bug/network-timeout-2/"><img class="next_cover lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Centos/Centos.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">运维手册——Centos7网络超时断开(后传)</div></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fa fa-fw fa-thumbs-up" aria-hidden="true"></i><span> 相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/2020/12/28/gpu/opencv-install/" title="Ubuntu16.04安装opencv"><img class="relatedPosts_cover lazyload"data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/opencv.png"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-history fa-fw" aria-hidden="true"></i> 2020-01-07</div><div class="relatedPosts_title">Ubuntu16.04安装opencv</div></div></a></div></div><div class="clear_both"></div></div><hr><div id="post-comment"><div class="comment_headling"><i class="fa fa-comments fa-fw" aria-hidden="true"></i><span> 评论</span></div><div class="vcomment" id="vcomment"></div><script src="https://cdn.jsdelivr.net/gh/xaoxuu/volantis/js/volantis.min.js"></script><script>var GUEST_INFO = ['nick','mail','link'];
+var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+  return GUEST_INFO.indexOf(item) > -1
+});
+guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
+
+window.valine = new Valine({
+  el:'#vcomment',
+  notify: false,
+  verify: false,
+  appId: 'GkD8YSRxxCgXoW6LqFO3cKhd-gzGzoHsz',
+  appKey: 'DbbNrHwsCuK9Ehh2wgOw6UXL',
+  placeholder: '记得留下你的昵称和邮箱...可以快速收到回复哦',
+  avatar: 'monsterid',
+  meta: guest_info,
+  pageSize: '10',
+  lang: 'zh-cn',
+  recordIP: false,
+  serverURLs: ''
+});</script></div></article></main><footer id="footer" style="background-image: url(https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Blog/matlab.jpg)" data-type="photo"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By Rugod</div><div class="footer_custom_text">弱小的人才习惯嘲讽和否定，而内心强大的人从不吝啬赞美和鼓励</div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="阅读模式"></i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换" target="_self">繁</a><i class="darkmode fa fa-moon-o" id="darkmode" title="夜间模式"></i></div><div id="rightside-config-show"><div id="rightside_config" title="设置"><i class="fa fa-cog" aria-hidden="true"></i></div><a id="to_comment" href="#post-comment" title="直达评论"><i class="scroll_to_comment fa fa-comments">  </i></a><i class="fa fa-list-ul close" id="mobile-toc-button" title="目录" aria-hidden="true"></i><i class="fa fa-arrow-up" id="go-up" title="回到顶部" aria-hidden="true"></i></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a href="https://github.com/wzpan/hexo-generator-search" target="_blank" rel="noopener" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script id="canvas_nest" color="255,0,0" opacity="0.7" zIndex="-1" count="99" mobile="false" src="/js/third-party/canvas-nest.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@latest/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/lazysizes@latest/lazysizes.min.js" async=""></script><script src="/js/third-party/ClickShowText.js"></script><script src="/js/search/local-search.js"></script></body></html>
