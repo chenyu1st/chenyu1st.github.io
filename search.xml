@@ -4,6 +4,19 @@
   
     
     <entry>
+      <title>linux/U-centos8-install</title>
+      <link href="2021/01/23/linux/U-centos8-install/"/>
+      <url>2021/01/23/linux/U-centos8-install/</url>
+      
+        <content type="html"><![CDATA[<hr><p>title: U盘安装Centos8</p><p>date: 2021-01-23 10:00:00</p><p>categories:</p><ul><li>Linux</li></ul><p>tags:</p><ul><li>Centos</li><li>Linux</li></ul><p>cover: <a href="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Centos/Centos.jpg" target="_blank" rel="noopener">https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Centos/Centos.jpg</a></p><p>description: U盘安装Centos8</p><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>机器升级了，由于新主板（B460）没有centos7驱动，导致一直无法正常安装，但是centos8可以安装，一起来试试吧</p><h1 id="下载镜像并制作U盘启动盘"><a href="#下载镜像并制作U盘启动盘" class="headerlink" title="下载镜像并制作U盘启动盘"></a>下载镜像并制作U盘启动盘</h1><h2 id="下载centos镜像"><a href="#下载centos镜像" class="headerlink" title="下载centos镜像"></a>下载centos镜像</h2><p><a href="http://mirrors.aliyun.com/centos/8/isos/x86_64/CentOS-8.3.2011-x86_64-dvd1.iso" target="_blank" rel="noopener">阿里源</a></p><h2 id="UItraISO（软碟通）制作"><a href="#UItraISO（软碟通）制作" class="headerlink" title="UItraISO（软碟通）制作"></a>UItraISO（软碟通）制作</h2><p>下载UItraISO</p><p><a href="https://cn.ultraiso.net/xiazai.html" target="_blank" rel="noopener">https://cn.ultraiso.net/xiazai.html</a></p><ul><li>安装完成后点击 试用</li><li>点击文件，选择打开centos的iso文件</li><li>插好U盘</li><li>点击顶部菜单中的 启动  选择 写入硬盘映像</li><li>硬盘驱动器选择你的U盘 ，写入方式 usb+hdd+</li><li>点击写入</li></ul><p>等待制作启动盘</p><h1 id="U盘引导"><a href="#U盘引导" class="headerlink" title="U盘引导"></a>U盘引导</h1><p>注意：如果直接在已经存在的系统上装盘可能会导致异常，建议用一块新的盘或者直接把现有的盘格式化，利用老毛桃或者其他PE系统先格式化磁盘</p><ul><li>把U盘插在电脑上</li><li>开机</li><li>一般按f12或者del进入bios界面设置U盘启动</li><li>进入以下画面请将光标选择install 然后按e进行编辑</li><li>将”LABEL=Centos\x207\x20x\86_64 quiet”更换成”/dev/sda4” </li><li>操作后你的install信息如下： </li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">inst.stage2&#x3D;hd:&#x2F;dev&#x2F;sda4 quiet</span><br></pre></td></tr></table></figure><ul><li>按ctrl+x安装即可进入centos安装界面</li></ul><h1 id="安装centos"><a href="#安装centos" class="headerlink" title="安装centos"></a>安装centos</h1><ul><li>语言选择英文</li><li>时区选择中国上海</li><li>安装源选择阿里源 <a href="http://mirrors.aliyun.com/centos/8/BaseOS/x86_64/os/" target="_blank" rel="noopener">http://mirrors.aliyun.com/centos/8/BaseOS/x86_64/os/</a></li><li>软件选择最小化安装</li><li>配置网络和主机名，固定一个ip并设置开机自动开启网络，根据你的实际场景来</li><li>磁盘分区 选择手动分区(I will configure partitioning)</li></ul><p>分区内容如下</p><table><thead><tr><th>目录</th><th>空间</th></tr></thead><tbody><tr><td>/boot</td><td>1024M</td></tr><tr><td>/boot/efi</td><td>200M</td></tr><tr><td>swap</td><td>2048M</td></tr><tr><td>/</td><td>剩余所有磁盘空间</td></tr></tbody></table><p>有的时候不需要分/boot/efi</p><ul><li>点击begin installation</li><li>配置root pswword</li></ul><p>等待</p><p>装好后重启即可进入centos了</p><h1 id="报错"><a href="#报错" class="headerlink" title="报错"></a>报错</h1><p>U盘启动时在install centos 7时报错</p><p>dracut-pre-udev[351]:modprobe :ERROR:could not insert ‘floppy’<br>dracut-pre-udev[351]:modprobe :ERROR:could not insert ‘edd’:No</p><p>网上找了很久</p><p>大部分说按e，修改inst.stage2=hd:LABEL=Centos\x207\x20x\86_64 quiet 为你真实U盘的设备名（/dev/sdc4或其他)</p><p>那怎么知道设备名呢</p><p>先将inst.stage2=hd:LABEL=Centos\x207\x20x\86_64 quiet改为</p><p>initrd=initrd.img linux dd quiet</p><p>按ctrl+x</p><p>可以进入主机设备界面，找到你现在的U盘的设备名</p><p>然后再重启，继续按e</p><p>修改inst.stage2=hd:LABEL=Centos\x207\x20x\86_64 quiet</p><p>为inst.stage2=hd:/dev/sdc4 quiet</p><p>按ctrl+x</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>对比centos7U盘安装，多了几个点。</p><ul><li>界面出现install的时候必须要选择U盘，nomodeset不起作用</li><li>安装时需要选择安装源，我一般就选择阿里源了</li></ul><p>以后可能centos8就慢慢普及了，就像cenots7代替centos6一样，现在学起来吧。</p><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="hhttps://blog.csdn.net/u012798683/article/details/106645108">Centos 8 U盘安装以及安装问题处理</a></p><p><a href="https://www.cnblogs.com/iwalkman/p/11781234.html" target="_blank" rel="noopener">Centos8和7的区别（参照redhat）</a></p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Centos7安装Matlab2017a</title>
       <link href="2021/01/18/gpu/matlab-install/"/>
       <url>2021/01/18/gpu/matlab-install/</url>
@@ -20,9 +33,9 @@
       
         <tags>
             
-            <tag> C </tag>
-            
             <tag> Matlab </tag>
+            
+            <tag> C </tag>
             
         </tags>
       
@@ -101,11 +114,11 @@
       
         <tags>
             
+            <tag> C </tag>
+            
             <tag> OpenCV </tag>
             
             <tag> Conda </tag>
-            
-            <tag> C </tag>
             
         </tags>
       
@@ -568,9 +581,9 @@
       
         <tags>
             
-            <tag> Gitlab </tag>
-            
             <tag> CI/CD </tag>
+            
+            <tag> Gitlab </tag>
             
         </tags>
       
@@ -676,9 +689,9 @@
       
         <tags>
             
-            <tag> Gitlab </tag>
-            
             <tag> CI/CD </tag>
+            
+            <tag> Gitlab </tag>
             
         </tags>
       
@@ -739,37 +752,6 @@
     
     
     <entry>
-      <title>跟我学Devops之工具篇（Jenkins）</title>
-      <link href="2020/10/11/devops/devops-jenkins-1/"/>
-      <url>2020/10/11/devops/devops-jenkins-1/</url>
-      
-        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p><hr><h1 id="jenkins简介"><a href="#jenkins简介" class="headerlink" title="jenkins简介"></a>jenkins简介</h1><p>Jenkins是一款开源 CI&amp;CD 软件，用于自动化各种任务，包括构建、测试和部署软件。</p><p>Jenkins 支持各种运行方式，可通过系统包、Docker 或者通过一个独立的 Java 程序。</p><p>Jenkins 是一个扩展性非常强的软件，其功能主要通过插件来扩展。</p><h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><h2 id="系统要求"><a href="#系统要求" class="headerlink" title="系统要求"></a>系统要求</h2><h3 id="最低推荐配置"><a href="#最低推荐配置" class="headerlink" title="最低推荐配置:"></a>最低推荐配置:</h3><p>256MB可用内存</p><p>1GB可用磁盘空间(作为一个Docker容器运行jenkins的话推荐10GB)</p><p>为小团队推荐的硬件配置:</p><p>1GB+可用内存</p><p>50 GB+ 可用磁盘空间</p><h3 id="软件配置"><a href="#软件配置" class="headerlink" title="软件配置:"></a>软件配置:</h3><p>Java 8无论是Java运行时环境（JRE）还是Java开发工具包（JDK）都可以。</p><p>注意: 如果将Jenkins作为Docker 容器运行，这不是必需的</p><h2 id="物理机部署"><a href="#物理机部署" class="headerlink" title="物理机部署"></a>物理机部署</h2><h3 id="安装java"><a href="#安装java" class="headerlink" title="安装java"></a>安装java</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y java-1.8.0-openjdk</span><br><span class="line">yum install -y java-devel</span><br></pre></td></tr></table></figure><h3 id="安装jenkins"><a href="#安装jenkins" class="headerlink" title="安装jenkins"></a>安装jenkins</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget -O &#x2F;etc&#x2F;yum.repos.d&#x2F;jenkins.repo https:&#x2F;&#x2F;pkg.jenkins.io&#x2F;redhat-stable&#x2F;jenkins.repo</span><br><span class="line">rpm --import https:&#x2F;&#x2F;pkg.jenkins.io&#x2F;redhat-stable&#x2F;jenkins.io.key</span><br><span class="line">yum install jenkins -y</span><br><span class="line">systemctl start jenkins</span><br></pre></td></tr></table></figure><p>安装好后，jenkins的主目录位于/var/lib/jenkins，这也是jenkins用户的家目录。</p><ul><li>jenkins主程序：/usr/lib/jenkins/jenkins.war</li><li>jenkins配置文件：/etc/sysconfig/jenkins</li><li>jenkins启动脚本：/etc/init.d/jenkins</li><li>jenkins日志目录：/var/log/jenkins</li></ul><p>初始化见下面docker部署初始化过程</p><h2 id="docker部署"><a href="#docker部署" class="headerlink" title="docker部署"></a>docker部署</h2><h3 id="配置docker-hub镜像加速"><a href="#配置docker-hub镜像加速" class="headerlink" title="配置docker hub镜像加速"></a>配置docker hub镜像加速</h3><p>由于默认拉取的镜像是docker hub，下载速度比较慢，可以切换国内镜像源</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">vim &#x2F;etc&#x2F;docker&#x2F;daemon.json</span><br><span class="line">添加</span><br><span class="line">&#123;</span><br><span class="line">    &quot;registry-mirrors&quot;: [</span><br><span class="line">        &quot;https:&#x2F;&#x2F;1nj0zren.mirror.aliyuncs.com&quot;,</span><br><span class="line">        &quot;https:&#x2F;&#x2F;docker.mirrors.ustc.edu.cn&quot;,</span><br><span class="line">        &quot;http:&#x2F;&#x2F;f1361db2.m.daocloud.io&quot;,</span><br><span class="line">        &quot;https:&#x2F;&#x2F;registry.docker-cn.com&quot;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl restart docker</span><br></pre></td></tr></table></figure><table><thead><tr><th>镜像加速器</th><th>镜像加速器地址</th></tr></thead><tbody><tr><td>Docker 中国官方镜像</td><td><a href="https://registry.docker-cn.com" target="_blank" rel="noopener">https://registry.docker-cn.com</a></td></tr><tr><td>DaoCloud 镜像站</td><td><a href="http://f1361db2.m.daocloud.io" target="_blank" rel="noopener">http://f1361db2.m.daocloud.io</a></td></tr><tr><td>Azure 中国镜像</td><td><a href="https://dockerhub.azk8s.cn" target="_blank" rel="noopener">https://dockerhub.azk8s.cn</a></td></tr><tr><td>阿里云</td><td>https://<your_code>.mirror.aliyuncs.com 需要登陆</td></tr><tr><td>腾讯云</td><td>ttps://mirror.ccs.tencentyun.com</td></tr></tbody></table><h3 id="拉取最新最稳定的jenkins镜像"><a href="#拉取最新最稳定的jenkins镜像" class="headerlink" title="拉取最新最稳定的jenkins镜像"></a>拉取最新最稳定的jenkins镜像</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull jenkinsci&#x2F;blueocean</span><br></pre></td></tr></table></figure><h3 id="将jenkins数据挂载到存储卷"><a href="#将jenkins数据挂载到存储卷" class="headerlink" title="将jenkins数据挂载到存储卷"></a>将jenkins数据挂载到存储卷</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker volume create jenkins-data &#x2F;&#x2F; 创建一个自定义存储卷</span><br><span class="line">docker volume ls &#x2F;&#x2F; 查看所有存储卷</span><br><span class="line">docker volume inspect jenkins-data &#x2F;&#x2F; 查看指定存储卷详情信息</span><br></pre></td></tr></table></figure><h3 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> docker run -u root -d --name jenkins -p 8080:8080 -v &#x2F;data&#x2F;jenkins&#x2F;:&#x2F;var&#x2F;jenkins_home -v &#x2F;var&#x2F;run&#x2F;docker.sock:&#x2F;var&#x2F;run&#x2F;docker.sock    jenkinsci&#x2F;blueocean ;</span><br><span class="line"></span><br><span class="line">-p 容器的端口8080到主机上的端口8080</span><br><span class="line">-v 此目录映射到计算机本地文件系统上的目录</span><br><span class="line">&#x2F;var&#x2F;run&#x2F;docker.sock 表示Docker守护程序通过其监听的基于Unix的套接字。 该映射允许 jenkin容器与Docker守护进程通信， 如果 jenkins 容器需要实例化其他Docker容器，则该守护进程是必需的。</span><br></pre></td></tr></table></figure><h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><p>访问<a href="http://ip:8080" target="_blank" rel="noopener">http://ip:8080</a> 解锁密码</p><p>获取密码</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it jenkins bash</span><br><span class="line">cat &#x2F;var&#x2F;jenkins_home&#x2F;secrets&#x2F;initialAdminPassword</span><br></pre></td></tr></table></figure><p>如果自动安装Maven Integration失败可以手动下载</p><p><a href="http://updates.jenkins-ci.org/download/plugins/maven-plugin/2.14/maven-plugin.hpi" target="_blank" rel="noopener">maven-plugin.hpi</a></p><p>然后在插件管理-高级-上传插件 将下载好的文件添加</p><p>下面说几个常用的插件</p><ul><li>插件：只拉取仓库指定的目录</li></ul><p>插件名：Git Parameter Plug-In</p><p>在源码管理处，选中Git，填写远程仓库地址，授权凭证，拉取分支，然后再点击新增，选中：Sparse Checkout Paths，填写上要从仓库里拉取的目录名称即可</p><ul><li>插件：jenkins任务失败重新构建</li></ul><p>插件名：Naginator Plugin</p><p>安装Naginator+Plugin后，新建一个任务，在构建后操作 选择 “Retry build after failure”</p><p>勾中Rerun build for unstable builds as well as failures</p><p>Maximum number of successive failed builds填1次</p><ul><li>插件：dingtalk告警机器人</li></ul><p>插件名：DingTalk</p><p>安装DingTalk后在系统管理 &gt; 系统配置里配置钉钉机器人</p><p>在钉钉群里的智能群助手里添加一个自定义的机器人，把webhook填到jenkins里即可</p><p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Devops/dingtalk.jpg"  alt="dingtalk.jpg"></p><p>最后在任务里引用这个机器人即可</p><ul><li>插件：远程进入服务器执行命令及文件传输</li></ul><p>插件名：Publish Over SSH</p><p>安装完成后可以在任务里的 构建或者构建后操作 选择send files or execute commands over ssh 这个步骤</p><p>然后输入你想执行的命令和传输的文件即可</p><h3 id="重启"><a href="#重启" class="headerlink" title="重启"></a>重启</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart &#123;CONTAINER ID&#125;</span><br></pre></td></tr></table></figure><h1 id="开始jenkins构建项目"><a href="#开始jenkins构建项目" class="headerlink" title="开始jenkins构建项目"></a>开始jenkins构建项目</h1><h2 id="java项目"><a href="#java项目" class="headerlink" title="java项目"></a>java项目</h2><p>通过jenkins帮助我们构建一个java项目，从代码到应用的过程</p><p>流水线设计</p><ul><li>拉gitlab分支代码  </li><li>maven构建打jar包 </li><li>dockerfile将jar包做成镜像  </li><li>推送到harbor仓库 </li><li>k8s拉取harbor仓库种的镜像 </li><li>helm部署到k8s上</li><li>钉钉通知相关人员发布正常/失败</li></ul><p>具体实际流程下期详细讲解</p><h2 id="npm项目"><a href="#npm项目" class="headerlink" title="npm项目"></a>npm项目</h2><p>流水线设计</p><ul><li>拉gitlab分支代码</li><li>npm打包</li><li>上传到s3/oss/具体服务器的路径</li><li>钉钉通知相关人员发布正常/失败</li></ul><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>至此，一个入门级的jenkins搭建完成，中途还是遇到了许多问题，在后面我会具体讲下实战的jenkins流水线部署过程。</p><h1 id="报错"><a href="#报错" class="headerlink" title="报错"></a>报错</h1><h2 id="脚本没权限执行"><a href="#脚本没权限执行" class="headerlink" title="脚本没权限执行"></a>脚本没权限执行</h2><p>这个是物理机安装jenkins需要注意的点，docker安装不需要注意这个问题</p><p>jenkins自动部署会用到shell命令，而物理机安装jenkins一般是jenkins用户启动的进程，使用root用户会避免遇到更多的问题</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ vim &#x2F;etc&#x2F;sysconfig&#x2F;jenkins # 打开配置文件</span><br><span class="line">    $JENKINS_USER&#x3D;&quot;root&quot; # 修改$JENKINS_USER变量为root，并去掉当前行注释</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#修改Jenkins相关文件夹用户权限(必须修改)</span><br><span class="line">$ chown -R root:root &#x2F;var&#x2F;lib&#x2F;jenkins</span><br><span class="line">$ chown -R root:root &#x2F;var&#x2F;log&#x2F;jenkins</span><br><span class="line">$ chown -R root:root &#x2F;var&#x2F;cache&#x2F;jenkins</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#重启Jenkins服务并检查运行Jenkins的用户是否已经切换为root</span><br><span class="line">$ systemctl restart  jenkins</span><br></pre></td></tr></table></figure><h2 id="插件安装不了"><a href="#插件安装不了" class="headerlink" title="插件安装不了"></a>插件安装不了</h2><p>有些插件下载速度慢是因为在国外，或者是这个插件本身下载就慢</p><p>这个时候我们只需要在官网插件地址看并下载即可</p><ul><li>搜索：<a href="https://plugins.jenkins.io/" target="_blank" rel="noopener">https://plugins.jenkins.io/</a> </li><li>列表：<a href="https://updates.jenkins-ci.org/download/plugins/" target="_blank" rel="noopener">https://updates.jenkins-ci.org/download/plugins/</a></li></ul><p>在jenkins的插件管理 &gt; 高级 &gt; 上传.hpi来安装插件</p><h2 id="git报错"><a href="#git报错" class="headerlink" title="git报错"></a>git报错</h2><p>添加gitlab地址报错如下</p><p>Error performing git command: git ls-remote -h 请查看日志 请检查配置</p><p>如果Jenkins主服务器上未安装git，则可能会发生此错误。</p><p>在宿主机上执行yum install -y git即可</p><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://www.jenkins.io/zh/doc/book/installing/" target="_blank" rel="noopener">jenkins官方安装</a></p><hr><p>版权声明：</p><p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>]]></content>
-      
-      
-      <categories>
-          
-          <category> 跟我学Devops </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> CI/CD </tag>
-            
-            <tag> Devops </tag>
-            
-            <tag> 自动化 </tag>
-            
-            <tag> Jenkins </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>运维手册——解决Harbor镜像传输TLS超时的问题</title>
       <link href="2020/10/11/bug/harbor-pull/"/>
       <url>2020/10/11/bug/harbor-pull/</url>
@@ -795,6 +777,37 @@
             <tag> HTTPS </tag>
             
             <tag> SSL </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>跟我学Devops之工具篇（Jenkins）</title>
+      <link href="2020/10/11/devops/devops-jenkins-1/"/>
+      <url>2020/10/11/devops/devops-jenkins-1/</url>
+      
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p><hr><h1 id="jenkins简介"><a href="#jenkins简介" class="headerlink" title="jenkins简介"></a>jenkins简介</h1><p>Jenkins是一款开源 CI&amp;CD 软件，用于自动化各种任务，包括构建、测试和部署软件。</p><p>Jenkins 支持各种运行方式，可通过系统包、Docker 或者通过一个独立的 Java 程序。</p><p>Jenkins 是一个扩展性非常强的软件，其功能主要通过插件来扩展。</p><h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><h2 id="系统要求"><a href="#系统要求" class="headerlink" title="系统要求"></a>系统要求</h2><h3 id="最低推荐配置"><a href="#最低推荐配置" class="headerlink" title="最低推荐配置:"></a>最低推荐配置:</h3><p>256MB可用内存</p><p>1GB可用磁盘空间(作为一个Docker容器运行jenkins的话推荐10GB)</p><p>为小团队推荐的硬件配置:</p><p>1GB+可用内存</p><p>50 GB+ 可用磁盘空间</p><h3 id="软件配置"><a href="#软件配置" class="headerlink" title="软件配置:"></a>软件配置:</h3><p>Java 8无论是Java运行时环境（JRE）还是Java开发工具包（JDK）都可以。</p><p>注意: 如果将Jenkins作为Docker 容器运行，这不是必需的</p><h2 id="物理机部署"><a href="#物理机部署" class="headerlink" title="物理机部署"></a>物理机部署</h2><h3 id="安装java"><a href="#安装java" class="headerlink" title="安装java"></a>安装java</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y java-1.8.0-openjdk</span><br><span class="line">yum install -y java-devel</span><br></pre></td></tr></table></figure><h3 id="安装jenkins"><a href="#安装jenkins" class="headerlink" title="安装jenkins"></a>安装jenkins</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget -O &#x2F;etc&#x2F;yum.repos.d&#x2F;jenkins.repo https:&#x2F;&#x2F;pkg.jenkins.io&#x2F;redhat-stable&#x2F;jenkins.repo</span><br><span class="line">rpm --import https:&#x2F;&#x2F;pkg.jenkins.io&#x2F;redhat-stable&#x2F;jenkins.io.key</span><br><span class="line">yum install jenkins -y</span><br><span class="line">systemctl start jenkins</span><br></pre></td></tr></table></figure><p>安装好后，jenkins的主目录位于/var/lib/jenkins，这也是jenkins用户的家目录。</p><ul><li>jenkins主程序：/usr/lib/jenkins/jenkins.war</li><li>jenkins配置文件：/etc/sysconfig/jenkins</li><li>jenkins启动脚本：/etc/init.d/jenkins</li><li>jenkins日志目录：/var/log/jenkins</li></ul><p>初始化见下面docker部署初始化过程</p><h2 id="docker部署"><a href="#docker部署" class="headerlink" title="docker部署"></a>docker部署</h2><h3 id="配置docker-hub镜像加速"><a href="#配置docker-hub镜像加速" class="headerlink" title="配置docker hub镜像加速"></a>配置docker hub镜像加速</h3><p>由于默认拉取的镜像是docker hub，下载速度比较慢，可以切换国内镜像源</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">vim &#x2F;etc&#x2F;docker&#x2F;daemon.json</span><br><span class="line">添加</span><br><span class="line">&#123;</span><br><span class="line">    &quot;registry-mirrors&quot;: [</span><br><span class="line">        &quot;https:&#x2F;&#x2F;1nj0zren.mirror.aliyuncs.com&quot;,</span><br><span class="line">        &quot;https:&#x2F;&#x2F;docker.mirrors.ustc.edu.cn&quot;,</span><br><span class="line">        &quot;http:&#x2F;&#x2F;f1361db2.m.daocloud.io&quot;,</span><br><span class="line">        &quot;https:&#x2F;&#x2F;registry.docker-cn.com&quot;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl restart docker</span><br></pre></td></tr></table></figure><table><thead><tr><th>镜像加速器</th><th>镜像加速器地址</th></tr></thead><tbody><tr><td>Docker 中国官方镜像</td><td><a href="https://registry.docker-cn.com" target="_blank" rel="noopener">https://registry.docker-cn.com</a></td></tr><tr><td>DaoCloud 镜像站</td><td><a href="http://f1361db2.m.daocloud.io" target="_blank" rel="noopener">http://f1361db2.m.daocloud.io</a></td></tr><tr><td>Azure 中国镜像</td><td><a href="https://dockerhub.azk8s.cn" target="_blank" rel="noopener">https://dockerhub.azk8s.cn</a></td></tr><tr><td>阿里云</td><td>https://<your_code>.mirror.aliyuncs.com 需要登陆</td></tr><tr><td>腾讯云</td><td>ttps://mirror.ccs.tencentyun.com</td></tr></tbody></table><h3 id="拉取最新最稳定的jenkins镜像"><a href="#拉取最新最稳定的jenkins镜像" class="headerlink" title="拉取最新最稳定的jenkins镜像"></a>拉取最新最稳定的jenkins镜像</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull jenkinsci&#x2F;blueocean</span><br></pre></td></tr></table></figure><h3 id="将jenkins数据挂载到存储卷"><a href="#将jenkins数据挂载到存储卷" class="headerlink" title="将jenkins数据挂载到存储卷"></a>将jenkins数据挂载到存储卷</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker volume create jenkins-data &#x2F;&#x2F; 创建一个自定义存储卷</span><br><span class="line">docker volume ls &#x2F;&#x2F; 查看所有存储卷</span><br><span class="line">docker volume inspect jenkins-data &#x2F;&#x2F; 查看指定存储卷详情信息</span><br></pre></td></tr></table></figure><h3 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> docker run -u root -d --name jenkins -p 8080:8080 -v &#x2F;data&#x2F;jenkins&#x2F;:&#x2F;var&#x2F;jenkins_home -v &#x2F;var&#x2F;run&#x2F;docker.sock:&#x2F;var&#x2F;run&#x2F;docker.sock    jenkinsci&#x2F;blueocean ;</span><br><span class="line"></span><br><span class="line">-p 容器的端口8080到主机上的端口8080</span><br><span class="line">-v 此目录映射到计算机本地文件系统上的目录</span><br><span class="line">&#x2F;var&#x2F;run&#x2F;docker.sock 表示Docker守护程序通过其监听的基于Unix的套接字。 该映射允许 jenkin容器与Docker守护进程通信， 如果 jenkins 容器需要实例化其他Docker容器，则该守护进程是必需的。</span><br></pre></td></tr></table></figure><h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><p>访问<a href="http://ip:8080" target="_blank" rel="noopener">http://ip:8080</a> 解锁密码</p><p>获取密码</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it jenkins bash</span><br><span class="line">cat &#x2F;var&#x2F;jenkins_home&#x2F;secrets&#x2F;initialAdminPassword</span><br></pre></td></tr></table></figure><p>如果自动安装Maven Integration失败可以手动下载</p><p><a href="http://updates.jenkins-ci.org/download/plugins/maven-plugin/2.14/maven-plugin.hpi" target="_blank" rel="noopener">maven-plugin.hpi</a></p><p>然后在插件管理-高级-上传插件 将下载好的文件添加</p><p>下面说几个常用的插件</p><ul><li>插件：只拉取仓库指定的目录</li></ul><p>插件名：Git Parameter Plug-In</p><p>在源码管理处，选中Git，填写远程仓库地址，授权凭证，拉取分支，然后再点击新增，选中：Sparse Checkout Paths，填写上要从仓库里拉取的目录名称即可</p><ul><li>插件：jenkins任务失败重新构建</li></ul><p>插件名：Naginator Plugin</p><p>安装Naginator+Plugin后，新建一个任务，在构建后操作 选择 “Retry build after failure”</p><p>勾中Rerun build for unstable builds as well as failures</p><p>Maximum number of successive failed builds填1次</p><ul><li>插件：dingtalk告警机器人</li></ul><p>插件名：DingTalk</p><p>安装DingTalk后在系统管理 &gt; 系统配置里配置钉钉机器人</p><p>在钉钉群里的智能群助手里添加一个自定义的机器人，把webhook填到jenkins里即可</p><p><img src="/" class="lazyload" data-src="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Devops/dingtalk.jpg"  alt="dingtalk.jpg"></p><p>最后在任务里引用这个机器人即可</p><ul><li>插件：远程进入服务器执行命令及文件传输</li></ul><p>插件名：Publish Over SSH</p><p>安装完成后可以在任务里的 构建或者构建后操作 选择send files or execute commands over ssh 这个步骤</p><p>然后输入你想执行的命令和传输的文件即可</p><h3 id="重启"><a href="#重启" class="headerlink" title="重启"></a>重启</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart &#123;CONTAINER ID&#125;</span><br></pre></td></tr></table></figure><h1 id="开始jenkins构建项目"><a href="#开始jenkins构建项目" class="headerlink" title="开始jenkins构建项目"></a>开始jenkins构建项目</h1><h2 id="java项目"><a href="#java项目" class="headerlink" title="java项目"></a>java项目</h2><p>通过jenkins帮助我们构建一个java项目，从代码到应用的过程</p><p>流水线设计</p><ul><li>拉gitlab分支代码  </li><li>maven构建打jar包 </li><li>dockerfile将jar包做成镜像  </li><li>推送到harbor仓库 </li><li>k8s拉取harbor仓库种的镜像 </li><li>helm部署到k8s上</li><li>钉钉通知相关人员发布正常/失败</li></ul><p>具体实际流程下期详细讲解</p><h2 id="npm项目"><a href="#npm项目" class="headerlink" title="npm项目"></a>npm项目</h2><p>流水线设计</p><ul><li>拉gitlab分支代码</li><li>npm打包</li><li>上传到s3/oss/具体服务器的路径</li><li>钉钉通知相关人员发布正常/失败</li></ul><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>至此，一个入门级的jenkins搭建完成，中途还是遇到了许多问题，在后面我会具体讲下实战的jenkins流水线部署过程。</p><h1 id="报错"><a href="#报错" class="headerlink" title="报错"></a>报错</h1><h2 id="脚本没权限执行"><a href="#脚本没权限执行" class="headerlink" title="脚本没权限执行"></a>脚本没权限执行</h2><p>这个是物理机安装jenkins需要注意的点，docker安装不需要注意这个问题</p><p>jenkins自动部署会用到shell命令，而物理机安装jenkins一般是jenkins用户启动的进程，使用root用户会避免遇到更多的问题</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ vim &#x2F;etc&#x2F;sysconfig&#x2F;jenkins # 打开配置文件</span><br><span class="line">    $JENKINS_USER&#x3D;&quot;root&quot; # 修改$JENKINS_USER变量为root，并去掉当前行注释</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#修改Jenkins相关文件夹用户权限(必须修改)</span><br><span class="line">$ chown -R root:root &#x2F;var&#x2F;lib&#x2F;jenkins</span><br><span class="line">$ chown -R root:root &#x2F;var&#x2F;log&#x2F;jenkins</span><br><span class="line">$ chown -R root:root &#x2F;var&#x2F;cache&#x2F;jenkins</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#重启Jenkins服务并检查运行Jenkins的用户是否已经切换为root</span><br><span class="line">$ systemctl restart  jenkins</span><br></pre></td></tr></table></figure><h2 id="插件安装不了"><a href="#插件安装不了" class="headerlink" title="插件安装不了"></a>插件安装不了</h2><p>有些插件下载速度慢是因为在国外，或者是这个插件本身下载就慢</p><p>这个时候我们只需要在官网插件地址看并下载即可</p><ul><li>搜索：<a href="https://plugins.jenkins.io/" target="_blank" rel="noopener">https://plugins.jenkins.io/</a> </li><li>列表：<a href="https://updates.jenkins-ci.org/download/plugins/" target="_blank" rel="noopener">https://updates.jenkins-ci.org/download/plugins/</a></li></ul><p>在jenkins的插件管理 &gt; 高级 &gt; 上传.hpi来安装插件</p><h2 id="git报错"><a href="#git报错" class="headerlink" title="git报错"></a>git报错</h2><p>添加gitlab地址报错如下</p><p>Error performing git command: git ls-remote -h 请查看日志 请检查配置</p><p>如果Jenkins主服务器上未安装git，则可能会发生此错误。</p><p>在宿主机上执行yum install -y git即可</p><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://www.jenkins.io/zh/doc/book/installing/" target="_blank" rel="noopener">jenkins官方安装</a></p><hr><p>版权声明：</p><p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 跟我学Devops </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Devops </tag>
+            
+            <tag> 自动化 </tag>
+            
+            <tag> Jenkins </tag>
+            
+            <tag> CI/CD </tag>
             
         </tags>
       
@@ -873,9 +886,9 @@
             
             <tag> AWS </tag>
             
-            <tag> Redis </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Redis </tag>
             
         </tags>
       
@@ -960,11 +973,11 @@
             
             <tag> AWS </tag>
             
+            <tag> Operation Manual </tag>
+            
             <tag> RDS </tag>
             
             <tag> Mysql </tag>
-            
-            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -1072,9 +1085,9 @@
       
         <tags>
             
-            <tag> Redis </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Redis </tag>
             
         </tags>
       
@@ -1126,9 +1139,9 @@
       
         <tags>
             
-            <tag> Mysql </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Mysql </tag>
             
         </tags>
       
@@ -1187,31 +1200,6 @@
     
     
     <entry>
-      <title>个人总结(2020.7)</title>
-      <link href="2020/08/04/summary/summary-2020-7/"/>
-      <url>2020/08/04/summary/summary-2020-7/</url>
-      
-        <content type="html"><![CDATA[<h1 id="感慨"><a href="#感慨" class="headerlink" title="感慨"></a>感慨</h1><p>2020的7月可能是我的整个人生的转折点</p><p>7月我经历了公司部门的震动（直属领导离职、华科大佬离职、大数据大佬们离职），我反思了很多，包括他们为什么会离职，以及自己的处境和发展空间。</p><p>最终我认为我不能按照原计划执行了（9月开始投简历），我需要加快我的复习进度以及现在就开始训练自己的面试能力。</p><p>为此我制定了一系列方案（后续会专门写篇文章分享我的跳槽之旅）以及如何落实（这个很难）</p><p>最终我在这个月内面试了20几家公司（有武汉深圳杭州的）也拿了几个不错的offer，最终在月底锁下了一家深圳的创业型公司。8月6日飞深圳，开始南漂。</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><h2 id="技术"><a href="#技术" class="headerlink" title="技术"></a>技术</h2><h3 id="文章"><a href="#文章" class="headerlink" title="文章"></a>文章</h3><p>7月我一共发布了14篇文章.</p><p>主要关于K8S、SRE、Docker的文章。</p><h3 id="学习："><a href="#学习：" class="headerlink" title="学习："></a>学习：</h3><p>买了极客时间 张磊老师的深入剖析Kubernetes</p><p>虽然是2年前的课，但是看完+官方文档的学习，能对K8S整个技术架构有了更加深刻的了解</p><p>买了本SRE《Site Reliability Engineering 》，学习下谷歌的运维团队的思想</p><h2 id="生活"><a href="#生活" class="headerlink" title="生活"></a>生活</h2><h3 id="作息时间"><a href="#作息时间" class="headerlink" title="作息时间"></a>作息时间</h3><p>7月我的生活是很辛苦的，高频率的面试使得我每天都在反复地总结，复习，进步。这个月超过12点睡觉一共有22天，平均睡觉时长为6小时21分钟。我每天复习面试题、核心知识细节，甚至几次晚上抱着书进入梦乡。</p><h3 id="做饭"><a href="#做饭" class="headerlink" title="做饭"></a>做饭</h3><p>这个月没时间做饭，天天吃外卖，确实有点不太健康。</p><h3 id="锻炼"><a href="#锻炼" class="headerlink" title="锻炼"></a>锻炼</h3><p>这个月只锻炼了3天，和北京出差的朋友打过篮球，带北京的朋友去看了一次黄鹤楼。</p><h1 id="对自己说"><a href="#对自己说" class="headerlink" title="对自己说"></a>对自己说</h1><p>7月的宇神辛苦了，每天不断地准备面试以及回放面试的电话录音，整个7月我就做两件事。</p><p>复习——面试——再复习——再面试</p><p>最好皇天不负有心人，结果是我比较满意的</p><h1 id="向前看"><a href="#向前看" class="headerlink" title="向前看"></a>向前看</h1><p>8月我会在深圳南山区科技园工作，那里都是高科技产业公司。我一边会快速融入新的公司完成自己的本职工作，一边也会去深大附件走走看看，感受大城市的科技魅力。</p><h1 id="名言共勉"><a href="#名言共勉" class="headerlink" title="名言共勉"></a>名言共勉</h1><p>莫愁前路无知己、天下谁人不识君</p><p>天下没有不散的筵席</p>]]></content>
-      
-      
-      <categories>
-          
-          <category> 个人总结 </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> 个人总结 </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>顶级理解之天下没有不散的筵席</title>
       <link href="2020/08/04/king/king-job-hopping/"/>
       <url>2020/08/04/king/king-job-hopping/</url>
@@ -1229,6 +1217,31 @@
         <tags>
             
             <tag> 顶级理解 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>个人总结(2020.7)</title>
+      <link href="2020/08/04/summary/summary-2020-7/"/>
+      <url>2020/08/04/summary/summary-2020-7/</url>
+      
+        <content type="html"><![CDATA[<h1 id="感慨"><a href="#感慨" class="headerlink" title="感慨"></a>感慨</h1><p>2020的7月可能是我的整个人生的转折点</p><p>7月我经历了公司部门的震动（直属领导离职、华科大佬离职、大数据大佬们离职），我反思了很多，包括他们为什么会离职，以及自己的处境和发展空间。</p><p>最终我认为我不能按照原计划执行了（9月开始投简历），我需要加快我的复习进度以及现在就开始训练自己的面试能力。</p><p>为此我制定了一系列方案（后续会专门写篇文章分享我的跳槽之旅）以及如何落实（这个很难）</p><p>最终我在这个月内面试了20几家公司（有武汉深圳杭州的）也拿了几个不错的offer，最终在月底锁下了一家深圳的创业型公司。8月6日飞深圳，开始南漂。</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><h2 id="技术"><a href="#技术" class="headerlink" title="技术"></a>技术</h2><h3 id="文章"><a href="#文章" class="headerlink" title="文章"></a>文章</h3><p>7月我一共发布了14篇文章.</p><p>主要关于K8S、SRE、Docker的文章。</p><h3 id="学习："><a href="#学习：" class="headerlink" title="学习："></a>学习：</h3><p>买了极客时间 张磊老师的深入剖析Kubernetes</p><p>虽然是2年前的课，但是看完+官方文档的学习，能对K8S整个技术架构有了更加深刻的了解</p><p>买了本SRE《Site Reliability Engineering 》，学习下谷歌的运维团队的思想</p><h2 id="生活"><a href="#生活" class="headerlink" title="生活"></a>生活</h2><h3 id="作息时间"><a href="#作息时间" class="headerlink" title="作息时间"></a>作息时间</h3><p>7月我的生活是很辛苦的，高频率的面试使得我每天都在反复地总结，复习，进步。这个月超过12点睡觉一共有22天，平均睡觉时长为6小时21分钟。我每天复习面试题、核心知识细节，甚至几次晚上抱着书进入梦乡。</p><h3 id="做饭"><a href="#做饭" class="headerlink" title="做饭"></a>做饭</h3><p>这个月没时间做饭，天天吃外卖，确实有点不太健康。</p><h3 id="锻炼"><a href="#锻炼" class="headerlink" title="锻炼"></a>锻炼</h3><p>这个月只锻炼了3天，和北京出差的朋友打过篮球，带北京的朋友去看了一次黄鹤楼。</p><h1 id="对自己说"><a href="#对自己说" class="headerlink" title="对自己说"></a>对自己说</h1><p>7月的宇神辛苦了，每天不断地准备面试以及回放面试的电话录音，整个7月我就做两件事。</p><p>复习——面试——再复习——再面试</p><p>最好皇天不负有心人，结果是我比较满意的</p><h1 id="向前看"><a href="#向前看" class="headerlink" title="向前看"></a>向前看</h1><p>8月我会在深圳南山区科技园工作，那里都是高科技产业公司。我一边会快速融入新的公司完成自己的本职工作，一边也会去深大附件走走看看，感受大城市的科技魅力。</p><h1 id="名言共勉"><a href="#名言共勉" class="headerlink" title="名言共勉"></a>名言共勉</h1><p>莫愁前路无知己、天下谁人不识君</p><p>天下没有不散的筵席</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 个人总结 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 个人总结 </tag>
             
         </tags>
       
@@ -1365,9 +1378,9 @@
       
         <tags>
             
-            <tag> Docker </tag>
-            
             <tag> Linux </tag>
+            
+            <tag> Docker </tag>
             
             <tag> 容器 </tag>
             
@@ -1394,9 +1407,9 @@
       
         <tags>
             
-            <tag> Ansible </tag>
-            
             <tag> Kubernetes </tag>
+            
+            <tag> Ansible </tag>
             
         </tags>
       
@@ -1558,9 +1571,9 @@
       
         <tags>
             
-            <tag> Docker </tag>
-            
             <tag> Linux </tag>
+            
+            <tag> Docker </tag>
             
             <tag> 容器 </tag>
             
@@ -1670,13 +1683,13 @@
       
         <tags>
             
-            <tag> Devops </tag>
-            
             <tag> Dockerfile </tag>
+            
+            <tag> Linux </tag>
             
             <tag> Docker </tag>
             
-            <tag> Linux </tag>
+            <tag> Devops </tag>
             
             <tag> 容器 </tag>
             
@@ -1703,11 +1716,11 @@
       
         <tags>
             
-            <tag> CI/CD </tag>
-            
             <tag> Devops </tag>
             
             <tag> 自动化 </tag>
+            
+            <tag> CI/CD </tag>
             
         </tags>
       
@@ -1732,13 +1745,13 @@
       
         <tags>
             
-            <tag> Devops </tag>
-            
             <tag> Dockerfile </tag>
+            
+            <tag> Linux </tag>
             
             <tag> Docker </tag>
             
-            <tag> Linux </tag>
+            <tag> Devops </tag>
             
             <tag> 容器 </tag>
             
@@ -1881,11 +1894,11 @@
       
         <tags>
             
-            <tag> Devops </tag>
+            <tag> Linux </tag>
             
             <tag> Docker </tag>
             
-            <tag> Linux </tag>
+            <tag> Devops </tag>
             
             <tag> 容器 </tag>
             
@@ -2026,9 +2039,9 @@
       
         <tags>
             
-            <tag> Mysql </tag>
-            
             <tag> Redis </tag>
+            
+            <tag> Mysql </tag>
             
             <tag> Docker </tag>
             
@@ -2059,11 +2072,11 @@
       
         <tags>
             
-            <tag> Devops </tag>
+            <tag> Linux </tag>
             
             <tag> Docker </tag>
             
-            <tag> Linux </tag>
+            <tag> Devops </tag>
             
             <tag> 容器 </tag>
             
@@ -2336,11 +2349,11 @@
       
         <tags>
             
-            <tag> CI/CD </tag>
-            
             <tag> Devops </tag>
             
             <tag> 自动化 </tag>
+            
+            <tag> CI/CD </tag>
             
             <tag> 敏捷开发 </tag>
             
@@ -2419,9 +2432,9 @@
       
         <tags>
             
-            <tag> Mysql </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Mysql </tag>
             
         </tags>
       
