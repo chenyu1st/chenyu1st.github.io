@@ -4,13 +4,27 @@
   
     
     <entry>
-      <title>linux/U-centos8-install</title>
+      <title>U盘安装Centos8</title>
       <link href="2021/01/23/linux/U-centos8-install/"/>
       <url>2021/01/23/linux/U-centos8-install/</url>
       
-        <content type="html"><![CDATA[<hr><p>title: U盘安装Centos8</p><p>date: 2021-01-23 10:00:00</p><p>categories:</p><ul><li>Linux</li></ul><p>tags:</p><ul><li>Centos</li><li>Linux</li></ul><p>cover: <a href="https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Centos/Centos.jpg" target="_blank" rel="noopener">https://cdn.jsdelivr.net/gh/chenyu1st/chenyu-cdn@master/rugod.cn/Centos/Centos.jpg</a></p><p>description: U盘安装Centos8</p><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>机器升级了，由于新主板（B460）没有centos7驱动，导致一直无法正常安装，但是centos8可以安装，一起来试试吧</p><h1 id="下载镜像并制作U盘启动盘"><a href="#下载镜像并制作U盘启动盘" class="headerlink" title="下载镜像并制作U盘启动盘"></a>下载镜像并制作U盘启动盘</h1><h2 id="下载centos镜像"><a href="#下载centos镜像" class="headerlink" title="下载centos镜像"></a>下载centos镜像</h2><p><a href="http://mirrors.aliyun.com/centos/8/isos/x86_64/CentOS-8.3.2011-x86_64-dvd1.iso" target="_blank" rel="noopener">阿里源</a></p><h2 id="UItraISO（软碟通）制作"><a href="#UItraISO（软碟通）制作" class="headerlink" title="UItraISO（软碟通）制作"></a>UItraISO（软碟通）制作</h2><p>下载UItraISO</p><p><a href="https://cn.ultraiso.net/xiazai.html" target="_blank" rel="noopener">https://cn.ultraiso.net/xiazai.html</a></p><ul><li>安装完成后点击 试用</li><li>点击文件，选择打开centos的iso文件</li><li>插好U盘</li><li>点击顶部菜单中的 启动  选择 写入硬盘映像</li><li>硬盘驱动器选择你的U盘 ，写入方式 usb+hdd+</li><li>点击写入</li></ul><p>等待制作启动盘</p><h1 id="U盘引导"><a href="#U盘引导" class="headerlink" title="U盘引导"></a>U盘引导</h1><p>注意：如果直接在已经存在的系统上装盘可能会导致异常，建议用一块新的盘或者直接把现有的盘格式化，利用老毛桃或者其他PE系统先格式化磁盘</p><ul><li>把U盘插在电脑上</li><li>开机</li><li>一般按f12或者del进入bios界面设置U盘启动</li><li>进入以下画面请将光标选择install 然后按e进行编辑</li><li>将”LABEL=Centos\x207\x20x\86_64 quiet”更换成”/dev/sda4” </li><li>操作后你的install信息如下： </li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">inst.stage2&#x3D;hd:&#x2F;dev&#x2F;sda4 quiet</span><br></pre></td></tr></table></figure><ul><li>按ctrl+x安装即可进入centos安装界面</li></ul><h1 id="安装centos"><a href="#安装centos" class="headerlink" title="安装centos"></a>安装centos</h1><ul><li>语言选择英文</li><li>时区选择中国上海</li><li>安装源选择阿里源 <a href="http://mirrors.aliyun.com/centos/8/BaseOS/x86_64/os/" target="_blank" rel="noopener">http://mirrors.aliyun.com/centos/8/BaseOS/x86_64/os/</a></li><li>软件选择最小化安装</li><li>配置网络和主机名，固定一个ip并设置开机自动开启网络，根据你的实际场景来</li><li>磁盘分区 选择手动分区(I will configure partitioning)</li></ul><p>分区内容如下</p><table><thead><tr><th>目录</th><th>空间</th></tr></thead><tbody><tr><td>/boot</td><td>1024M</td></tr><tr><td>/boot/efi</td><td>200M</td></tr><tr><td>swap</td><td>2048M</td></tr><tr><td>/</td><td>剩余所有磁盘空间</td></tr></tbody></table><p>有的时候不需要分/boot/efi</p><ul><li>点击begin installation</li><li>配置root pswword</li></ul><p>等待</p><p>装好后重启即可进入centos了</p><h1 id="报错"><a href="#报错" class="headerlink" title="报错"></a>报错</h1><p>U盘启动时在install centos 7时报错</p><p>dracut-pre-udev[351]:modprobe :ERROR:could not insert ‘floppy’<br>dracut-pre-udev[351]:modprobe :ERROR:could not insert ‘edd’:No</p><p>网上找了很久</p><p>大部分说按e，修改inst.stage2=hd:LABEL=Centos\x207\x20x\86_64 quiet 为你真实U盘的设备名（/dev/sdc4或其他)</p><p>那怎么知道设备名呢</p><p>先将inst.stage2=hd:LABEL=Centos\x207\x20x\86_64 quiet改为</p><p>initrd=initrd.img linux dd quiet</p><p>按ctrl+x</p><p>可以进入主机设备界面，找到你现在的U盘的设备名</p><p>然后再重启，继续按e</p><p>修改inst.stage2=hd:LABEL=Centos\x207\x20x\86_64 quiet</p><p>为inst.stage2=hd:/dev/sdc4 quiet</p><p>按ctrl+x</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>对比centos7U盘安装，多了几个点。</p><ul><li>界面出现install的时候必须要选择U盘，nomodeset不起作用</li><li>安装时需要选择安装源，我一般就选择阿里源了</li></ul><p>以后可能centos8就慢慢普及了，就像cenots7代替centos6一样，现在学起来吧。</p><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="hhttps://blog.csdn.net/u012798683/article/details/106645108">Centos 8 U盘安装以及安装问题处理</a></p><p><a href="https://www.cnblogs.com/iwalkman/p/11781234.html" target="_blank" rel="noopener">Centos8和7的区别（参照redhat）</a></p>]]></content>
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p><hr><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>机器升级了，由于新主板（B460）没有centos7驱动，导致一直无法正常安装，但是centos8可以安装，一起来试试吧</p><h1 id="下载镜像并制作U盘启动盘"><a href="#下载镜像并制作U盘启动盘" class="headerlink" title="下载镜像并制作U盘启动盘"></a>下载镜像并制作U盘启动盘</h1><h2 id="下载centos镜像"><a href="#下载centos镜像" class="headerlink" title="下载centos镜像"></a>下载centos镜像</h2><p><a href="http://mirrors.aliyun.com/centos/8/isos/x86_64/CentOS-8.3.2011-x86_64-dvd1.iso" target="_blank" rel="noopener">阿里源</a></p><h2 id="UItraISO（软碟通）制作"><a href="#UItraISO（软碟通）制作" class="headerlink" title="UItraISO（软碟通）制作"></a>UItraISO（软碟通）制作</h2><p>下载UItraISO</p><p><a href="https://cn.ultraiso.net/xiazai.html" target="_blank" rel="noopener">https://cn.ultraiso.net/xiazai.html</a></p><ul><li>安装完成后点击 试用</li><li>点击文件，选择打开centos的iso文件</li><li>插好U盘</li><li>点击顶部菜单中的 启动  选择 写入硬盘映像</li><li>硬盘驱动器选择你的U盘 ，写入方式 usb+hdd+</li><li>点击写入</li></ul><p>等待制作启动盘</p><h1 id="U盘引导"><a href="#U盘引导" class="headerlink" title="U盘引导"></a>U盘引导</h1><p>注意：如果直接在已经存在的系统上装盘可能会导致异常，建议用一块新的盘或者直接把现有的盘格式化，利用老毛桃或者其他PE系统先格式化磁盘</p><ul><li>把U盘插在电脑上</li><li>开机</li><li>一般按f12或者del进入bios界面设置U盘启动</li><li>进入以下画面请将光标选择install 然后按e进行编辑</li><li>将”LABEL=Centos\x207\x20x\86_64 quiet”更换成”/dev/sda4” </li><li>操作后你的install信息如下： </li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">inst.stage2&#x3D;hd:&#x2F;dev&#x2F;sda4 quiet</span><br></pre></td></tr></table></figure><ul><li>按ctrl+x安装即可进入centos安装界面</li></ul><h1 id="安装centos"><a href="#安装centos" class="headerlink" title="安装centos"></a>安装centos</h1><ul><li>语言选择英文</li><li>时区选择中国上海</li><li>安装源选择阿里源 <a href="http://mirrors.aliyun.com/centos/8/BaseOS/x86_64/os/" target="_blank" rel="noopener">http://mirrors.aliyun.com/centos/8/BaseOS/x86_64/os/</a></li><li>软件选择最小化安装</li><li>配置网络和主机名，固定一个ip并设置开机自动开启网络，根据你的实际场景来</li><li>磁盘分区 选择手动分区(I will configure partitioning)</li></ul><p>分区内容如下</p><table><thead><tr><th>目录</th><th>空间</th></tr></thead><tbody><tr><td>/boot</td><td>1024M</td></tr><tr><td>/boot/efi</td><td>200M</td></tr><tr><td>swap</td><td>2048M</td></tr><tr><td>/</td><td>剩余所有磁盘空间</td></tr></tbody></table><p>有的时候不需要分/boot/efi</p><ul><li>点击begin installation</li><li>配置root pswword</li></ul><p>等待</p><p>装好后重启即可进入centos了</p><h1 id="报错"><a href="#报错" class="headerlink" title="报错"></a>报错</h1><p>U盘启动时在install centos 7时报错</p><p>dracut-pre-udev[351]:modprobe :ERROR:could not insert ‘floppy’<br>dracut-pre-udev[351]:modprobe :ERROR:could not insert ‘edd’:No</p><p>网上找了很久</p><p>大部分说按e，修改inst.stage2=hd:LABEL=Centos\x207\x20x\86_64 quiet 为你真实U盘的设备名（/dev/sdc4或其他)</p><p>那怎么知道设备名呢</p><p>先将inst.stage2=hd:LABEL=Centos\x207\x20x\86_64 quiet改为</p><p>initrd=initrd.img linux dd quiet</p><p>按ctrl+x</p><p>可以进入主机设备界面，找到你现在的U盘的设备名</p><p>然后再重启，继续按e</p><p>修改inst.stage2=hd:LABEL=Centos\x207\x20x\86_64 quiet</p><p>为inst.stage2=hd:/dev/sdc4 quiet</p><p>按ctrl+x</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>对比centos7U盘安装，多了几个点。</p><ul><li>界面出现install的时候必须要选择U盘，nomodeset不起作用</li><li>安装时需要选择安装源，我一般就选择阿里源了</li></ul><p>以后可能centos8就慢慢普及了，就像cenots7代替centos6一样，现在学起来吧。</p><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="hhttps://blog.csdn.net/u012798683/article/details/106645108">Centos 8 U盘安装以及安装问题处理</a></p><p><a href="https://www.cnblogs.com/iwalkman/p/11781234.html" target="_blank" rel="noopener">Centos8和7的区别（参照redhat）</a></p>]]></content>
       
       
+      <categories>
+          
+          <category> Linux </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Centos </tag>
+            
+            <tag> Linux </tag>
+            
+        </tags>
       
     </entry>
     
@@ -33,9 +47,9 @@
       
         <tags>
             
-            <tag> Matlab </tag>
-            
             <tag> C </tag>
+            
+            <tag> Matlab </tag>
             
         </tags>
       
@@ -114,11 +128,11 @@
       
         <tags>
             
-            <tag> C </tag>
-            
             <tag> OpenCV </tag>
             
             <tag> Conda </tag>
+            
+            <tag> C </tag>
             
         </tags>
       
@@ -581,9 +595,9 @@
       
         <tags>
             
-            <tag> CI/CD </tag>
-            
             <tag> Gitlab </tag>
+            
+            <tag> CI/CD </tag>
             
         </tags>
       
@@ -689,9 +703,9 @@
       
         <tags>
             
-            <tag> CI/CD </tag>
-            
             <tag> Gitlab </tag>
+            
+            <tag> CI/CD </tag>
             
         </tags>
       
@@ -805,9 +819,9 @@
             
             <tag> 自动化 </tag>
             
-            <tag> Jenkins </tag>
-            
             <tag> CI/CD </tag>
+            
+            <tag> Jenkins </tag>
             
         </tags>
       
@@ -886,9 +900,9 @@
             
             <tag> AWS </tag>
             
-            <tag> Operation Manual </tag>
-            
             <tag> Redis </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -973,11 +987,11 @@
             
             <tag> AWS </tag>
             
-            <tag> Operation Manual </tag>
-            
             <tag> RDS </tag>
             
             <tag> Mysql </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -1085,9 +1099,9 @@
       
         <tags>
             
-            <tag> Operation Manual </tag>
-            
             <tag> Redis </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -1139,9 +1153,9 @@
       
         <tags>
             
-            <tag> Operation Manual </tag>
-            
             <tag> Mysql </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -2432,9 +2446,9 @@
       
         <tags>
             
-            <tag> Operation Manual </tag>
-            
             <tag> Mysql </tag>
+            
+            <tag> Operation Manual </tag>
             
         </tags>
       
