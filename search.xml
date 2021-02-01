@@ -4,35 +4,6 @@
   
     
     <entry>
-      <title>centos7安装opencv</title>
-      <link href="2021/02/01/gpu/opencv-install-centos7/"/>
-      <url>2021/02/01/gpu/opencv-install-centos7/</url>
-      
-        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>由于服务器更换操作系统，所以需要重新部署一套C环境</p><h1 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h1><ul><li>操作系统：centos7</li><li>opencv版本：3.3.1</li><li>conda版本：4.8.2</li><li>python版本：3.7.6</li></ul><h1 id="下载与安装"><a href="#下载与安装" class="headerlink" title="下载与安装"></a>下载与安装</h1><h2 id="安装Conda及Python"><a href="#安装Conda及Python" class="headerlink" title="安装Conda及Python"></a>安装Conda及Python</h2><pre><code>wget https://repo.anaconda.com/archive/Anaconda3-2020.02-Linux-x86_64.shchmod +x Anaconda3-2020.02-Linux-x86_64.sh#安装时已经自动添加到环境变量中#export PATH=$HOME/anaconda3/bin/:$PATH# 安装 python 3.7.6conda install python=3.7.6$ pythonPython 3.7.6 (default, Jan  8 2020, 19:59:22)[GCC 7.3.0] :: Anaconda, Inc. on linuxType &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.&gt;&gt;&gt;$ which pip/data/anaconda3/bin/pip</code></pre><h2 id="安装opencv"><a href="#安装opencv" class="headerlink" title="安装opencv"></a>安装opencv</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget https:&#x2F;&#x2F;codeload.github.com&#x2F;opencv&#x2F;opencv&#x2F;tar.gz&#x2F;3.3.1   -O opencv3.3.1.tar.gz &amp;&amp; tar -zxvf opencv-3.3.1.tar.gz</span><br><span class="line">mkdir opencv-3.3.1&#x2F;build</span><br></pre></td></tr></table></figure><h2 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h2><h3 id="安装opencv相关库"><a href="#安装opencv相关库" class="headerlink" title="安装opencv相关库"></a>安装opencv相关库</h3><pre><code>sudo yum install -y cmake gcc gcc-c++ gtk+-devel gimp-devel gimp-devel-tools gimp-help-browser zlib-devel libtiff-devel libjpeg-devel libpng-devel gstreamer-devel libavc1394-devel libraw1394-devel libdc1394-devel jasper-devel jasper-utils swig python libtool nasmyum install ffmpeg-devel --失败，需要下载源码编译安装或者通过第三方yum源安装。</code></pre><p>下面介绍通过第三方yum源安装</p><pre><code>yum install epel-releaseyum localinstall --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7.noarch.rpmyum install ffmpeg ffmpeg-develffmpeg -versionffmpeg version 3.4.8 Copyright (c) 2000-2020 the FFmpeg developersbuilt with gcc 4.8.5 (GCC) 20150623 (Red Hat 4.8.5-39)</code></pre><h2 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h2><p>注意：不要随便执行make -j，可能会把服务器跑挂</p><p>参考你自己机器点CPU和内存大小去选择-j的数量</p><p>编译失败需要build目录执行make clean 再cmake和make</p><p>或者直接删除build目录，再重头来遍</p><pre><code>cd opencv-3.3.1/build/cmake -D CMAKE_BUILD_TYPE=RELEASE -D  CMAKE_INSTALL_PREFIX=/data/anaconda3 -D CMAKE_CXX_FLAGS:STRING=-fpermissive  INSTALL_PYTHON_EXAMPLES=ON  -D INSTALL_C_EXAMPLES=OFF  -D  PYTHON_EXCUTABLE=/data/anaconda3/bin/python -D WITH_TBB=ON -D WITH_V4L=ON   -D WITH_GTK=ON  -D WITH_OPENGL=ON -D BUILD_EXAMPLES=ON ..make -j2</code></pre><h2 id="安装及动态库链接"><a href="#安装及动态库链接" class="headerlink" title="安装及动态库链接"></a>安装及动态库链接</h2><pre><code>sudo make installsudo ldconfig</code></pre><h2 id="安装eigen"><a href="#安装eigen" class="headerlink" title="安装eigen"></a>安装eigen</h2><pre><code>yum install eigen3-devel -y</code></pre><h2 id="验证成功"><a href="#验证成功" class="headerlink" title="验证成功"></a>验证成功</h2><p>执行python，引入cv2不报错即可完成</p><pre><code>$ pythonPython 3.7.6 (default, Jan  8 2020, 19:59:22)[GCC 7.3.0] :: Anaconda, Inc. on linuxType &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.&gt;&gt;&gt; import cv2&gt;&gt;&gt;</code></pre><h1 id="报错总结"><a href="#报错总结" class="headerlink" title="报错总结"></a>报错总结</h1><h2 id="添加动态链接库失败"><a href="#添加动态链接库失败" class="headerlink" title="添加动态链接库失败"></a>添加动态链接库失败</h2><p>ldconfig后 python import cv2报错找不到opencv编译后的几个包</p><pre><code>ldconfig -p |grep libopencv_core.so.3.3找不到动态链接库</code></pre><p>解决问题</p><pre><code>vim /etc/ld.so.conf添加一行opencv的lib路径/opt/opencv-3.3.1/build/lib/ldconfigldconfig -p |grep libopencv_core.so.3.3libopencv_core.so.3.3 (libc6,x86-64) =&gt; /opt/opencv-3.3.1/build/lib/libopencv_core.so.3.3</code></pre><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>centos7对比之前ubuntu16安装opencv轻松很多，也是第一次踩过坑之后基本上没啥报错就能成功安装。</p><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://linuxize.com/post/how-to-install-ffmpeg-on-centos-7/" target="_blank" rel="noopener">How to Install and Use FFmpeg on CentOS 7</a></p><hr><p>版权声明：</p><p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>]]></content>
-      
-      
-      <categories>
-          
-          <category> OpenCV </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> OpenCV </tag>
-            
-            <tag> Conda </tag>
-            
-            <tag> C </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>SRE实战之Gitlab事故发现、修复、反思</title>
       <link href="2021/02/01/sre/troubleshouting-gitlab/"/>
       <url>2021/02/01/sre/troubleshouting-gitlab/</url>
@@ -116,6 +87,33 @@
     
     
     <entry>
+      <title>运维手册——解决CI时间过长的问题</title>
+      <link href="2021/01/18/bug/dbmate/"/>
+      <url>2021/01/18/bug/dbmate/</url>
+      
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p><hr><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>最近同事反馈说jenkins构建比以前慢很多很多，让我帮忙看看是什么原因导致的</p><h1 id="现状"><a href="#现状" class="headerlink" title="现状"></a>现状</h1><p>以前的项目开发测试环境自动构建基本上是10-20分钟以内（包含了自动化测试），生产环境构建不到1分钟（发布镜像）</p><p>现在看了jenkins几个项目的构建流程，自动化构建需要20-30分钟，生产环境构建需要10分钟左右，但是只有几个发布前端的项目还是速度不变</p><p>基本上排查下他们的区别就可以判断了</p><p>我自己测试了几次后发现速度慢在自动化执行sql这一步</p><h1 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h1><p>自动化执行sql用的工具是dbmate</p><p>如果你不知道dbmate是做什么的，那么请参考下面链接（包括但不限于）进行学习:</p><p><a href="https://github.com/amacneil/dbmate" target="_blank" rel="noopener">dbmate</a></p><p>dbmate在我如之前就已经在使用了，所以我并没有过多的关注这个组件。现在这个问题就是dbmate会执行一系列的sql（不管这些sql有没有被执行过）</p><p>按dbmate执行逻辑应该是dbmate会标记一系列sql在数据库里，如果执行过则直接跳过，速度大概在1-2秒内，特别快</p><p>我重新看了下官方文档并没看出什么问题</p><p>然后我准备做一个实验</p><h2 id="控制变量"><a href="#控制变量" class="headerlink" title="控制变量"></a>控制变量</h2><p>我在2台不同的机器上都重新下载相同版本的dbmate并配置相同的数据库及环境，测试2个不同的数据库dbmate的速度。</p><h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><pre><code>$ sudo curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64$ sudo chmod +x /usr/local/bin/dbmate</code></pre><h2 id="dbmate命令及参数"><a href="#dbmate命令及参数" class="headerlink" title="dbmate命令及参数"></a>dbmate命令及参数</h2><h3 id="Commands"><a href="#Commands" class="headerlink" title="Commands"></a>Commands</h3><pre><code>dbmate --help    # print usage helpdbmate new       # generate a new migration filedbmate up        # create the database (if it does not already exist) and run any pending migrationsdbmate create    # create the databasedbmate drop      # drop the databasedbmate migrate   # run any pending migrationsdbmate rollback  # roll back the most recent migrationdbmate down      # alias for rollbackdbmate status    # show the status of all migrations (supports --exit-code and --quiet)dbmate dump      # write the database schema.sql filedbmate wait      # wait for the database server to become available</code></pre><h3 id="Command-Line-Options"><a href="#Command-Line-Options" class="headerlink" title="Command Line Options"></a>Command Line Options</h3><p>The following options are available with all commands. You must use command line arguments in the order dbmate [global options] command [command options]. Most options can also be configured via environment variables (and loaded from your .env file, which is helpful to share configuration between team members).</p><ul><li>–url, -u “protocol://host:port/dbname” - specify the database url directly. (env: $DATABASE_URL)</li><li>–env, -e “DATABASE_URL” - specify an environment variable to read the database connection URL from.</li><li>–migrations-dir, -d “./db/migrations” - where to keep the migration files. (env: $DBMATE_MIGRATIONS_DIR)</li><li>–migrations-table “schema_migrations” - database table to record migrations in. (env: $DBMATE_MIGRATIONS_TABLE)</li><li>–schema-file, -s “./db/schema.sql” - a path to keep the schema.sql file. (env: $DBMATE_SCHEMA_FILE)</li><li>–no-dump-schema - don’t auto-update the schema.sql file on migrate/rollback (env: $DBMATE_NO_DUMP_SCHEMA)</li><li>–wait - wait for the db to become available before executing the subsequent command (env: $DBMATE_WAIT)</li><li>–wait-timeout 60s - timeout for –wait flag (env: $DBMATE_WAIT_TIMEOUT)</li></ul><h2 id="实验流程"><a href="#实验流程" class="headerlink" title="实验流程"></a>实验流程</h2><p>先创建一个文件夹test以及子文件夹db,在test目录下添加一个数据库的配置信息,将sql放到db目录下，然后执行dbmate自动化语句</p><pre><code>mkdir -pv test/dbcd testvim .envDATABASE_URL=&quot;mysql://user:passwd@xxx:3306/Databases&quot;cp *.sql ./db/dbmate -s db/schema-dev.sql migrate</code></pre><h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>实际上发现新机器并没有问题，执行速度1-2秒，而只有旧机器有问题</p><p>这么问题来，旧机器是多了什么呢才导致dbmate执行这么慢呢</p><h2 id="进一步分析"><a href="#进一步分析" class="headerlink" title="进一步分析"></a>进一步分析</h2><p>我将这台故障的机器重新启动，发现仍然不行，然后我再次执行的时候后台监控进程</p><p>问题出来了</p><pre><code>ps -aux|grep dbmatemysqldump --opt --routines --no-data --skip-dump-date --skip-add-drop-table --host=mysql.com --port=3306 --user=dbmate --password=x xxxxxxxxxxxxxx mysql</code></pre><p>后台居然在执行mysqldump</p><p>我再回过头看这两台机器的区别</p><p>一台装了mysql-client 一台没有装</p><p>而装mysql-clinet是我在jenkins这台机器执行定时备份时安装的，没有想到影响了构建速度</p><h1 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h1><p>再回过头看dbmate的额外参数</p><p>其中有一项</p><p>–no-dump-schema - don’t auto-update the schema.sql file on migrate/rollback (env: $DBMATE_NO_DUMP_SCHEMA)</p><p>加上这个参数后便不执行更新schema.sql文件（写到本地）</p><p>在自动化脚本里添加这个参数后即解决构建慢的问题</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>其实dbmate默认是需要更新schema.sql文件，由于插件不带mysql-client，所以旧机器一直不能执行罢了，并不是新增的功能。</p><p>再由于最初技术选型时研发人员没有深入研究便使用技术，导致故障发生时定位过慢。</p><p>好在这个问题并没有影响生产环境，只是影响构建速度，所以造成的影响并不大。</p><p>最后总结2点</p><ul><li>技术选型时一定要慎重，尤其是用于生产环境（不管是构建流程还是应用流程）除了最重要的技术功能外，细节也不应该忽略</li><li>接手其他人的项目时一定要重新复习你不太清楚的技术，即使什么流程都没有更改，但是你需要保证流程的稳定性，你有责任掌控一切</li></ul><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://github.com/amacneil/dbmate" target="_blank" rel="noopener">dbmate</a></p><hr><p>版权声明：</p><p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Mysql </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Operation Manual </tag>
+            
+            <tag> Mysql </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Centos7安装Matlab2017a</title>
       <link href="2021/01/18/gpu/matlab-install/"/>
       <url>2021/01/18/gpu/matlab-install/</url>
@@ -135,6 +133,35 @@
             <tag> C </tag>
             
             <tag> Matlab </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>Centos7安装opencv</title>
+      <link href="2021/01/16/gpu/opencv-install-centos7/"/>
+      <url>2021/01/16/gpu/opencv-install-centos7/</url>
+      
+        <content type="html"><![CDATA[<p>声明:这是我在大学毕业后进入第二家互联网公司学习的内容</p><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>由于服务器更换操作系统，所以需要重新部署一套C环境</p><h1 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h1><ul><li>操作系统：centos7</li><li>opencv版本：3.3.1</li><li>conda版本：4.8.2</li><li>python版本：3.7.6</li></ul><h1 id="下载与安装"><a href="#下载与安装" class="headerlink" title="下载与安装"></a>下载与安装</h1><h2 id="安装Conda及Python"><a href="#安装Conda及Python" class="headerlink" title="安装Conda及Python"></a>安装Conda及Python</h2><pre><code>wget https://repo.anaconda.com/archive/Anaconda3-2020.02-Linux-x86_64.shchmod +x Anaconda3-2020.02-Linux-x86_64.sh#安装时已经自动添加到环境变量中#export PATH=$HOME/anaconda3/bin/:$PATH# 安装 python 3.7.6conda install python=3.7.6$ pythonPython 3.7.6 (default, Jan  8 2020, 19:59:22)[GCC 7.3.0] :: Anaconda, Inc. on linuxType &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.&gt;&gt;&gt;$ which pip/data/anaconda3/bin/pip</code></pre><h2 id="安装opencv"><a href="#安装opencv" class="headerlink" title="安装opencv"></a>安装opencv</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget https:&#x2F;&#x2F;codeload.github.com&#x2F;opencv&#x2F;opencv&#x2F;tar.gz&#x2F;3.3.1   -O opencv3.3.1.tar.gz &amp;&amp; tar -zxvf opencv-3.3.1.tar.gz</span><br><span class="line">mkdir opencv-3.3.1&#x2F;build</span><br></pre></td></tr></table></figure><h2 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h2><h3 id="安装opencv相关库"><a href="#安装opencv相关库" class="headerlink" title="安装opencv相关库"></a>安装opencv相关库</h3><pre><code>sudo yum install -y cmake gcc gcc-c++ gtk+-devel gimp-devel gimp-devel-tools gimp-help-browser zlib-devel libtiff-devel libjpeg-devel libpng-devel gstreamer-devel libavc1394-devel libraw1394-devel libdc1394-devel jasper-devel jasper-utils swig python libtool nasmyum install ffmpeg-devel --失败，需要下载源码编译安装或者通过第三方yum源安装。</code></pre><p>下面介绍通过第三方yum源安装</p><pre><code>yum install epel-releaseyum localinstall --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7.noarch.rpmyum install ffmpeg ffmpeg-develffmpeg -versionffmpeg version 3.4.8 Copyright (c) 2000-2020 the FFmpeg developersbuilt with gcc 4.8.5 (GCC) 20150623 (Red Hat 4.8.5-39)</code></pre><h2 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h2><p>注意：不要随便执行make -j，可能会把服务器跑挂</p><p>参考你自己机器点CPU和内存大小去选择-j的数量</p><p>编译失败需要build目录执行make clean 再cmake和make</p><p>或者直接删除build目录，再重头来遍</p><pre><code>cd opencv-3.3.1/build/cmake -D CMAKE_BUILD_TYPE=RELEASE -D  CMAKE_INSTALL_PREFIX=/data/anaconda3 -D CMAKE_CXX_FLAGS:STRING=-fpermissive  INSTALL_PYTHON_EXAMPLES=ON  -D INSTALL_C_EXAMPLES=OFF  -D  PYTHON_EXCUTABLE=/data/anaconda3/bin/python -D WITH_TBB=ON -D WITH_V4L=ON   -D WITH_GTK=ON  -D WITH_OPENGL=ON -D BUILD_EXAMPLES=ON ..make -j2</code></pre><h2 id="安装及动态库链接"><a href="#安装及动态库链接" class="headerlink" title="安装及动态库链接"></a>安装及动态库链接</h2><pre><code>sudo make installsudo ldconfig</code></pre><h2 id="安装eigen"><a href="#安装eigen" class="headerlink" title="安装eigen"></a>安装eigen</h2><pre><code>yum install eigen3-devel -y</code></pre><h2 id="验证成功"><a href="#验证成功" class="headerlink" title="验证成功"></a>验证成功</h2><p>执行python，引入cv2不报错即可完成</p><pre><code>$ pythonPython 3.7.6 (default, Jan  8 2020, 19:59:22)[GCC 7.3.0] :: Anaconda, Inc. on linuxType &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.&gt;&gt;&gt; import cv2&gt;&gt;&gt;</code></pre><h1 id="报错总结"><a href="#报错总结" class="headerlink" title="报错总结"></a>报错总结</h1><h2 id="添加动态链接库失败"><a href="#添加动态链接库失败" class="headerlink" title="添加动态链接库失败"></a>添加动态链接库失败</h2><p>ldconfig后 python import cv2报错找不到opencv编译后的几个包</p><pre><code>ldconfig -p |grep libopencv_core.so.3.3找不到动态链接库</code></pre><p>解决问题</p><pre><code>vim /etc/ld.so.conf添加一行opencv的lib路径/opt/opencv-3.3.1/build/lib/ldconfigldconfig -p |grep libopencv_core.so.3.3libopencv_core.so.3.3 (libc6,x86-64) =&gt; /opt/opencv-3.3.1/build/lib/libopencv_core.so.3.3</code></pre><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>centos7对比之前ubuntu16安装opencv轻松很多，也是第一次踩过坑之后基本上没啥报错就能成功安装。</p><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://linuxize.com/post/how-to-install-ffmpeg-on-centos-7/" target="_blank" rel="noopener">How to Install and Use FFmpeg on CentOS 7</a></p><hr><p>版权声明：</p><p>原创不易，洗文可耻。除非注明，本博文章均为原创，转载请以链接形式标明本文地址。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> OpenCV </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> OpenCV </tag>
+            
+            <tag> Conda </tag>
+            
+            <tag> C </tag>
             
         </tags>
       
@@ -983,11 +1010,11 @@
       
         <tags>
             
+            <tag> Operation Manual </tag>
+            
             <tag> AWS </tag>
             
             <tag> Redis </tag>
-            
-            <tag> Operation Manual </tag>
             
         </tags>
       
@@ -1070,13 +1097,13 @@
       
         <tags>
             
-            <tag> AWS </tag>
-            
-            <tag> RDS </tag>
+            <tag> Operation Manual </tag>
             
             <tag> Mysql </tag>
             
-            <tag> Operation Manual </tag>
+            <tag> AWS </tag>
+            
+            <tag> RDS </tag>
             
         </tags>
       
@@ -1101,11 +1128,11 @@
       
         <tags>
             
+            <tag> Mysql </tag>
+            
             <tag> AWS </tag>
             
             <tag> RDS </tag>
-            
-            <tag> Mysql </tag>
             
         </tags>
       
@@ -1184,9 +1211,9 @@
       
         <tags>
             
-            <tag> Redis </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Redis </tag>
             
         </tags>
       
@@ -1238,9 +1265,9 @@
       
         <tags>
             
-            <tag> Mysql </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Mysql </tag>
             
         </tags>
       
@@ -1788,9 +1815,9 @@
             
             <tag> Docker </tag>
             
-            <tag> 容器 </tag>
-            
             <tag> Devops </tag>
+            
+            <tag> 容器 </tag>
             
         </tags>
       
@@ -1850,9 +1877,9 @@
             
             <tag> Docker </tag>
             
-            <tag> 容器 </tag>
-            
             <tag> Devops </tag>
+            
+            <tag> 容器 </tag>
             
         </tags>
       
@@ -1997,9 +2024,9 @@
             
             <tag> Docker </tag>
             
-            <tag> 容器 </tag>
-            
             <tag> Devops </tag>
+            
+            <tag> 容器 </tag>
             
         </tags>
       
@@ -2175,9 +2202,9 @@
             
             <tag> Docker </tag>
             
-            <tag> 容器 </tag>
-            
             <tag> Devops </tag>
+            
+            <tag> 容器 </tag>
             
         </tags>
       
@@ -2531,9 +2558,9 @@
       
         <tags>
             
-            <tag> Mysql </tag>
-            
             <tag> Operation Manual </tag>
+            
+            <tag> Mysql </tag>
             
         </tags>
       
